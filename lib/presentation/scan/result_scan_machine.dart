@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:assets_mobile/data/models/auth_state.dart';
 import 'package:assets_mobile/data/models/checklist_state.dart';
+import 'package:assets_mobile/data/models/generate_clhead_state.dart';
 import 'package:assets_mobile/presentation/checklist/provider/checklist_provider.dart';
 import 'package:assets_mobile/presentation/scan/provider/scan_provider.dart';
 import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
@@ -19,6 +20,7 @@ import 'package:assets_mobile/utils/app_text_Style.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ResultScanMachineScreen extends ConsumerStatefulWidget {
   const ResultScanMachineScreen({super.key});
@@ -82,41 +84,60 @@ class _ResultScanMachineScreenState
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: status.length,
                           itemBuilder: (context, index) => ButtonReusableWidget(
-                              onPressed: () {
-                                ref.read(routerProvider).pop();
-                                final shift = ref.read(dataShiftProvider);
-                                ref.read(tssycdProvider.notifier).update(
-                                    (state) => status[index]["tssycd"]
-                                        .toString()
-                                        .trim());
-                                ref.read(generateClheadProvider(
-                                  machineNumber: machineId,
-                                  shiftId: shift.id,
-                                  period: shift.period,
-                                  statusId:
-                                      status[index]["tssycd"].toString().trim(),
-                                ));
-                                ref
-                                    .read(dataGetChecklistProvider.notifier)
-                                    .update((state) => {
-                                          "id": machineId,
-                                          "shiftId": shift.id,
-                                          "period": shift.period,
-                                          "statusId": status[index]["tssycd"]
-                                              .toString()
-                                              .trim(),
-                                        });
-
-                                ref
-                                    .read(checklistProvider.notifier)
-                                    .callChecklist(
-                                      id: machineId,
+                              onPressed: () async {
+                                AppPrint.debugLog(
+                                    "STATUS MACHINE: ${status[index]["tssycd"]}");
+                                await ref
+                                    .read(generateClheadProvider.notifier)
+                                    .callGenerateClhead(
+                                      machineNumber: machineId,
                                       shiftId: shift.id,
                                       period: shift.period,
                                       statusId: status[index]["tssycd"]
                                           .toString()
                                           .trim(),
                                     );
+                                if (status[index]["tssycd"] == "1") {
+                                  ref.read(routerProvider).pop();
+                                  final shift = ref.read(dataShiftProvider);
+                                  ref.read(tssycdProvider.notifier).update(
+                                      (state) => status[index]["tssycd"]
+                                          .toString()
+                                          .trim());
+                                  ref
+                                      .read(dataGetChecklistProvider.notifier)
+                                      .update((state) => {
+                                            "id": machineId,
+                                            "shiftId": shift.id,
+                                            "period": shift.period,
+                                            "statusId": status[index]["tssycd"]
+                                                .toString()
+                                                .trim(),
+                                          });
+
+                                  ref
+                                      .read(checklistProvider.notifier)
+                                      .callChecklist(
+                                        id: machineId,
+                                        shiftId: shift.id,
+                                        period: shift.period,
+                                        statusId: status[index]["tssycd"]
+                                            .toString()
+                                            .trim(),
+                                      );
+                                } else {
+                                  ref.read(routerProvider).pop();
+                                  if (mounted) {
+                                    await Future.delayed(Duration.zero, () {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  "Checklist disimpan...")));
+                                      ref.read(routerProvider).pop();
+                                      // context.pop();
+                                    });
+                                  }
+                                }
                               },
                               title: "${status[index]["tssynm"]}"),
                         ));

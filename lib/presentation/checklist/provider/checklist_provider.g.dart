@@ -155,184 +155,7 @@ class _TakePictureProviderElement extends AutoDisposeFutureProviderElement<void>
   TakePhotoChecklistType get type => (origin as TakePictureProvider).type;
 }
 
-String _$generateClheadHash() => r'f2383386627b49ee6091e37769bd5a3d89692fed';
-
-/// See also [generateClhead].
-@ProviderFor(generateClhead)
-const generateClheadProvider = GenerateClheadFamily();
-
-/// See also [generateClhead].
-class GenerateClheadFamily extends Family<AsyncValue> {
-  /// See also [generateClhead].
-  const GenerateClheadFamily();
-
-  /// See also [generateClhead].
-  GenerateClheadProvider call({
-    required String shiftId,
-    required String machineNumber,
-    required String statusId,
-    required String period,
-  }) {
-    return GenerateClheadProvider(
-      shiftId: shiftId,
-      machineNumber: machineNumber,
-      statusId: statusId,
-      period: period,
-    );
-  }
-
-  @override
-  GenerateClheadProvider getProviderOverride(
-    covariant GenerateClheadProvider provider,
-  ) {
-    return call(
-      shiftId: provider.shiftId,
-      machineNumber: provider.machineNumber,
-      statusId: provider.statusId,
-      period: provider.period,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'generateClheadProvider';
-}
-
-/// See also [generateClhead].
-class GenerateClheadProvider extends AutoDisposeFutureProvider<Object?> {
-  /// See also [generateClhead].
-  GenerateClheadProvider({
-    required String shiftId,
-    required String machineNumber,
-    required String statusId,
-    required String period,
-  }) : this._internal(
-          (ref) => generateClhead(
-            ref as GenerateClheadRef,
-            shiftId: shiftId,
-            machineNumber: machineNumber,
-            statusId: statusId,
-            period: period,
-          ),
-          from: generateClheadProvider,
-          name: r'generateClheadProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$generateClheadHash,
-          dependencies: GenerateClheadFamily._dependencies,
-          allTransitiveDependencies:
-              GenerateClheadFamily._allTransitiveDependencies,
-          shiftId: shiftId,
-          machineNumber: machineNumber,
-          statusId: statusId,
-          period: period,
-        );
-
-  GenerateClheadProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.shiftId,
-    required this.machineNumber,
-    required this.statusId,
-    required this.period,
-  }) : super.internal();
-
-  final String shiftId;
-  final String machineNumber;
-  final String statusId;
-  final String period;
-
-  @override
-  Override overrideWith(
-    FutureOr<Object?> Function(GenerateClheadRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: GenerateClheadProvider._internal(
-        (ref) => create(ref as GenerateClheadRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        shiftId: shiftId,
-        machineNumber: machineNumber,
-        statusId: statusId,
-        period: period,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<Object?> createElement() {
-    return _GenerateClheadProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is GenerateClheadProvider &&
-        other.shiftId == shiftId &&
-        other.machineNumber == machineNumber &&
-        other.statusId == statusId &&
-        other.period == period;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, shiftId.hashCode);
-    hash = _SystemHash.combine(hash, machineNumber.hashCode);
-    hash = _SystemHash.combine(hash, statusId.hashCode);
-    hash = _SystemHash.combine(hash, period.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-mixin GenerateClheadRef on AutoDisposeFutureProviderRef<Object?> {
-  /// The parameter `shiftId` of this provider.
-  String get shiftId;
-
-  /// The parameter `machineNumber` of this provider.
-  String get machineNumber;
-
-  /// The parameter `statusId` of this provider.
-  String get statusId;
-
-  /// The parameter `period` of this provider.
-  String get period;
-}
-
-class _GenerateClheadProviderElement
-    extends AutoDisposeFutureProviderElement<Object?> with GenerateClheadRef {
-  _GenerateClheadProviderElement(super.provider);
-
-  @override
-  String get shiftId => (origin as GenerateClheadProvider).shiftId;
-  @override
-  String get machineNumber => (origin as GenerateClheadProvider).machineNumber;
-  @override
-  String get statusId => (origin as GenerateClheadProvider).statusId;
-  @override
-  String get period => (origin as GenerateClheadProvider).period;
-}
-
-String _$getChecklistHash() => r'9c59f5282e3e23a7a9a342a0521d6c61a1ade783';
+String _$getChecklistHash() => r'b3bef6130967a0659247616f1b267d2695af15f8';
 
 /// See also [getChecklist].
 @ProviderFor(getChecklist)
@@ -465,7 +288,23 @@ class _GetChecklistProviderElement
   String get cdchcdiy => (origin as GetChecklistProvider).cdchcdiy;
 }
 
-String _$checklistHash() => r'69ac531e55f9700212066a115e284ad0070084c3';
+String _$generateClheadHash() => r'3e053a238e0f48e05fb4751ba7f0bc7edac1e9e1';
+
+/// See also [GenerateClhead].
+@ProviderFor(GenerateClhead)
+final generateClheadProvider =
+    AutoDisposeNotifierProvider<GenerateClhead, GenerateClheadState>.internal(
+  GenerateClhead.new,
+  name: r'generateClheadProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$generateClheadHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$GenerateClhead = AutoDisposeNotifier<GenerateClheadState>;
+String _$checklistHash() => r'd67e96a49bc800486f9c722238602758a8dd0ed8';
 
 /// See also [Checklist].
 @ProviderFor(Checklist)
@@ -480,7 +319,7 @@ final checklistProvider =
 );
 
 typedef _$Checklist = AutoDisposeNotifier<ChecklistState>;
-String _$saveChecklistHash() => r'7b9c9961fb598d50e332e47ec67dda4555d0eaba';
+String _$saveChecklistHash() => r'ba5a0b356fe13ed1774b4f50ac9347f03d544f9d';
 
 /// See also [SaveChecklist].
 @ProviderFor(SaveChecklist)

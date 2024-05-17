@@ -2,6 +2,7 @@ import 'package:assets_mobile/data/models/checklist.dart';
 import 'package:assets_mobile/data/models/checklist_detail.dart';
 import 'package:assets_mobile/data/models/checklist_state.dart';
 import 'package:assets_mobile/data/models/cutom_error.dart';
+import 'package:assets_mobile/data/models/generate_clhead_state.dart';
 import 'package:assets_mobile/data/models/save_checklist_state.dart';
 import 'package:assets_mobile/presentation/scan/provider/scan_provider.dart';
 import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
@@ -86,18 +87,31 @@ FutureOr<void> takePicture(TakePictureRef ref,
 }
 
 @riverpod
-FutureOr generateClhead(
-  GenerateClheadRef ref, {
-  required String shiftId,
-  required String machineNumber,
-  required String statusId,
-  required String period,
-}) async {
-  return await ref.read(checklistRepositoryProvider).generateClhead(
-      shiftId: shiftId,
-      machineNumber: machineNumber,
-      statusId: statusId,
-      period: period);
+class GenerateClhead extends _$GenerateClhead {
+  @override
+  GenerateClheadState build() {
+    return GenerateClheadState.initial();
+  }
+
+  Future callGenerateClhead({
+    required String shiftId,
+    required String machineNumber,
+    required String statusId,
+    required String period,
+  }) async {
+    state = state.copyWith(status: GenerateClheadStatus.loading);
+    try {
+      await ref.read(checklistRepositoryProvider).generateClhead(
+          shiftId: shiftId,
+          machineNumber: machineNumber,
+          statusId: statusId,
+          period: period);
+      state = state.copyWith(status: GenerateClheadStatus.success);
+    } on CustomError catch (e) {
+      state =
+          state.copyWith(status: GenerateClheadStatus.failure, customError: e);
+    }
+  }
 }
 
 @riverpod
