@@ -75,8 +75,10 @@ extension Token on String {
   bool get checkExpiredToken {
     final decodeToken = parseJwt;
     final dateNow = DateTime.now();
-    final expiredToken = DateTime.fromMillisecondsSinceEpoch(int.parse(decodeToken["exp"].toString()) * 1000);
-    AppPrint.debugPrint("EXPIRED TOKEN: $expiredToken -- DATE now: ${DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch)}");
+    final expiredToken = DateTime.fromMillisecondsSinceEpoch(
+        int.parse(decodeToken["exp"].toString()) * 1000);
+    AppPrint.debugPrint(
+        "EXPIRED TOKEN: $expiredToken -- DATE now: ${DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch)}");
     if (expiredToken.isAfter(dateNow)) {
       return false;
     } else {
@@ -101,7 +103,8 @@ extension A7Support on String {
 
   String _reverseFromList(int itemIndex) {
     final splitChar = _splitChar(itemIndex);
-    final reversedData = splitChar.map((e) => e.split('').reversed.join()).toList().join();
+    final reversedData =
+        splitChar.map((e) => e.split('').reversed.join()).toList().join();
     final a = reversedData._splitChar(itemIndex);
     return a.join().split("").reversed.toList().join();
   }
@@ -192,7 +195,8 @@ extension EncryptA7<K, V> on Map<K, V> {
       String d4 = d3._strAcak(2);
       result.add(d4);
     }
-    List<String> replaceWhiteSpace = result.map((String item) => item.replaceAll(' ', '')).toList();
+    List<String> replaceWhiteSpace =
+        result.map((String item) => item.replaceAll(' ', '')).toList();
 
     return replaceWhiteSpace.join(",");
   }
@@ -247,8 +251,10 @@ extension DateTimeExtension on DateTime {
 }
 
 extension Iterables<E> on Iterable<E> {
-  Map<K, List<E>> groupBy<K>(K Function(E) keyFunction) =>
-      fold(<K, List<E>>{}, (Map<K, List<E>> map, E element) => map..putIfAbsent(keyFunction(element), () => <E>[]).add(element));
+  Map<K, List<E>> groupBy<K>(K Function(E) keyFunction) => fold(
+      <K, List<E>>{},
+      (Map<K, List<E>> map, E element) =>
+          map..putIfAbsent(keyFunction(element), () => <E>[]).add(element));
 }
 
 extension ShiftModelExtension on ShiftModel {

@@ -301,18 +301,24 @@ class ChecklistModel {
         chchcd: map['chchcd'] != null ? (map['chchcd'] as String).trim() : null,
         chchcdiy: map['chchcdiy'] != null ? map['chchcdiy'] as int : null,
         chchnm: map['chchnm'] != null ? (map['chchnm'] as String).trim() : null,
-        cochdt: map['cochdt'] != null ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["cochdt"]) ?? 0) : null,
+        cochdt: map['cochdt'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["cochdt"]) ?? 0)
+            : null,
         cochid: map['cochid'] != null ? (map['cochid'] as String).trim() : null,
         cochno: map['cochno'] != null ? map['cochno'] as int : null,
         cocoln: map['cocoln'] != null ? map['cocoln'] as int : null,
         tempId: map["tempId"],
         cocolniy: map['cocolniy'] != null ? map['cocolniy'] as int : null,
-        cocsdt: map['cocsdt'] != null ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["cocsdt"]) ?? 0) : null,
+        cocsdt: map['cocsdt'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["cocsdt"]) ?? 0)
+            : null,
         cocsid: map['cocsid'] != null ? (map['cocsid'] as String).trim() : null,
         codpfg: _toInt(map['codpfg']) ?? 0,
         comctniy: _toInt(map["comctniy"]) ?? 0,
         coremk: map['coremk'] != null ? (map['coremk'] as String).trim() : null,
-        corgdt: map['corgdt'] != null ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["corgdt"]) ?? 0) : null,
+        corgdt: map['corgdt'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["corgdt"]) ?? 0)
+            : null,
         corgid: map['corgid'] != null ? (map['corgid'] as String).trim() : null,
         corlcdiy: map['corlcdiy'] != null ? _toInt(map["corlcdiy"]) ?? 0 : null,
         cousrm: map['cousrm'] != null ? (map['cousrm'] as String).trim() : null,
@@ -363,7 +369,9 @@ class ChecklistModel {
         clshft: _toInt(map["clshft"]),
         clstat: map['clstat'] != null ? (map['clstat'] as String).trim() : null,
         clstsm: map['clstsm'] != null ? (map['clstsm'] as String).trim() : null,
-        cltrdt: map['cltrdt'] != null ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["cltrdt"]) ?? 0) : null,
+        cltrdt: map['cltrdt'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["cltrdt"]) ?? 0)
+            : null,
         cmacvl: map['cmacvl'] != null ? (map['cmacvl'] as String).trim() : null,
         cmcdlniy: _toInt(map["cmcdlniy"]),
         cmchcdiy: _toInt(map["cmchcdiy"]),
@@ -385,7 +393,9 @@ class ChecklistModel {
         mrchcdiy: _toInt(map["mrchcdiy"]),
         mrmgcdiy: _toInt(map["mrmgcdiy"]),
         mrrlcdiy: _toInt(map["mrrlcdiy"]) ?? 0,
-        mtacdt: map['mtacdt'] != null ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["mtacdt"]) ?? 0) : null,
+        mtacdt: map['mtacdt'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(_toInt(map["mtacdt"]) ?? 0)
+            : null,
         mtancd: _toInt(map["mtancd"]),
         mtdays: _toInt(map["mtdays"]),
         mtmtcd: map['mtmtcd'] != null ? (map['mtmtcd'] as String).trim() : null,
@@ -396,7 +406,8 @@ class ChecklistModel {
 
   String toJson() => json.encode(toMap());
 
-  factory ChecklistModel.fromJson(String source) => ChecklistModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory ChecklistModel.fromJson(String source) =>
+      ChecklistModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   static int? _toInt(dynamic value) {
     if (value is int) return value;
@@ -404,197 +415,99 @@ class ChecklistModel {
     return null;
   }
 
-  ChecklistModel copyWith({
-    String? chchcd,
-    String? tempId,
-    int? chchcdiy,
-    String? chchnm,
-    DateTime? cochdt,
-    String? cochid,
-    int? cochno,
-    int? cocoln,
-    int? cocolniy,
-    DateTime? cocsdt,
-    String? cocsid,
-    int? codpfg,
-    int? comctniy,
-    String? coremk,
-    DateTime? corgdt,
-    String? corgid,
-    int? corlcdiy,
-    String? cousrm,
-    int? cplsnoiy,
-    int? cpmctniy,
-    int? cpmtcdiy,
-    String? mgmgcd,
-    int? mgmgcdiy,
-    List<ChecklistModel>? item,
-    String? mgmgnm,
-    String? mimicd,
-    int? mimicdiy,
-    String? miminm,
-    String? mpmpcd,
-    int? mpmpcdiy,
-    String? mpmpnm,
-    String? mrmrcd,
-    String? mrmrnm,
-    String? trlsnm,
-    String? trlsno,
-    String? cdcdds,
-    int? cdcdln,
-    int? cdcdlniy,
-    int? cdchcdiy,
-    int? cdmand,
-    double? cdrglv,
-    double? cdrguv,
-    String? cdtype,
-    String? cdunms,
-    int? cdvalu,
-    String? chcatg,
-    int? ckcknoiy,
-    int? ckclnoiy,
-    String? ckflk1,
-    String? ckflk2,
-    String? ckflk3,
-    String? ckflk4,
-    String? ckflk5,
-    String? ckfln1,
-    String? ckfln2,
-    String? ckfln3,
-    String? ckfln4,
-    String? ckfln5,
-    int? ckmgcdiy,
-    String? clclno,
-    int? clclnoiy,
-    int? cllsnoiy,
-    int? clmtcdiy,
-    int? clshft,
-    String? clstat,
-    String? clstsm,
-    DateTime? cltrdt,
-    String? cmacvl,
-    int? cmcdlniy,
-    int? cmchcdiy,
-    int? cmcknoiy,
-    int? cmcmlniy,
-    String? cmflk1,
-    String? cmflk2,
-    String? cmflk3,
-    String? cmflk4,
-    String? cmflk5,
-    String? cmfln1,
-    String? cmfln2,
-    String? cmfln3,
-    String? cmfln4,
-    String? cmfln5,
-    int? cmrlcdiy,
-    int? mgmicdiy,
-    int? mgmpcdiy,
-    int? mrchcdiy,
-    int? mrmgcdiy,
-    int? mrrlcdiy,
-    DateTime? mtacdt,
-    int? mtancd,
-    int? mtdays,
-    String? mtmtcd,
-    int? mtmtcdiy,
-    dynamic mtmtnm,
-  }) {
-    return ChecklistModel(
-      chchcd: chchcd ?? this.chchcd,
-      tempId: tempId ?? this.tempId,
-      chchcdiy: chchcdiy ?? this.chchcdiy,
-      chchnm: chchnm ?? this.chchnm,
-      cochdt: cochdt ?? this.cochdt,
-      cochid: cochid ?? this.cochid,
-      cochno: cochno ?? this.cochno,
-      cocoln: cocoln ?? this.cocoln,
-      cocolniy: cocolniy ?? this.cocolniy,
-      cocsdt: cocsdt ?? this.cocsdt,
-      cocsid: cocsid ?? this.cocsid,
-      codpfg: codpfg ?? this.codpfg,
-      comctniy: comctniy ?? this.comctniy,
-      coremk: coremk ?? this.coremk,
-      corgdt: corgdt ?? this.corgdt,
-      corgid: corgid ?? this.corgid,
-      corlcdiy: corlcdiy ?? this.corlcdiy,
-      cousrm: cousrm ?? this.cousrm,
-      cplsnoiy: cplsnoiy ?? this.cplsnoiy,
-      cpmctniy: cpmctniy ?? this.cpmctniy,
-      cpmtcdiy: cpmtcdiy ?? this.cpmtcdiy,
-      mgmgcd: mgmgcd ?? this.mgmgcd,
-      mgmgcdiy: mgmgcdiy ?? this.mgmgcdiy,
-      item: item ?? this.item,
-      mgmgnm: mgmgnm ?? this.mgmgnm,
-      mimicd: mimicd ?? this.mimicd,
-      mimicdiy: mimicdiy ?? this.mimicdiy,
-      miminm: miminm ?? this.miminm,
-      mpmpcd: mpmpcd ?? this.mpmpcd,
-      mpmpcdiy: mpmpcdiy ?? this.mpmpcdiy,
-      mpmpnm: mpmpnm ?? this.mpmpnm,
-      mrmrcd: mrmrcd ?? this.mrmrcd,
-      mrmrnm: mrmrnm ?? this.mrmrnm,
-      trlsnm: trlsnm ?? this.trlsnm,
-      trlsno: trlsno ?? this.trlsno,
-      cdcdds: cdcdds ?? this.cdcdds,
-      cdcdln: cdcdln ?? this.cdcdln,
-      cdcdlniy: cdcdlniy ?? this.cdcdlniy,
-      cdchcdiy: cdchcdiy ?? this.cdchcdiy,
-      cdmand: cdmand ?? this.cdmand,
-      cdrglv: cdrglv ?? this.cdrglv,
-      cdrguv: cdrguv ?? this.cdrguv,
-      cdtype: cdtype ?? this.cdtype,
-      cdunms: cdunms ?? this.cdunms,
-      cdvalu: cdvalu ?? this.cdvalu,
-      chcatg: chcatg ?? this.chcatg,
-      ckcknoiy: ckcknoiy ?? this.ckcknoiy,
-      ckclnoiy: ckclnoiy ?? this.ckclnoiy,
-      ckflk1: ckflk1 ?? this.ckflk1,
-      ckflk2: ckflk2 ?? this.ckflk2,
-      ckflk3: ckflk3 ?? this.ckflk3,
-      ckflk4: ckflk4 ?? this.ckflk4,
-      ckflk5: ckflk5 ?? this.ckflk5,
-      ckfln1: ckfln1 ?? this.ckfln1,
-      ckfln2: ckfln2 ?? this.ckfln2,
-      ckfln3: ckfln3 ?? this.ckfln3,
-      ckfln4: ckfln4 ?? this.ckfln4,
-      ckfln5: ckfln5 ?? this.ckfln5,
-      ckmgcdiy: ckmgcdiy ?? this.ckmgcdiy,
-      clclno: clclno ?? this.clclno,
-      clclnoiy: clclnoiy ?? this.clclnoiy,
-      cllsnoiy: cllsnoiy ?? this.cllsnoiy,
-      clmtcdiy: clmtcdiy ?? this.clmtcdiy,
-      clshft: clshft ?? this.clshft,
-      clstat: clstat ?? this.clstat,
-      clstsm: clstsm ?? this.clstsm,
-      cltrdt: cltrdt ?? this.cltrdt,
-      cmacvl: cmacvl ?? this.cmacvl,
-      cmcdlniy: cmcdlniy ?? this.cmcdlniy,
-      cmchcdiy: cmchcdiy ?? this.cmchcdiy,
-      cmcknoiy: cmcknoiy ?? this.cmcknoiy,
-      cmcmlniy: cmcmlniy ?? this.cmcmlniy,
-      cmflk1: cmflk1 ?? this.cmflk1,
-      cmflk2: cmflk2 ?? this.cmflk2,
-      cmflk3: cmflk3 ?? this.cmflk3,
-      cmflk4: cmflk4 ?? this.cmflk4,
-      cmflk5: cmflk5 ?? this.cmflk5,
-      cmfln1: cmfln1 ?? this.cmfln1,
-      cmfln2: cmfln2 ?? this.cmfln2,
-      cmfln3: cmfln3 ?? this.cmfln3,
-      cmfln4: cmfln4 ?? this.cmfln4,
-      cmfln5: cmfln5 ?? this.cmfln5,
-      cmrlcdiy: cmrlcdiy ?? this.cmrlcdiy,
-      mgmicdiy: mgmicdiy ?? this.mgmicdiy,
-      mgmpcdiy: mgmpcdiy ?? this.mgmpcdiy,
-      mrchcdiy: mrchcdiy ?? this.mrchcdiy,
-      mrmgcdiy: mrmgcdiy ?? this.mrmgcdiy,
-      mrrlcdiy: mrrlcdiy ?? this.mrrlcdiy,
-      mtacdt: mtacdt ?? this.mtacdt,
-      mtancd: mtancd ?? this.mtancd,
-      mtdays: mtdays ?? this.mtdays,
-      mtmtcd: mtmtcd ?? this.mtmtcd,
-      mtmtcdiy: mtmtcdiy ?? this.mtmtcdiy,
-      mtmtnm: mtmtnm ?? this.mtmtnm,
-    );
+  void merge(ChecklistModel other) {
+    chchcd = other.chchcd ?? chchcd;
+    tempId = other.tempId ?? tempId;
+    chchcdiy = other.chchcdiy ?? chchcdiy;
+    chchnm = other.chchnm ?? chchnm;
+    cochdt = other.cochdt ?? cochdt;
+    cochid = other.cochid ?? cochid;
+    cochno = other.cochno ?? cochno;
+    cocoln = other.cocoln ?? cocoln;
+    cocolniy = other.cocolniy ?? cocolniy;
+    cocsdt = other.cocsdt ?? cocsdt;
+    cocsid = other.cocsid ?? cocsid;
+    codpfg = other.codpfg ?? codpfg;
+    comctniy = other.comctniy ?? comctniy;
+    coremk = other.coremk ?? coremk;
+    corgdt = other.corgdt ?? corgdt;
+    corgid = other.corgid ?? corgid;
+    corlcdiy = other.corlcdiy ?? corlcdiy;
+    cousrm = other.cousrm ?? cousrm;
+    cplsnoiy = other.cplsnoiy ?? cplsnoiy;
+    cpmctniy = other.cpmctniy ?? cpmctniy;
+    cpmtcdiy = other.cpmtcdiy ?? cpmtcdiy;
+    mgmgcd = other.mgmgcd ?? mgmgcd;
+    mgmgcdiy = other.mgmgcdiy ?? mgmgcdiy;
+    mgmgnm = other.mgmgnm ?? mgmgnm;
+    mimicd = other.mimicd ?? mimicd;
+    mimicdiy = other.mimicdiy ?? mimicdiy;
+    miminm = other.miminm ?? miminm;
+    mpmpcd = other.mpmpcd ?? mpmpcd;
+    mpmpcdiy = other.mpmpcdiy ?? mpmpcdiy;
+    mpmpnm = other.mpmpnm ?? mpmpnm;
+    mrmrcd = other.mrmrcd ?? mrmrcd;
+    mrmrnm = other.mrmrnm ?? mrmrnm;
+    trlsnm = other.trlsnm ?? trlsnm;
+    trlsno = other.trlsno ?? trlsno;
+    cdcdds = other.cdcdds ?? cdcdds;
+    cdcdln = other.cdcdln ?? cdcdln;
+    cdcdlniy = other.cdcdlniy ?? cdcdlniy;
+    cdchcdiy = other.cdchcdiy ?? cdchcdiy;
+    cdmand = other.cdmand ?? cdmand;
+    cdrglv = other.cdrglv ?? cdrglv;
+    cdrguv = other.cdrguv ?? cdrguv;
+    cdtype = other.cdtype ?? cdtype;
+    cdunms = other.cdunms ?? cdunms;
+    cdvalu = other.cdvalu ?? cdvalu;
+    chcatg = other.chcatg ?? chcatg;
+    ckcknoiy = other.ckcknoiy ?? ckcknoiy;
+    ckclnoiy = other.ckclnoiy ?? ckclnoiy;
+    ckflk1 = other.ckflk1 ?? ckflk1;
+    ckflk2 = other.ckflk2 ?? ckflk2;
+    ckflk3 = other.ckflk3 ?? ckflk3;
+    ckflk4 = other.ckflk4 ?? ckflk4;
+    ckflk5 = other.ckflk5 ?? ckflk5;
+    ckfln1 = other.ckfln1 ?? ckfln1;
+    ckfln2 = other.ckfln2 ?? ckfln2;
+    ckfln3 = other.ckfln3 ?? ckfln3;
+    ckfln4 = other.ckfln4 ?? ckfln4;
+    ckfln5 = other.ckfln5 ?? ckfln5;
+    ckmgcdiy = other.ckmgcdiy ?? ckmgcdiy;
+    clclno = other.clclno ?? clclno;
+    clclnoiy = other.clclnoiy ?? clclnoiy;
+    cllsnoiy = other.cllsnoiy ?? cllsnoiy;
+    clmtcdiy = other.clmtcdiy ?? clmtcdiy;
+    clshft = other.clshft ?? clshft;
+    clstat = other.clstat ?? clstat;
+    clstsm = other.clstsm ?? clstsm;
+    cltrdt = other.cltrdt ?? cltrdt;
+    cmacvl = other.cmacvl ?? cmacvl;
+    cmcdlniy = other.cmcdlniy ?? cmcdlniy;
+    cmchcdiy = other.cmchcdiy ?? cmchcdiy;
+    cmcknoiy = other.cmcknoiy ?? cmcknoiy;
+    cmcmlniy = other.cmcmlniy ?? cmcmlniy;
+    cmflk1 = other.cmflk1 ?? cmflk1;
+    cmflk2 = other.cmflk2 ?? cmflk2;
+    cmflk3 = other.cmflk3 ?? cmflk3;
+    cmflk4 = other.cmflk4 ?? cmflk4;
+    cmflk5 = other.cmflk5 ?? cmflk5;
+    cmfln1 = other.cmfln1 ?? cmfln1;
+    cmfln2 = other.cmfln2 ?? cmfln2;
+    cmfln3 = other.cmfln3 ?? cmfln3;
+    cmfln4 = other.cmfln4 ?? cmfln4;
+    cmfln5 = other.cmfln5 ?? cmfln5;
+    cmrlcdiy = other.cmrlcdiy ?? cmrlcdiy;
+    mgmicdiy = other.mgmicdiy ?? mgmicdiy;
+    mgmpcdiy = other.mgmpcdiy ?? mgmpcdiy;
+    mrchcdiy = other.mrchcdiy ?? mrchcdiy;
+    mrmgcdiy = other.mrmgcdiy ?? mrmgcdiy;
+    mrrlcdiy = other.mrrlcdiy ?? mrrlcdiy;
+    mtacdt = other.mtacdt ?? mtacdt;
+    mtancd = other.mtancd ?? mtancd;
+    mtdays = other.mtdays ?? mtdays;
+    mtmtcd = other.mtmtcd ?? mtmtcd;
+    mtmtcdiy = other.mtmtcdiy ?? mtmtcdiy;
+    mtmtnm = other.mtmtnm ?? mtmtnm;
   }
 }

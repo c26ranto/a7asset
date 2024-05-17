@@ -71,10 +71,10 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             Navigator.pop(context);
             AppDialog.loadingDialog(context);
             break;
-          case SaveChecklistStatus.failure:
-            Navigator.pop(context);
-            AppDialog.errorDialog(context, next.customError.errorMessage,
-                () => Navigator.pop(context));
+          // case SaveChecklistStatus.failure:
+          //   Navigator.pop(context);
+          //   AppDialog.errorDialog(context, next.customError.errorMessage,
+          //       () => Navigator.pop(context));
           default:
             Navigator.pop(context);
             ScaffoldMessenger.of(context)

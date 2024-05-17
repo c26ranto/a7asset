@@ -181,6 +181,8 @@ class HttpClient {
 
     Map<String, dynamic> data = {};
 
+    AppPrint.debugLog("DECODE POST: $decode");
+
     // FOR GET CON LIST
     if (url.toLowerCase().contains("getcon")) {
       data = {
@@ -188,8 +190,14 @@ class HttpClient {
         "data": decode,
       };
     } else {
-      final decrypt = List<String>.from(decode["Data"]).decryptA7;
+      final dataDecode = decode["Data"];
+
+      // if (dataDecode is List) {
+      //   data = {"code": response.statusCode, "Data": {}};
+      // } else {
+      final decrypt = List<String>.from(dataDecode).decryptA7;
       data = {"code": response.statusCode, "data": decrypt};
+      // }
     }
 
     AppPrint.debugLog("DATA HTTP CLIENT GET: $data");

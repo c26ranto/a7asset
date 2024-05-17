@@ -134,7 +134,6 @@ class _ResultScanMachineScreenState
                                               content: Text(
                                                   "Checklist disimpan...")));
                                       ref.read(routerProvider).pop();
-                                      // context.pop();
                                     });
                                   }
                                 }
