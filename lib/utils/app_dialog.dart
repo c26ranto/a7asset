@@ -14,7 +14,8 @@ import 'package:go_router/go_router.dart';
 
 class AppDialog {
   static void loadingDialog(BuildContext context) {
-    if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       showCupertinoDialog(
         context: context,
         barrierDismissible: false,
@@ -49,8 +50,10 @@ class AppDialog {
     }
   }
 
-  static void errorDialog(BuildContext context, String errorMessage, void Function()? onPressed) {
-    if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+  static void errorDialog(
+      BuildContext context, String errorMessage, void Function()? onPressed) {
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       showCupertinoDialog(
         context: context,
         barrierDismissible: false,
@@ -111,7 +114,8 @@ class AppDialog {
         child: AlertDialog(
           backgroundColor: AppColors.bgColor2,
           // insetPadding: EdgeInsets.zero,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           title: title ?? const Text('Info..'),
           content: content ?? Text(msg ?? ""),
           actions: hasTokenExpired != null && hasTokenExpired
@@ -131,7 +135,8 @@ class AppDialog {
                           },
                       child: Text(
                         titleOnTapOk ?? 'OK',
-                        style: styleOnTapOk ?? const TextStyle(color: AppColors.thirdColor),
+                        style: styleOnTapOk ??
+                            const TextStyle(color: AppColors.thirdColor),
                       ),
                     ),
                   ],
@@ -140,7 +145,8 @@ class AppDialog {
     );
   }
 
-  static popupScan(BuildContext context, String type, TextEditingController controller) {
+  static popupScan(
+      BuildContext context, String type, TextEditingController controller) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -148,7 +154,8 @@ class AppDialog {
           Widget okButton = TextButton(
             child: Text(
               "Input Manually",
-              style: AppTextStyle.subTitleTextStyle.copyWith(color: AppColors.blue),
+              style: AppTextStyle.subTitleTextStyle
+                  .copyWith(color: AppColors.blue),
             ),
             onPressed: () {
               context.pop();
@@ -170,7 +177,8 @@ class AppDialog {
                 ),
                 Text(
                   "Scan",
-                  style: AppTextStyle.subTitleTextStyle.copyWith(color: AppColors.blue),
+                  style: AppTextStyle.subTitleTextStyle
+                      .copyWith(color: AppColors.blue),
                 ),
               ],
             ),
@@ -193,7 +201,9 @@ class AppDialog {
               style: AppTextStyle.subTitleTextStyle.copyWith(),
             ),
             content: SingleChildScrollView(
-                child: Center(child: Text("Choose these available option to pick machine", style: AppTextStyle.commonTextStyle.copyWith()))),
+                child: Center(
+                    child: Text("Choose these available option to pick machine",
+                        style: AppTextStyle.commonTextStyle.copyWith()))),
             actions: [okButton, deleteButton],
           );
         });
@@ -201,14 +211,16 @@ class AppDialog {
     );
   }
 
-  static inputManualDialog(BuildContext context, {required TextEditingController controller}) async {
+  static inputManualDialog(BuildContext context,
+      {required TextEditingController controller}) async {
     await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
             title: Text(
               "Type Machine Code",
-              style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.black),
+              style:
+                  AppTextStyle.subTitleTextStyle.copyWith(color: Colors.black),
             ),
             content: Consumer(
               builder: (_, ref, __) {
@@ -219,7 +231,8 @@ class AppDialog {
                       TextFormField(
                         controller: controller,
                         textCapitalization: TextCapitalization.characters,
-                        decoration: const InputDecoration(border: OutlineInputBorder(), hintText: ""),
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder(), hintText: ""),
                       ),
                       10.h,
                       Row(
@@ -227,17 +240,25 @@ class AppDialog {
                         children: [
                           InkWell(
                             onTap: () async {
-                              ref.read(idQrCodeProvider.notifier).update((state) => controller.text);
-                              AppPrint.debugLog("DATA MACHINE ID TIDAK NULL INPUT MANUAL ${controller.text}");
-                              await ref.read(routerProvider).pushReplacement(RouteName.resultScanMachine);
+                              ref
+                                  .read(idQrCodeProvider.notifier)
+                                  .update((state) => controller.text);
+                              AppPrint.debugLog(
+                                  "DATA MACHINE ID TIDAK NULL INPUT MANUAL ${controller.text}");
+                              await ref
+                                  .read(routerProvider)
+                                  .pushReplacement(RouteName.resultScanMachine);
                             },
                             child: Row(
                               children: [
-                                const Icon(Icons.checklist, size: 18, color: AppColors.blue),
+                                const Icon(Icons.checklist,
+                                    size: 18, color: AppColors.blue),
                                 7.w,
                                 Text(
                                   "Create Checklist",
-                                  style: AppTextStyle.commonTextStyle.copyWith(fontWeight: FontWeight.w500, color: AppColors.blue),
+                                  style: AppTextStyle.commonTextStyle.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.blue),
                                 ),
                               ],
                             ),
@@ -250,7 +271,9 @@ class AppDialog {
                             },
                             child: Text(
                               "Cancel",
-                              style: AppTextStyle.commonTextStyle.copyWith(fontWeight: FontWeight.w500, color: AppColors.blue),
+                              style: AppTextStyle.commonTextStyle.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.blue),
                             ),
                           ),
                         ],

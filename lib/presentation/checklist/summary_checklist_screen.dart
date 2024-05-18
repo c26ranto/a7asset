@@ -17,7 +17,7 @@ class SummaryChecklistScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statusChecklist = ref.watch(statusChecklistProvider);
+    final statusChecklist = ref.watch(statusChecklistItemProvider);
     final partData = ref.watch(partDataProvider);
     return Scaffold(
       appBar: CustomAppbarWidget(
@@ -84,19 +84,30 @@ class SummaryChecklistScreen extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       AppPrint.debugLog("WELL WELL: $partData");
                       final item = partData["part"]["item"][index];
+                      final detailChecklist =
+                          List.from(item["detailItemChecklist"]);
                       return CustomLongCardWidget(
                         title: item["value"],
-                        // TODO
-                        // textLeading: "${item["cdvalu"] == null ? "0" : item["cdvalue"]}/${item["cdvalu"] == null ? "0" : item["cdvalue"]}",
+                        textLeading:
+                            "${item["cdvalu"] == null ? "0" : item["cdvalue"]}/${detailChecklist.length}",
                         onTap: () {
                           AppPrint.debugLog(
-                              "DATA FROM SUMMARY CHECKLIST: $item");
+                              "DATA FROM SUMMARY CHECKLIST: $detailChecklist");
                           ref
                               .read(cdchcdiyProvider.notifier)
                               .update((state) => item["id"].toString());
                           ref
                               .read(detailChecklistItemProvider.notifier)
                               .update((state) => item);
+
+                          ref
+                              .read(detailChecklistItemTestProvider.notifier)
+                              .update(
+                                (state) => {
+                                  "detailChecklist": detailChecklist,
+                                },
+                              );
+
                           ref
                               .read(routerProvider)
                               .push(RouteName.checklistDetail);

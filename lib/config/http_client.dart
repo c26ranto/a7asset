@@ -115,13 +115,12 @@ class HttpClient {
         token.isNotEmpty &&
         !httpClientParams.path.contains("getConnList")) {
       final checkExpired = token.checkExpiredToken;
-
+      AppPrint.debugLog("CHECK EXPIRED TOKEN: $checkExpired");
       // WHEN EXPIRED
       // CALL REFRESH TOKEN
-      if (checkExpired) {
+      if (checkExpired == true) {
         final data = await ref.read(authRepositoryProvider).refreshToken();
         token = data["access_token"];
-        await Future.delayed(const Duration(seconds: 1));
       }
     }
 

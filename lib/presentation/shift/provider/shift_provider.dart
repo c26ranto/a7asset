@@ -17,7 +17,9 @@ final shiftDateProvider = StateProvider.autoDispose<String>((ref) {
   return date;
 });
 
-final dataTableProvider = StateProvider.family<List<Map<String, dynamic>>, Map<String, dynamic>>((ref, data) {
+final dataTableProvider =
+    StateProvider.family<List<Map<String, dynamic>>, Map<String, dynamic>>(
+        (ref, data) {
   return [
     {
       "label": "Machine No",
@@ -51,11 +53,18 @@ final isDefaultShiftProvider = Provider.autoDispose<bool>((ref) {
   return shift.isDefault;
 });
 
-final partChecklistDataProvider = StateProvider<List<Map<String, dynamic>>>((ref) {
+final partChecklistDataProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) {
   return [];
 });
 
-final statusChecklistProvider = StateProvider<List<Map<String, dynamic>>>((ref) {
+final statusChecklistProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
+final statusChecklistItemProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) {
   return [];
 });
 
@@ -74,22 +83,28 @@ FutureOr<List<Map<String, dynamic>>> getShift(GetShiftRef ref) async {
 }
 
 @riverpod
-FutureOr<List<Map<String, dynamic>>> getChecklistPeriod(GetChecklistPeriodRef ref) async {
+FutureOr<List<Map<String, dynamic>>> getChecklistPeriod(
+    GetChecklistPeriodRef ref) async {
   final response = await ref.read(shiftRepositoryProvider).getChecklistPeriod();
   return response;
 }
 
 @riverpod
-FutureOr<List<Map<String, dynamic>>> getAllMachines(Ref ref, {required String id, required String type}) async {
-  final response = await ref.read(machineRepositoryProvider).getAllMachines(id: id, type: type);
+FutureOr<List<Map<String, dynamic>>> getAllMachines(Ref ref,
+    {required String id, required String type}) async {
+  final response = await ref
+      .read(machineRepositoryProvider)
+      .getAllMachines(id: id, type: type);
   return response;
 }
 
 @riverpod
 Future<AuthState> getStatusMachine(GetStatusMachineRef ref) async {
-  AuthState state = const AuthState(status: AuthStatus.loading, result: null, error: CustomError());
+  AuthState state = const AuthState(
+      status: AuthStatus.loading, result: null, error: CustomError());
   try {
-    final response = await ref.watch(machineRepositoryProvider).getStatusMachine();
+    final response =
+        await ref.watch(machineRepositoryProvider).getStatusMachine();
 
     AppPrint.debugLog("RESPONSE GET STATUS MACHINE PROVIDER: $response");
 
@@ -105,10 +120,14 @@ Future<AuthState> getStatusMachine(GetStatusMachineRef ref) async {
       });
     }
 
-    state = AuthState(status: AuthStatus.success, result: jsonEncode(status), error: const CustomError());
+    state = AuthState(
+        status: AuthStatus.success,
+        result: jsonEncode(status),
+        error: const CustomError());
     return state;
   } catch (e) {
-    state = AuthState(status: AuthStatus.success, result: null, error: e as CustomError);
+    state = AuthState(
+        status: AuthStatus.success, result: null, error: e as CustomError);
     return state;
   }
 }

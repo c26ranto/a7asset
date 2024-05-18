@@ -20,6 +20,11 @@ final detailChecklistItemProvider = StateProvider<Map<String, dynamic>>((ref) {
   return {};
 });
 
+final detailChecklistItemTestProvider =
+    StateProvider<Map<String, dynamic>>((ref) {
+  return {};
+});
+
 final imagesDetailChecklistProvider =
     StateProvider.autoDispose<List<XFile>>((ref) {
   return [];
@@ -143,14 +148,12 @@ class Checklist extends _$Checklist {
       status: ChecklistStatus.loading,
     );
     try {
-      List<Map<String, dynamic>> groupingPart = [];
-
       // CALCULATE CHECKLIST STATUS
       int doneChecklist = 0;
       int tempTotalChecklist = 0;
 
-      List<ChecklistModel> mergedList = [];
-
+      int doneChecklistItem = 0;
+      int tempTotalChecklistItem = 0;
       final resp = await ref
           .read(checklistRepositoryProvider)
           .getGenerateCldetl(
@@ -162,93 +165,42 @@ class Checklist extends _$Checklist {
             machineId: id,
           );
 
-      for (final a in resp) {
-        AppPrint.debugLog('CLDETL PROVIDER: ${a.toMap()}');
-      }
-
       final checklistModel = resp.map((e) => ChecklistModel.fromMap(e.toMap()));
       final tempp = response.map((e) => ChecklistModel.fromMap(e));
 
-      for (final a in checklistModel) {
-        AppPrint.debugLog("HELLLO: ${a.toMap()}");
-      }
+      final mergedList = [...checklistModel, ...tempp];
 
-      for (final b in tempp) {
-        AppPrint.debugLog("AFTER THAT: ${b.toMap()}");
-      }
+      final groupingItem =
+          ref.read(checklistControllerProvider.notifier).mergeData(mergedList);
 
-      mergedList = [...checklistModel, ...tempp];
+      AppPrint.debugLog("GROUPIN PART: $groupingItem");
 
-      for (final a in mergedList) {
-        AppPrint.debugLog("Hello from part ${a.toMap()}");
-      }
+      for (int i = 0; i < groupingItem.length; i++) {
+        final item =
+            List.from(groupingItem[i][groupingItem[i]["tempId"]]["item"]);
 
-      for (int i = 0; i < mergedList.length; i++) {
-        final mpmpcdiy = mergedList[i].mpmpcdiy.toString();
-        final mimicdiy = mergedList[i].mimicdiy;
-        final miminm = mergedList[i].miminm;
+        doneChecklist =
+            item.where((element) => element["cdvalu"] != null).length;
+        tempTotalChecklist += item.length;
 
-        if (!groupingPart.any((element) => element.containsKey(mpmpcdiy))) {
-          groupingPart.add({
-            "tempId": mpmpcdiy,
-            "trlsnm": mergedList[i].trlsnm.toString().trim(),
-            mpmpcdiy: {
-              "mpmpnm": mergedList[i].mpmpnm,
-              "cmcmlniy": mergedList[i].cmcmlniy,
-              "cmacvl": mergedList[i].cmacvl,
-              "cdcdlniy": mergedList[i].cdcdlniy,
-              // ...temp[i].toMap(),
-              "item": [
-                {
-                  "id": mimicdiy,
-                  "value": miminm.toString().trim(),
-                  ...mergedList[i].toMap(),
-                }
-              ],
-            },
-          });
-        } else {
-          final index = groupingPart
-              .indexWhere((element) => element.containsKey(mpmpcdiy));
-          final items = groupingPart[index][mpmpcdiy]["item"]
-              as List<Map<String, dynamic>>;
-          final existingItemIndex =
-              items.indexWhere((item) => item["id"] == mimicdiy);
+        for (final a in item) {
+          final detail = List.from(a["detailItemChecklist"]);
 
-          if (existingItemIndex == -1) {
-            // Add new item
-            items.add({
-              "id": mimicdiy,
-              "value": miminm.toString().trim(),
-              ...mergedList[i].toMap(),
-            });
-          } else {
-            items[existingItemIndex] = {
-              "id": mimicdiy,
-              "value": miminm.toString().trim(),
-              ...mergedList[i].toMap(),
-            };
-          }
-
-          groupingPart[index][mpmpcdiy]["item"] = items;
+          doneChecklistItem =
+              detail.where((element) => element["cdvalu"] != null).length;
+          tempTotalChecklistItem += detail.length;
         }
       }
 
-      for (final a in groupingPart) {
-        AppPrint.debugLog("DATA BARU: $a");
-      }
-
-      for (int i = 0; i < groupingPart.length; i++) {
-        doneChecklist =
-            List.from(groupingPart[i][groupingPart[i]["tempId"]]["item"])
-                .where((element) => element["cdvalu"] != null)
-                .length;
-        tempTotalChecklist +=
-            List.from(groupingPart[i][groupingPart[i]["tempId"]]["item"])
-                .length;
-      }
-
       final undone = tempTotalChecklist - doneChecklist;
+      final undoneItem = tempTotalChecklistItem - doneChecklistItem;
+
+      AppPrint.debugLog("DONE CHECKLIST: $doneChecklist");
+      AppPrint.debugLog("TEMP TOTAL CHECKLIST: $tempTotalChecklist");
+      AppPrint.debugLog("UN DONE CHECKLIST: $undone");
+
+      AppPrint.debugLog("DONE CHECKLIST ITEM: $doneChecklistItem");
+      AppPrint.debugLog("TEMP TOTAL CHECKLIST ITEM: $tempTotalChecklistItem");
 
       ref.read(statusChecklistProvider.notifier).update((state) => [
             {
@@ -268,14 +220,32 @@ class Checklist extends _$Checklist {
             },
           ]);
 
+      ref.read(statusChecklistItemProvider.notifier).update((state) => [
+            {
+              "label": "Total Checklist",
+              "value": "$tempTotalChecklistItem",
+              "type": CardStatusType.total,
+            },
+            {
+              "label": "Done",
+              "value": doneChecklistItem,
+              "type": CardStatusType.done,
+            },
+            {
+              "label": "Not Done",
+              "value": "$undoneItem",
+              "type": CardStatusType.notDone,
+            },
+          ]);
+
       ref
           .read(partChecklistDataProvider.notifier)
-          .update((state) => groupingPart);
+          .update((state) => groupingItem);
 
       ref.read(modelProvider.notifier).update((state) => response[0]["trlsnm"]);
 
-      state =
-          state.copyWith(status: ChecklistStatus.success, success: mergedList);
+      state = state.copyWith(
+          status: ChecklistStatus.success, success: groupingItem);
     } on CustomError catch (e) {
       AppPrint.debugLog("ERROR BRO: $e");
       state = state.copyWith(
@@ -308,5 +278,115 @@ class SaveChecklist extends _$SaveChecklist {
       state =
           state.copyWith(status: SaveChecklistStatus.failure, customError: e);
     }
+  }
+}
+
+@riverpod
+class ChecklistController extends _$ChecklistController {
+  @override
+  void build() {
+    return;
+  }
+
+  List<Map<String, dynamic>> mergeData(List<ChecklistModel> mergedList) {
+    List<Map<String, dynamic>> groupingPart = [];
+
+    try {
+      for (final item in mergedList) {
+        final mpmpcdiy = item.mpmpcdiy.toString();
+        final mimicdiy = item.mimicdiy;
+        final miminm = item.miminm;
+        final mrrlcdiy = item.mrrlcdiy;
+        final mrmrnm = item.mrmrnm;
+        final chchcdiy = item.chchcdiy;
+        final cdtype = item.cdtype;
+        final cmcmlniy = item.cmcmlniy;
+        final cmacvl = item.cmacvl;
+        final cmcdlniy = item.cmcdlniy;
+        final cdcdds = item.cdcdds;
+        final cdvalu = item.cdvalu;
+        final cdrguv = item.cdrguv;
+        final cdunms = item.cdunms;
+        final chchnm = item.chchnm;
+
+        final detailItemChecklist = {
+          "mrmrnm": mrmrnm,
+          "mrrlcdiy": mrrlcdiy,
+          "chchcdiy": chchcdiy,
+          "cdtype": cdtype,
+          "cmcmlniy": cmcmlniy,
+          "cmacvl": cmacvl,
+          "cmcdlniy": cmcdlniy,
+          "cdcdds": cdcdds,
+          "cdrguv": cdrguv,
+          "chchnm": chchnm,
+          "cdvalu": cdvalu,
+          "cdunms": cdunms,
+        };
+
+        if (!groupingPart.any((element) => element.containsKey(mpmpcdiy))) {
+          groupingPart.add({
+            "tempId": mpmpcdiy,
+            "trlsnm": item.trlsnm.toString().trim(),
+            mpmpcdiy: {
+              "mpmpnm": item.mpmpnm,
+              "cmcmlniy": item.cmcmlniy,
+              "cmacvl": item.cmacvl,
+              "cdcdlniy": item.cdcdlniy,
+              "item": [
+                {
+                  "id": mimicdiy,
+                  "value": miminm.toString().trim(),
+                  "detailItemChecklist": [detailItemChecklist],
+                  ...item.toMap(),
+                }
+              ],
+            },
+          });
+        } else {
+          final index = groupingPart
+              .indexWhere((element) => element.containsKey(mpmpcdiy));
+          final items = groupingPart[index][mpmpcdiy]["item"]
+              as List<Map<String, dynamic>>;
+          final existingItemIndex =
+              items.indexWhere((item) => item["id"] == mimicdiy);
+
+          if (existingItemIndex == -1) {
+            items.add({
+              "id": mimicdiy,
+              "value": miminm.toString().trim(),
+              "detailItemChecklist": [detailItemChecklist],
+              ...item.toMap(),
+            });
+          } else {
+            final existingItem = items[existingItemIndex];
+            var existingDetailChecklist = existingItem["detailItemChecklist"];
+
+            if (existingDetailChecklist is List) {
+              final findUniqueId = existingDetailChecklist
+                  .indexWhere((element) => element["chchcdiy"] == chchcdiy);
+
+              if (findUniqueId == -1) {
+                existingDetailChecklist.add(detailItemChecklist);
+              }
+            } else {
+              existingDetailChecklist = [
+                existingDetailChecklist,
+                detailItemChecklist
+              ];
+            }
+
+            existingItem["detailItemChecklist"] = existingDetailChecklist;
+            items[existingItemIndex] = existingItem;
+          }
+
+          groupingPart[index][mpmpcdiy]["item"] = items;
+        }
+      }
+    } catch (e, st) {
+      AppPrint.debugLog("ERRROR YA: $e $st");
+    }
+
+    return groupingPart;
   }
 }

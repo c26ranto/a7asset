@@ -17,7 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$ChecklistState {
   ChecklistStatus get status => throw _privateConstructorUsedError;
-  List<ChecklistModel>? get success => throw _privateConstructorUsedError;
+  List<Map<String, dynamic>>? get success => throw _privateConstructorUsedError;
   CustomError get customError => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -33,7 +33,7 @@ abstract class $ChecklistStateCopyWith<$Res> {
   @useResult
   $Res call(
       {ChecklistStatus status,
-      List<ChecklistModel>? success,
+      List<Map<String, dynamic>>? success,
       CustomError customError});
 
   $CustomErrorCopyWith<$Res> get customError;
@@ -64,7 +64,7 @@ class _$ChecklistStateCopyWithImpl<$Res, $Val extends ChecklistState>
       success: freezed == success
           ? _value.success
           : success // ignore: cast_nullable_to_non_nullable
-              as List<ChecklistModel>?,
+              as List<Map<String, dynamic>>?,
       customError: null == customError
           ? _value.customError
           : customError // ignore: cast_nullable_to_non_nullable
@@ -91,7 +91,7 @@ abstract class _$$ChecklistStateImplCopyWith<$Res>
   @useResult
   $Res call(
       {ChecklistStatus status,
-      List<ChecklistModel>? success,
+      List<Map<String, dynamic>>? success,
       CustomError customError});
 
   @override
@@ -121,7 +121,7 @@ class __$$ChecklistStateImplCopyWithImpl<$Res>
       success: freezed == success
           ? _value._success
           : success // ignore: cast_nullable_to_non_nullable
-              as List<ChecklistModel>?,
+              as List<Map<String, dynamic>>?,
       customError: null == customError
           ? _value.customError
           : customError // ignore: cast_nullable_to_non_nullable
@@ -135,15 +135,15 @@ class __$$ChecklistStateImplCopyWithImpl<$Res>
 class _$ChecklistStateImpl implements _ChecklistState {
   const _$ChecklistStateImpl(
       {required this.status,
-      required final List<ChecklistModel>? success,
+      required final List<Map<String, dynamic>>? success,
       required this.customError})
       : _success = success;
 
   @override
   final ChecklistStatus status;
-  final List<ChecklistModel>? _success;
+  final List<Map<String, dynamic>>? _success;
   @override
-  List<ChecklistModel>? get success {
+  List<Map<String, dynamic>>? get success {
     final value = _success;
     if (value == null) return null;
     if (_success is EqualUnmodifiableListView) return _success;
@@ -185,13 +185,13 @@ class _$ChecklistStateImpl implements _ChecklistState {
 abstract class _ChecklistState implements ChecklistState {
   const factory _ChecklistState(
       {required final ChecklistStatus status,
-      required final List<ChecklistModel>? success,
+      required final List<Map<String, dynamic>>? success,
       required final CustomError customError}) = _$ChecklistStateImpl;
 
   @override
   ChecklistStatus get status;
   @override
-  List<ChecklistModel>? get success;
+  List<Map<String, dynamic>>? get success;
   @override
   CustomError get customError;
   @override

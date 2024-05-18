@@ -77,13 +77,11 @@ extension Token on String {
     final dateNow = DateTime.now();
     final expiredToken = DateTime.fromMillisecondsSinceEpoch(
         int.parse(decodeToken["exp"].toString()) * 1000);
-    AppPrint.debugPrint(
-        "EXPIRED TOKEN: $expiredToken -- DATE now: ${DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch)}");
-    if (expiredToken.isAfter(dateNow)) {
-      return false;
-    } else {
-      return true;
-    }
+
+    AppPrint.debugPrint("Decoded Token: $decodeToken");
+    AppPrint.debugPrint("EXPIRED TOKEN: $expiredToken -- DATE now: $dateNow");
+
+    return dateNow.isAfter(expiredToken);
   }
 }
 

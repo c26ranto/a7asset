@@ -15,11 +15,14 @@ enum ChecklistStatus {
 class ChecklistState with _$ChecklistState {
   const factory ChecklistState({
     required ChecklistStatus status,
-    required List<ChecklistModel>? success,
+    required List<Map<String, dynamic>>? success,
     required CustomError customError,
   }) = _ChecklistState;
 
   factory ChecklistState.initial() {
-    return const ChecklistState(status: ChecklistStatus.initial, success: null, customError: CustomError());
+    return const ChecklistState(
+        status: ChecklistStatus.initial,
+        success: null,
+        customError: CustomError());
   }
 }

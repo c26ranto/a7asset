@@ -304,7 +304,7 @@ final generateClheadProvider =
 );
 
 typedef _$GenerateClhead = AutoDisposeNotifier<GenerateClheadState>;
-String _$checklistHash() => r'd67e96a49bc800486f9c722238602758a8dd0ed8';
+String _$checklistHash() => r'89b1400b533e01abe901feb7c9f4b78560d4c2a1';
 
 /// See also [Checklist].
 @ProviderFor(Checklist)
@@ -335,5 +335,22 @@ final saveChecklistProvider =
 );
 
 typedef _$SaveChecklist = AutoDisposeNotifier<SaveChecklistState>;
+String _$checklistControllerHash() =>
+    r'814b8f815f35c627194301cd8332be8df6dd47bb';
+
+/// See also [ChecklistController].
+@ProviderFor(ChecklistController)
+final checklistControllerProvider =
+    AutoDisposeNotifierProvider<ChecklistController, void>.internal(
+  ChecklistController.new,
+  name: r'checklistControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$checklistControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$ChecklistController = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

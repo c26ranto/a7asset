@@ -10,15 +10,18 @@ import 'package:assets_mobile/presentation/widgets/background_image_image.dart';
 import 'package:assets_mobile/presentation/widgets/button_widget.dart';
 import 'package:assets_mobile/presentation/widgets/card_status_widget.dart';
 import 'package:assets_mobile/presentation/widgets/custom_appbar_widget.dart';
+import 'package:assets_mobile/presentation/widgets/custom_error_widget.dart';
 import 'package:assets_mobile/presentation/widgets/custom_long_card_widget.dart';
 import 'package:assets_mobile/presentation/widgets/loading_shimmer.dart';
 import 'package:assets_mobile/route/route_name.dart';
 import 'package:assets_mobile/route/route_provider.dart';
+import 'package:assets_mobile/utils/app_colors.dart';
 import 'package:assets_mobile/utils/app_dialog.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:assets_mobile/utils/app_text_Style.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -40,8 +43,8 @@ class _ResultScanMachineScreenState
     final shift = ref.watch(dataShiftProvider);
     final model = ref.watch(modelProvider);
     final statusChecklist = ref.read(statusChecklistProvider);
-    final partChecklist = ref.watch(partChecklistDataProvider);
     final dataGetChecklist = ref.watch(dataGetChecklistProvider);
+
     Widget prevChecklistWidget = const SizedBox.shrink();
 
     final checklistState = ref.watch(checklistProvider);
@@ -151,7 +154,8 @@ class _ResultScanMachineScreenState
           break;
         case AuthStatus.failure:
           Navigator.pop(context);
-          AppDialog.errorDialog(context, next.value!.error.errorMessage, () {});
+          AppDialog.errorDialog(context, next.value!.error.errorMessage,
+              () => Navigator.pop(context));
         default:
       }
     });
@@ -167,7 +171,75 @@ class _ResultScanMachineScreenState
           setState(() {
             loading = false;
           });
-          AppPrint.debugLog("SUCCESS BOSKU: ${next.success}");
+          final status = next.success?.first["clstat"] ?? "0";
+          AppPrint.debugLog("HELLO STATUS $status");
+          switch (status.trim()) {
+            case "90":
+              AppDialog.customDialog(context, "",
+                  barrierDismissible: false,
+                  title: Text(
+                    "Machine checklist is finished\nPress create new to check again",
+                    style: AppTextStyle.subTitleTextStyle.copyWith(),
+                  ),
+                  actions: [
+                    ButtonReusableWidget(
+                      onPressed: () => context.pop(),
+                      title: "Back",
+                    ),
+                    ButtonReusableWidget(
+                      onPressed: () async {
+                        context.pop();
+                      },
+                      title: "Create New",
+                    ),
+                  ]);
+              break;
+            case "10":
+              AppDialog.customDialog(
+                context,
+                "",
+                barrierDismissible: false,
+                title: Text(
+                  "Machine Checklist is Onprogress\nMachine Checklist is Onprogress, you can continue or scan other machine.",
+                  style: AppTextStyle.subTitleTextStyle.copyWith(),
+                ),
+                actions: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ButtonReusableWidget(
+                          onPressed: () => context.pop(),
+                          backgroundColor: Colors.red,
+                          title: "Back",
+                        ),
+                      ),
+                      10.w,
+                      Expanded(
+                        child: ButtonReusableWidget(
+                          onPressed: () async {
+                            context.pop();
+                          },
+                          backgroundColor: Colors.blue,
+                          title: "Create New",
+                        ),
+                      ),
+                      10.w,
+                      Expanded(
+                        child: ButtonReusableWidget(
+                          onPressed: () async {
+                            context.pop();
+                          },
+                          backgroundColor: Colors.green,
+                          title: "Continue",
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+              break;
+          }
+
         case ChecklistStatus.loading:
           setState(() {
             loading = true;
@@ -191,37 +263,48 @@ class _ResultScanMachineScreenState
           ),
         );
       case ChecklistStatus.success:
-        prevChecklistWidget = ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: partChecklist.length,
-          itemBuilder: (context, index) {
-            final idPart = partChecklist[index]["tempId"];
-            final part = partChecklist[index][idPart];
-            return CustomLongCardWidget(
-              title: part["mpmpnm"].toString().trimRight(),
-              onTap: () {
-                final data = {
-                  "part": part,
-                  "mechineName": partChecklist[index]["trlsnm"],
-                  "chchnm": part["chchnm"]
-                };
+        prevChecklistWidget = checklistState.success?.isEmpty ?? [].isEmpty
+            ? const SizedBox(
+                height: 150,
+                child: CustomErrorWidget(
+                  customErrorWidgetType: CustomErrorWidgetType.widget,
+                  errorMessage: "Tidak ada data, silahkan coba lagi",
+                  buttonTitle: "Kembali",
+                ))
+            : ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: checklistState.success?.length,
+                itemBuilder: (context, index) {
+                  final data = checklistState.success ?? [];
 
-                AppPrint.debugLog("DATAA: $data");
+                  final idPart = data[index]["tempId"];
+                  final part = data[index][idPart];
+                  return CustomLongCardWidget(
+                    title: part["mpmpnm"].toString().trimRight(),
+                    onTap: () {
+                      final dataPass = {
+                        "part": part,
+                        "mechineName": data[index]["trlsnm"],
+                        "chchnm": part["chchnm"]
+                      };
 
-                ref
-                    .read(cmcmlniyProvider.notifier)
-                    .update((state) => data["part"]["cmcmlniy"].toString());
-                ref.read(partDataProvider.notifier).update((state) => data);
+                      AppPrint.debugLog("DATAA: $data");
 
-                ref.read(routerProvider).push(RouteName.summaryChecklist);
-              },
-              textLeading: "0/${part["item"]?.length}",
-              titleStye: AppTextStyle.subTitleTextStyle.copyWith(),
-              textLeadingStyle: AppTextStyle.subTitleTextStyle.copyWith(),
-            );
-          },
-        );
+                      ref.read(cmcmlniyProvider.notifier).update(
+                          (state) => dataPass["part"]["cmcmlniy"].toString());
+                      ref
+                          .read(partDataProvider.notifier)
+                          .update((state) => dataPass);
+
+                      ref.read(routerProvider).push(RouteName.summaryChecklist);
+                    },
+                    textLeading: "0/${part["item"]?.length}",
+                    titleStye: AppTextStyle.subTitleTextStyle.copyWith(),
+                    textLeadingStyle: AppTextStyle.subTitleTextStyle.copyWith(),
+                  );
+                },
+              );
         break;
       case ChecklistStatus.failure:
         prevChecklistWidget = Center(

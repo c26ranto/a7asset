@@ -60,6 +60,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     final dataPart = ref.watch(partDataProvider);
     final item = ref.watch(detailChecklistItemProvider);
     final cmcmlniy = ref.watch(cmcmlniyProvider);
+    final detail = ref.watch(detailChecklistItemTestProvider);
 
     final chchcdiy = ref.watch(cdchcdiyProvider);
 
@@ -71,10 +72,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             Navigator.pop(context);
             AppDialog.loadingDialog(context);
             break;
-          // case SaveChecklistStatus.failure:
-          //   Navigator.pop(context);
-          //   AppDialog.errorDialog(context, next.customError.errorMessage,
-          //       () => Navigator.pop(context));
+
           default:
             Navigator.pop(context);
             ScaffoldMessenger.of(context)
@@ -146,42 +144,42 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                   ),
                   20.h,
                   ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: 1,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) => CustomLongCardWidget(
-                        title: item["chchnm"].toString(),
-                        onTap: () async {
-                          AppPrint.debugLog("clickkk: $item");
-                          ref.invalidate(chooseCdcdlniyProvider);
-                          ref.invalidate(imagesOnDialogProvider);
-                          ref.invalidate(cdcdlniyProvider);
+                      shrinkWrap: true,
+                      itemCount: detail["detailChecklist"].length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final data = detail["detailChecklist"][index];
+                        return CustomLongCardWidget(
+                            title: data["chchnm"].toString(),
+                            onTap: () async {
+                              AppPrint.debugLog("clickkk: $data");
+                              ref.invalidate(chooseCdcdlniyProvider);
+                              ref.invalidate(imagesOnDialogProvider);
+                              ref.invalidate(cdcdlniyProvider);
 
-                          clearController();
+                              clearController();
 
-                          showDialog(
-                            context: context,
-                            builder: (context) => Consumer(
-                              builder: (_, ref, __) {
-                                final checklist = ref.watch(
-                                    getChecklistProvider(cdchcdiy: chchcdiy));
-                                final imagesDialog =
-                                    ref.watch(imagesOnDialogProvider);
-                                final cdcdlniy = ref.watch(cdcdlniyProvider);
-                                final saveChecklist =
-                                    ref.watch(saveChecklistProvider);
-                                final chooseCdcdlniy =
-                                    ref.watch(chooseCdcdlniyProvider);
-                                final cdtype = ref.watch(cdtypeProvider);
+                              AppDialog.customDialog(context, "",
+                                  title: const SizedBox(), content: Consumer(
+                                builder: (_, ref, __) {
+                                  final checklist = ref.watch(
+                                      getChecklistProvider(
+                                          cdchcdiy:
+                                              data["chchcdiy"].toString()));
+                                  final imagesDialog =
+                                      ref.watch(imagesOnDialogProvider);
+                                  final cdcdlniy = ref.watch(cdcdlniyProvider);
+                                  final saveChecklist =
+                                      ref.watch(saveChecklistProvider);
+                                  final chooseCdcdlniy =
+                                      ref.watch(chooseCdcdlniyProvider);
+                                  final cdtype = ref.watch(cdtypeProvider);
 
-                                return AlertDialog(
-                                  contentPadding: const EdgeInsets.all(10),
-                                  insetPadding: const EdgeInsets.all(50),
-                                  content: SizedBox(
+                                  return SizedBox(
                                     width: MediaQuery.of(context).size.width,
                                     child: checklist.when(
-                                      data: (data) {
-                                        if (data.isEmpty) {
+                                      data: (result) {
+                                        if (result.isEmpty) {
                                           return SizedBox(
                                             height: MediaQuery.of(context)
                                                     .size
@@ -205,7 +203,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                             children: [
                                               20.h,
                                               Text(
-                                                item["chchnm"].toString(),
+                                                data["chchnm"].toString(),
                                                 style: AppTextStyle
                                                     .subTitleTextStyle
                                                     .copyWith(),
@@ -218,18 +216,18 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                     0.2,
                                                 child: ListView.builder(
                                                   shrinkWrap: true,
-                                                  itemCount: data.length,
+                                                  itemCount: result.length,
                                                   physics:
                                                       const NeverScrollableScrollPhysics(),
                                                   itemBuilder:
                                                       (context, index) {
-                                                    final item = data[index];
+                                                    final item = result[index];
 
                                                     return item.cdtype
                                                                 ?.toLowerCase() ==
                                                             "o"
                                                         ? CustomLongCardWidget(
-                                                            title: data[index]
+                                                            title: result[index]
                                                                     .cdcdds ??
                                                                 "no data",
                                                             titleStye: AppTextStyle
@@ -263,12 +261,12 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                               ref
                                                                   .read(cdcdlniyProvider
                                                                       .notifier)
-                                                                  .update((state) => data[
+                                                                  .update((state) => result[
                                                                           index]
                                                                       .cdcdlniy
                                                                       .toString());
                                                               AppPrint.debugLog(
-                                                                  "WELLLLLLL: ${data[index].toMap()}");
+                                                                  "WELLLLLLL: ${result[index].toMap()}");
                                                             })
                                                         : item.cdtype
                                                                     ?.toLowerCase() ==
@@ -554,13 +552,13 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        }),
-                  ),
+                                  );
+                                },
+                              ), actions: [
+                                const SizedBox(),
+                              ]);
+                            });
+                      }),
                   10.h,
                   Container(
                     padding:
