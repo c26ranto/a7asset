@@ -242,7 +242,6 @@ class HttpClient {
         request = http.MultipartRequest(method, uri)
           ..fields["Data"] = encryptParam
           ..headers['Content-Type'] = "multipart/form-data"
-          ..headers['Content-Type'] = "multipart/form-data"
           ..headers['Authorization'] = "Bearer $token";
 
         AppPrint.debugLog("FILES FROM HTTPCLIENT: ${files?.keys}");
@@ -257,7 +256,7 @@ class HttpClient {
               key,
               Uint8List.fromList(value),
               filename: "$key.png",
-              contentType: MediaType('image', 'png'),
+              contentType: MediaType('image', 'jpeg'),
             );
 
             request.files.add(multipartFile);
