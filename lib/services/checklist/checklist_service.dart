@@ -160,12 +160,13 @@ class ChecklistService {
           path: "datadr",
           controller: "CLDETL",
           subMethod: "Update",
+          method: "POST",
           isEdit: true,
           files: {
             "cmflk1": file1,
-            "cmflk2": file2,
-            "cmflk3": file3,
-            "cmflk4": file4,
+            // "cmflk2": file2,
+            // "cmflk3": file3,
+            // "cmflk4": file4,
           },
           postRequestType: PostRequestType.formdata,
           param: {
@@ -174,7 +175,8 @@ class ChecklistService {
             "cdcdlniy": cdcdlniy
           });
 
-      AppPrint.debugLog("HTTP CLIENT PARAMS FILE: ${httpClientParams.files}");
+      AppPrint.debugLog(
+          "HTTP CLIENT PARAMS FILE: ${httpClientParams.files?.keys}");
 
       final response =
           await ref.read(httpClientProvider(httpClientParams)).callHttp;

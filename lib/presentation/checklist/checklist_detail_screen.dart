@@ -74,7 +74,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             AppDialog.errorDialog(
               context,
               next.customError.errorMessage,
-              () => context.pop(),
+              () => Navigator.pop(context),
             );
 
           default:

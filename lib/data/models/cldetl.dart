@@ -235,21 +235,21 @@ class CldetlModel {
   factory CldetlModel.fromMap(Map<String, dynamic> map) {
     return CldetlModel(
       cdcdds: map['cdcdds'] != null ? (map['cdcdds'] as String).trim() : null,
-      cdcdln: map['cdcdln'] != null ? (map['cdcdln'] as String).trim() : null,
-      cdcdlniy: map['cdcdlniy'] != null ? (map['cdcdlniy'] as String).trim() : null,
-      cdchcdiy: map['cdchcdiy'] != null ? (map['cdchcdiy'] as String).trim() : null,
+      cdcdln: intToString(map['cdcdln']),
+      cdcdlniy: intToString(map['cdcdlniy']),
+      cdchcdiy: intToString(map['cdchcdiy']),
       cdmand: map['cdmand'] != null ? (map['cdmand'] as String).trim() : null,
-      cdrglv: map['cdrglv'] != null ? (map['cdrglv'] as String).trim() : null,
-      cdrguv: map['cdrguv'] != null ? (map['cdrguv'] as String).trim() : null,
+      cdrglv: intToString(map['cdrglv']),
+      cdrguv: intToString(map['cdrguv']),
       cdtype: map['cdtype'] != null ? (map['cdtype'] as String).trim() : null,
       cdunms: map['cdunms'] != null ? (map['cdunms'] as String).trim() : null,
       cdvalu: map['cdvalu'] != null ? (map['cdvalu'] as String).trim() : null,
       chcatg: map['chcatg'] != null ? (map['chcatg'] as String).trim() : null,
       chchcd: map['chchcd'] != null ? (map['chchcd'] as String).trim() : null,
-      chchcdiy: map['chchcdiy'] != null ? map['chchcdiy'] as int : null,
+      chchcdiy: stringToInt(map['chchcdiy']),
       chchnm: map['chchnm'] != null ? (map['chchnm'] as String).trim() : null,
-      ckcknoiy: map['ckcknoiy'] != null ? map['ckcknoiy'] as int : null,
-      ckclnoiy: map['ckclnoiy'] != null ? map['ckclnoiy'] as int : null,
+      ckcknoiy: stringToInt(map['ckcknoiy']),
+      ckclnoiy: stringToInt(map['ckclnoiy']),
       ckflk1: map['ckflk1'] != null ? (map['ckflk1'] as String).trim() : null,
       ckflk2: map['ckflk2'] != null ? (map['ckflk2'] as String).trim() : null,
       ckflk3: map['ckflk3'] != null ? (map['ckflk3'] as String).trim() : null,
@@ -260,10 +260,10 @@ class CldetlModel {
       ckfln3: map['ckfln3'] != null ? (map['ckfln3'] as String).trim() : null,
       ckfln4: map['ckfln4'] != null ? (map['ckfln4'] as String).trim() : null,
       ckfln5: map['ckfln5'] != null ? (map['ckfln5'] as String).trim() : null,
-      ckmgcdiy: map['ckmgcdiy'] != null ? map['ckmgcdiy'] as int : null,
+      ckmgcdiy: stringToInt(map['ckmgcdiy']),
       clclno: map['clclno'] != null ? (map['clclno'] as String).trim() : null,
-      clclnoiy: map['clclnoiy'] != null ? map['clclnoiy'] as int : null,
-      cllsnoiy: map['cllsnoiy'] != null ? map['cllsnoiy'] as int : null,
+      clclnoiy: stringToInt(map['clclnoiy']),
+      cllsnoiy: stringToInt(map['cllsnoiy']),
       clmtcdiy: map['clmtcdiy'] != null ? map['clmtcdiy'] as int : null,
       clshft: map['clshft'] != null
           ? map['clshft'] is String
@@ -274,7 +274,7 @@ class CldetlModel {
       clstsm: map['clstsm'] != null ? (map['clstsm'] as String).trim() : null,
       cltrdt: map['cltrdt'] != null ? (map['cltrdt'] as String).trim() : null,
       cmacvl: map['cmacvl'] != null ? (map['cmacvl'] as String).trim() : null,
-      cmcdlniy: map['cmcdlniy'] != null ? (map['cmcdlniy'] as String).trim() : null,
+      cmcdlniy: intToString(map["cmcdlniy"]),
       cmchcdiy: map['cmchcdiy'] != null ? map['cmchcdiy'] as int : null,
       cmcknoiy: map['cmcknoiy'] != null ? map['cmcknoiy'] as int : null,
       cmcmlniy: map['cmcmlniy'] != null ? map['cmcmlniy'] as int : null,
@@ -323,7 +323,30 @@ class CldetlModel {
     );
   }
 
+  static String? intToString(dynamic value) {
+    if (value != null) {
+      if (value is int) {
+        return value.toString();
+      } else if (value is String) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  static int? stringToInt(dynamic value) {
+    if (value != null) {
+      if (value is String) {
+        return int.tryParse(value);
+      } else if (value is int) {
+        return value;
+      }
+    }
+    return null;
+  }
+
   String toJson() => json.encode(toMap());
 
-  factory CldetlModel.fromJson(String source) => CldetlModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory CldetlModel.fromJson(String source) =>
+      CldetlModel.fromMap(json.decode(source) as Map<String, dynamic>);
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:assets_mobile/config/constants.dart';
 import 'package:assets_mobile/data/models/cutom_error.dart';
@@ -7,6 +8,7 @@ import 'package:assets_mobile/data/models/http_client_params.dart';
 import 'package:assets_mobile/presentation/splash/provider/splash_provider.dart';
 import 'package:assets_mobile/repositories/auth/provider/auth_repository_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:assets_mobile/utils/app_error_code.dart';
 import 'package:assets_mobile/utils/app_error_message.dart';
 import 'package:assets_mobile/utils/app_key.dart';
@@ -215,8 +217,6 @@ class HttpClient {
 
     Map<String, String> headers = {};
 
-    AppPrint.debugLog("TOKENN: $token");
-
     // CASE FOR NOT LOGIN FUNC
     // AND REFRESH TOKEN
     if (token != null || !uri.path.toLowerCase().contains("refreshtoken")) {
@@ -227,7 +227,7 @@ class HttpClient {
       "encrypt": encryptParam,
       "path": path,
       "token": token,
-      "files": files,
+      "files": files?.keys,
       "requestType": postRequestType,
       "url": uri.path,
     };
@@ -235,26 +235,41 @@ class HttpClient {
     AppPrint.debugLog("Post Method Call: $paramsPost");
 
     dynamic request;
+    dynamic streamedResponse;
 
     if (postRequestType == PostRequestType.formdata) {
       try {
-        if (isEdit != null && isEdit) {
-          method = "PUT";
-        }
         request = http.MultipartRequest(method, uri)
           ..fields["Data"] = encryptParam
-          ..headers['Content-Type'] = "multipart/form-data";
+          ..headers['Content-Type'] = "multipart/form-data"
+          ..headers['Content-Type'] = "multipart/form-data"
+          ..headers['Authorization'] = "Bearer $token";
 
-        AppPrint.debugLog("FILES FROM HTTPCLIENT: $files");
+        AppPrint.debugLog("FILES FROM HTTPCLIENT: ${files?.keys}");
 
         if (files != null) {
-          files.forEach(
-            (key, value) {
-              AppPrint.debugLog("KEY FILE: $key - $value");
+          for (var entry in files.entries) {
+            var key = entry.key;
+            var value = entry.value;
+            AppPrint.debugLog("KEY FILE: $key");
 
-              request.fields[key] = value;
-            },
-          );
+            var multipartFile = http.MultipartFile.fromBytes(
+              key,
+              Uint8List.fromList(value),
+              filename: "$key.png",
+              contentType: MediaType('image', 'png'),
+            );
+
+            request.files.add(multipartFile);
+          }
+        }
+
+        streamedResponse = await request.send();
+
+        if (streamedResponse.statusCode == 200) {
+          print("Request berhasil dikirim!");
+        } else {
+          print("Gagal mengirim request: ${streamedResponse.statusCode}");
         }
       } catch (e) {
         AppPrint.debugLog("ERROR BRO: $e");
@@ -274,8 +289,10 @@ class HttpClient {
 
     request.headers.addAll(headers);
 
-    var streamedResponse =
-        await request.send().timeout(const Duration(seconds: 7));
+    if (isEdit != null && isEdit == false) {
+      streamedResponse =
+          await request.send().timeout(const Duration(seconds: 7));
+    }
     var responseBody = await streamedResponse.stream.bytesToString();
     AppPrint.debugLog("RESPONE BODY: $responseBody");
 

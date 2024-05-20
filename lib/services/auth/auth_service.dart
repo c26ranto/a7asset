@@ -19,7 +19,10 @@ class AuthService {
 
   AuthService({required this.ref});
 
-  Future<void> signIn({required String username, required String password, required String database}) async {
+  Future<void> signIn(
+      {required String username,
+      required String password,
+      required String database}) async {
     try {
       preferences = await SharedPreferences.getInstance();
 
@@ -33,11 +36,20 @@ class AuthService {
 
       AppPrint.debugLog("PARAMS LOGIN: $params");
 
-      final httpClientParams = HttpClientParams(path: "login", param: params, method: "POST", token: "", postRequestType: PostRequestType.formdata);
+      final httpClientParams = HttpClientParams(
+          path: "login",
+          param: params,
+          method: "POST",
+          token: "",
+          postRequestType: PostRequestType.formdata);
 
-      final response = await ref.read(httpClientProvider(httpClientParams)).callHttp;
+      final response =
+          await ref.read(httpClientProvider(httpClientParams)).callHttp;
 
-      if (!response.containsKey("Data")) throw CustomError(errorCode: AppErrorCode.unauthorized, errorMessage: AppErrorMessage.internalServerError);
+      if (!response.containsKey("Data"))
+        throw CustomError(
+            errorCode: AppErrorCode.unauthorized,
+            errorMessage: AppErrorMessage.internalServerError);
 
       final decryptData = List<String>.from(response["Data"]).decryptA7;
 
@@ -71,7 +83,11 @@ class AuthService {
       final token = preferences.getString(AppKey.token);
 
       final params = {
-        'tbluph': {'tpuser': username, 'tppswd': newPassword, 'oldpas': password},
+        'tbluph': {
+          'tpuser': username,
+          'tppswd': newPassword,
+          'oldpas': password
+        },
         "AppUserName": username,
         "username": username,
         "Mode": "CP22",
@@ -82,9 +98,11 @@ class AuthService {
 
       AppPrint.debugLog("PARAMS CHANGE PASSWORD: $params");
 
-      final httpClientParams = HttpClientParams(path: "changepassword", param: params, method: "POST", token: token);
+      final httpClientParams = HttpClientParams(
+          path: "changepassword", param: params, method: "POST", token: token);
 
-      final response = await ref.read(httpClientProvider(httpClientParams)).callHttp;
+      final response =
+          await ref.read(httpClientProvider(httpClientParams)).callHttp;
 
       AppPrint.debugLog("RESPONSE CHANGE PASSWORD: $response");
     } catch (e, st) {
@@ -99,11 +117,13 @@ class AuthService {
       final httpClientParams = HttpClientParams(
         path: "logout",
         method: "POST",
+        postRequestType: PostRequestType.formdata,
         controller: "TBLHSL",
         subMethod: "OUT",
       );
 
-      final response = await ref.read(httpClientProvider(httpClientParams)).callHttp;
+      final response =
+          await ref.read(httpClientProvider(httpClientParams)).callHttp;
 
       AppPrint.debugLog("RESPONSE LOGOUT: $response");
     } catch (e, st) {
@@ -116,11 +136,17 @@ class AuthService {
     preferences = await SharedPreferences.getInstance();
 
     try {
-      final httpClientParams = HttpClientParams(path: "refreshToken", method: "POST", token: "", postRequestType: PostRequestType.body, body: {
-        "refresh_token": preferences.getString(AppKey.refreshToken),
-      });
+      final httpClientParams = HttpClientParams(
+          path: "refreshToken",
+          method: "POST",
+          token: "",
+          postRequestType: PostRequestType.body,
+          body: {
+            "refresh_token": preferences.getString(AppKey.refreshToken),
+          });
 
-      final response = await ref.read(httpClientProvider(httpClientParams)).callHttp;
+      final response =
+          await ref.read(httpClientProvider(httpClientParams)).callHttp;
 
       AppPrint.debugLog("RESPONSE REFRESH: $response");
 
