@@ -38,6 +38,11 @@ extension DecryptA7 on List<String> {
     final decodeData = jsonDecode(splitSevenChar);
 
     if (decodeData is List) return {"Data": decodeData};
+
+    if (decodeData is String || decodeData == null) {
+      return {"Data": decodeData ?? "No Data"};
+    }
+
     return decodeData;
   }
 }

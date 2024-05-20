@@ -106,6 +106,8 @@ class HttpClient {
     final data = {
       "plain_param": param,
       "httpclientparams_param": httpClientParams.param,
+      "postRequest": httpClientParams.postRequestType,
+      "files": httpClientParams.files?.keys,
       "encrypt_param": encryptParam,
     };
 
@@ -135,7 +137,8 @@ class HttpClient {
         final response = await _postMethod(
             token, httpClientParams.path, encryptParam,
             isEdit: httpClientParams.isEdit,
-            postRequestType: httpClientParams.postRequestType);
+            postRequestType: httpClientParams.postRequestType,
+            files: httpClientParams.files);
         return response;
       default:
         throw const CustomError(
@@ -180,8 +183,6 @@ class HttpClient {
 
     Map<String, dynamic> data = {};
 
-    AppPrint.debugLog("DECODE POST: $decode");
-
     // FOR GET CON LIST
     if (url.toLowerCase().contains("getcon")) {
       data = {
@@ -191,12 +192,11 @@ class HttpClient {
     } else {
       final dataDecode = decode["Data"];
 
-      // if (dataDecode is List) {
-      //   data = {"code": response.statusCode, "Data": {}};
-      // } else {
-      final decrypt = List<String>.from(dataDecode).decryptA7;
+      final decodeData = List<String>.from(dataDecode);
+      AppPrint.debugLog("DECODE DATA HTTP CLIENT: $decodeData");
+      final decrypt = decodeData.decryptA7;
+      AppPrint.debugLog("DECRYPT: $decrypt");
       data = {"code": response.statusCode, "data": decrypt};
-      // }
     }
 
     AppPrint.debugLog("DATA HTTP CLIENT GET: $data");
@@ -206,7 +206,9 @@ class HttpClient {
 
   Future<Map<String, dynamic>> _postMethod(
       String? token, String path, String encryptParam,
-      {PostRequestType? postRequestType, bool? isEdit}) async {
+      {PostRequestType? postRequestType,
+      bool? isEdit,
+      Map<String, dynamic>? files}) async {
     String method = 'POST';
 
     Uri uri = Uri.parse("${BaseUrl.ipAddressApi}/$path");
@@ -225,6 +227,7 @@ class HttpClient {
       "encrypt": encryptParam,
       "path": path,
       "token": token,
+      "files": files,
       "requestType": postRequestType,
       "url": uri.path,
     };
@@ -234,12 +237,28 @@ class HttpClient {
     dynamic request;
 
     if (postRequestType == PostRequestType.formdata) {
-      if (isEdit != null && isEdit) {
-        method = "PUT";
+      try {
+        if (isEdit != null && isEdit) {
+          method = "PUT";
+        }
+        request = http.MultipartRequest(method, uri)
+          ..fields["Data"] = encryptParam
+          ..headers['Content-Type'] = "multipart/form-data";
+
+        AppPrint.debugLog("FILES FROM HTTPCLIENT: $files");
+
+        if (files != null) {
+          files.forEach(
+            (key, value) {
+              AppPrint.debugLog("KEY FILE: $key - $value");
+
+              request.fields[key] = value;
+            },
+          );
+        }
+      } catch (e) {
+        AppPrint.debugLog("ERROR BRO: $e");
       }
-      request = http.MultipartRequest(method, uri)
-        ..fields["Data"] = encryptParam
-        ..headers['Content-Type'] = "";
     } else if (uri.path.toString().toLowerCase().contains("refreshtoken")) {
       request = http.Request("POST", uri);
       request.body = encryptParam;

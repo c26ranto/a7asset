@@ -6,6 +6,7 @@ import 'package:assets_mobile/presentation/main/main_screen.dart';
 import 'package:assets_mobile/presentation/profile/profile_screen.dart';
 import 'package:assets_mobile/presentation/scan/result_scan_machine.dart';
 import 'package:assets_mobile/presentation/scan/scan_machine_screen.dart';
+import 'package:assets_mobile/presentation/scan/temp_result_screen.dart';
 import 'package:assets_mobile/presentation/shift/choose_checklist_period_screen.dart';
 import 'package:assets_mobile/presentation/shift/choose_shift_screen.dart';
 import 'package:assets_mobile/presentation/splash/splash_screen.dart';
@@ -60,6 +61,10 @@ GoRouter router(RouterRef ref) {
       GoRoute(
         path: RouteName.resultScanMachine,
         builder: (context, state) => const ResultScanMachineScreen(),
+      ),
+      GoRoute(
+        path: RouteName.tempResultScanMachine,
+        builder: (context, state) => const TempResultScreen(),
       ),
       GoRoute(
         path: RouteName.checklistDetail,

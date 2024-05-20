@@ -18,13 +18,15 @@ Future<void> main() async {
     // initializeDateFormatting();
     AppPrint.debugPrint("MAIN DEMO CALLED");
     // SAVE STATE FOR IDENTIFY USER HAS FIRST INSTALL APPS OR NOT
-    final hasFirstInstall = await SharedPreferencesHelper.getBool(AppKey.hasFirstInstall);
-    await SharedPreferencesHelper.saveData({AppKey.hasFirstInstall: hasFirstInstall});
-    runApp(ProviderScope(
+    final hasFirstInstall =
+        await SharedPreferencesHelper.getBool(AppKey.hasFirstInstall);
+    await SharedPreferencesHelper.saveData(
+        {AppKey.hasFirstInstall: hasFirstInstall});
+    runApp(const ProviderScope(
       observers: [
-        MyObserver(),
+        // MyObserver(),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ));
   }, (dynamic error, dynamic stack) {
     AppPrint.debugPrint(

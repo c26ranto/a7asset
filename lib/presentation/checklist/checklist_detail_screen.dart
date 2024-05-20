@@ -22,6 +22,7 @@ import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ChecklistDetailScreen extends ConsumerStatefulWidget {
   const ChecklistDetailScreen({super.key});
@@ -57,32 +58,32 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
   Widget build(BuildContext context) {
     final machineId = ref.watch(idQrCodeProvider);
     final images = ref.watch(imagesDetailChecklistProvider);
-    final dataPart = ref.watch(partDataProvider);
     final item = ref.watch(detailChecklistItemProvider);
     final cmcmlniy = ref.watch(cmcmlniyProvider);
     final detail = ref.watch(detailChecklistItemTestProvider);
+    final cdcdlniy = ref.watch(cdcdlniyProvider);
 
-    final chchcdiy = ref.watch(cdchcdiyProvider);
+    final files = ref.watch(filesProvider);
 
     ref.listen<SaveChecklistState>(
       saveChecklistProvider,
       (previous, next) {
         switch (next.status) {
-          case SaveChecklistStatus.loading:
-            Navigator.pop(context);
-            AppDialog.loadingDialog(context);
-            break;
+          case SaveChecklistStatus.failure:
+            context.pop();
+            AppDialog.errorDialog(
+              context,
+              next.customError.errorMessage,
+              () => context.pop(),
+            );
 
           default:
-            Navigator.pop(context);
+            context.pop();
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text("Berhasil!")));
         }
       },
     );
-
-    AppPrint.debugLog("item part: $item");
-    AppPrint.debugLog("data part: $dataPart");
 
     return Scaffold(
       appBar: CustomAppbarWidget(
@@ -157,6 +158,10 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                               ref.invalidate(imagesOnDialogProvider);
                               ref.invalidate(cdcdlniyProvider);
 
+                              ref.read(cmcmlniyProvider.notifier).update(
+                                    (state) => data["cmcmlniy"].toString(),
+                                  );
+
                               clearController();
 
                               AppDialog.customDialog(context, "",
@@ -168,7 +173,6 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                               data["chchcdiy"].toString()));
                                   final imagesDialog =
                                       ref.watch(imagesOnDialogProvider);
-                                  final cdcdlniy = ref.watch(cdcdlniyProvider);
                                   final saveChecklist =
                                       ref.watch(saveChecklistProvider);
                                   final chooseCdcdlniy =
@@ -478,15 +482,15 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                     10.w,
                                                     ButtonReusableWidget(
                                                         width: 150,
-                                                        disabled: cdtype
-                                                                    .toLowerCase() ==
-                                                                'o'
+                                                        disabled: saveChecklist
+                                                                        .status ==
+                                                                    SaveChecklistStatus
+                                                                        .loading ||
+                                                                cdtype.toLowerCase() ==
+                                                                    'o'
                                                             ? chooseCdcdlniy ==
                                                                 99
-                                                            : saveChecklist
-                                                                    .status ==
-                                                                SaveChecklistStatus
-                                                                    .loading,
+                                                            : false,
                                                         onPressed: () async {
                                                           AppPrint.debugLog(
                                                               "MY ITEM: $item");
@@ -501,7 +505,15 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                       _detailNoteDialogC
                                                                           .text,
                                                                   cdcdlniy:
-                                                                      cdcdlniy);
+                                                                      cdcdlniy,
+                                                                  file1:
+                                                                      files[0],
+                                                                  file2:
+                                                                      files[0],
+                                                                  file3:
+                                                                      files[0],
+                                                                  file4:
+                                                                      files[0]);
                                                         },
                                                         title: saveChecklist
                                                                     .status ==
@@ -640,7 +652,18 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             Expanded(
                 child: ButtonReusableWidget(
                     disabled: images.isEmpty,
-                    onPressed: () {},
+                    onPressed: () {
+                      ref
+                          .read(saveChecklistProvider.notifier)
+                          .callSaveChecklist(
+                              cmcmlniy: cmcmlniy,
+                              cmacvl: _detailNoteDialogC.text,
+                              cdcdlniy: cdcdlniy,
+                              file1: files.first,
+                              file2: files.first,
+                              file3: files.first,
+                              file4: files.first);
+                    },
                     title: "Save",
                     backgroundColor: AppColors.primaryColor)),
           ],

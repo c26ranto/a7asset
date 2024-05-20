@@ -82,7 +82,6 @@ class SummaryChecklistScreen extends ConsumerWidget {
                   child: ListView.builder(
                     itemCount: partData["part"]["item"].length,
                     itemBuilder: (context, index) {
-                      AppPrint.debugLog("WELL WELL: $partData");
                       final item = partData["part"]["item"][index];
                       final detailChecklist =
                           List.from(item["detailItemChecklist"]);

@@ -39,5 +39,22 @@ final getMachineStatusProvider =
 );
 
 typedef _$GetMachineStatus = AutoDisposeNotifier<AuthState>;
+String _$getMachineProgressHash() =>
+    r'1b8c0a0b05d6c3ebed7e99c31691dfd42016fc75';
+
+/// See also [GetMachineProgress].
+@ProviderFor(GetMachineProgress)
+final getMachineProgressProvider = AutoDisposeNotifierProvider<
+    GetMachineProgress, GetMachineProgressState>.internal(
+  GetMachineProgress.new,
+  name: r'getMachineProgressProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getMachineProgressHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$GetMachineProgress = AutoDisposeNotifier<GetMachineProgressState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

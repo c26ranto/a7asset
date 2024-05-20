@@ -8,6 +8,7 @@ class RouteName {
   static const profile = '/profile';
   static const scanMachine = '/scan-machines';
   static const resultScanMachine = '/result-scan-machines';
+  static const tempResultScanMachine = '/temp-result-scan-machines';
   static const summaryChecklist = '/summary-checklist';
   static const checklistDetail = '/checklist-detail';
 }

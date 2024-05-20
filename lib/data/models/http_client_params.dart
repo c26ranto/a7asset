@@ -24,6 +24,7 @@ class HttpClientParams {
   final PostRequestType postRequestType;
   final String? tipeGrid;
   final String? filter;
+  final Map<String, dynamic>? files;
   final List<dynamic>? sort;
 
   HttpClientParams({
@@ -49,6 +50,7 @@ class HttpClientParams {
     this.perPage,
     this.source,
     this.filter,
+    this.files,
     this.sort,
     this.isEdit,
   });

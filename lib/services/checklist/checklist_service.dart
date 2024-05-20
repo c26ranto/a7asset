@@ -5,6 +5,7 @@ import 'package:assets_mobile/data/models/http_client_params.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
 import 'package:assets_mobile/utils/app_key.dart';
 import 'package:assets_mobile/utils/app_print.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,7 +98,7 @@ class ChecklistService {
 
       List<CldetlModel> tempData = [];
 
-      AppPrint.debugLog("HELLO WORLD: $response");
+      AppPrint.debugLog("Resp generate cldetl: $response");
 
       final data = response["data"]["Data"];
 
@@ -145,28 +146,84 @@ class ChecklistService {
     }
   }
 
-  Future saveChecklist(
-      {required String cmcmlniy,
-      required String cmacvl,
-      required String cdcdlniy}) async {
+  Future saveChecklist({
+    required String cmcmlniy,
+    required String cmacvl,
+    required String cdcdlniy,
+    Uint8List? file1,
+    Uint8List? file2,
+    Uint8List? file3,
+    Uint8List? file4,
+  }) async {
     try {
       final httpClientParams = HttpClientParams(
           path: "datadr",
           controller: "CLDETL",
           subMethod: "Update",
           isEdit: true,
+          files: {
+            "cmflk1": file1,
+            "cmflk2": file2,
+            "cmflk3": file3,
+            "cmflk4": file4,
+          },
+          postRequestType: PostRequestType.formdata,
           param: {
             "cmcmlniy": cmcmlniy,
             "cmacvl": cmacvl,
             "cdcdlniy": cdcdlniy
           });
 
+      AppPrint.debugLog("HTTP CLIENT PARAMS FILE: ${httpClientParams.files}");
+
       final response =
           await ref.read(httpClientProvider(httpClientParams)).callHttp;
 
       AppPrint.debugLog("RESPONSE SAVE CHECKLIST: $response");
     } catch (e, st) {
-      AppPrint.debugLog("ERROR GET CHECKLIST: $e $st");
+      AppPrint.debugLog("ERROR SAVE CHECKLIST: $e $st");
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getMachineProgress({
+    required String shiftId,
+    required String machineNumber,
+    required String statusId,
+    required String period,
+  }) async {
+    preferences = await SharedPreferences.getInstance();
+
+    DateFormat dateFormat = DateFormat("yyyyMMdd");
+    final date = dateFormat.format(DateTime.now());
+
+    try {
+      final params = {
+        "trlsno": machineNumber,
+        "clshft": shiftId,
+        "clstsm": statusId,
+        "mtmtnm": period,
+        "cltrdt": date,
+        "Mode": "A",
+      };
+
+      AppPrint.debugLog("PARAMS GET MACHINE PROGRESS: $params");
+
+      final httpClientParams = HttpClientParams(
+        path: "datadr",
+        param: params,
+        controller: "CLHEAD",
+        subMethod: "LoadData",
+      );
+
+      final response =
+          await ref.read(httpClientProvider(httpClientParams)).callHttp;
+
+      AppPrint.debugLog("RESPONSE GET MACHINE PROGRESS: $response");
+
+      return response;
+    } catch (e) {
+      AppPrint.debugLog("ERROR GET MACHINE PROGRESS: $e");
       rethrow;
     }
   }

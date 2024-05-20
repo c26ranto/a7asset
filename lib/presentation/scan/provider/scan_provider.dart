@@ -1,5 +1,12 @@
+import 'dart:convert';
+
 import 'package:assets_mobile/data/models/auth_state.dart';
+import 'package:assets_mobile/data/models/cutom_error.dart';
+import 'package:assets_mobile/data/models/get_machine_progress_state.dart';
+import 'package:assets_mobile/repositories/checklist/provider/checklist_repository_provider.dart';
 import 'package:assets_mobile/repositories/machines/provider/machine_repository_provider.dart';
+import 'package:assets_mobile/utils/app_error_code.dart';
+import 'package:assets_mobile/utils/app_error_message.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -12,11 +19,13 @@ final barcodeProvider = StateProvider.autoDispose<qr.Barcode?>((ref) {
   return null;
 });
 
-final qrControllerProvider = StateProvider.autoDispose<qr.QRViewController?>((ref) {
+final qrControllerProvider =
+    StateProvider.autoDispose<qr.QRViewController?>((ref) {
   return null;
 });
 
-final mobileScannerControllerProvider = StateProvider.autoDispose<MobileScannerController>((ref) {
+final mobileScannerControllerProvider =
+    StateProvider.autoDispose<MobileScannerController>((ref) {
   return MobileScannerController();
 });
 
@@ -60,11 +69,50 @@ class GetMachineStatus extends _$GetMachineStatus {
     );
 
     try {
-      final response = await ref.read(machineRepositoryProvider).getStatusMachine();
+      final response =
+          await ref.read(machineRepositoryProvider).getStatusMachine();
       AppPrint.debugLog("RESPONSE GET STATUS MACHINE PROVIDER: $response");
       state = state.copyWith(status: AuthStatus.success);
     } catch (e) {
       state = state.copyWith(status: AuthStatus.failure);
+    }
+  }
+}
+
+@riverpod
+class GetMachineProgress extends _$GetMachineProgress {
+  @override
+  GetMachineProgressState build() {
+    return GetMachineProgressState.initial();
+  }
+
+  Future<void> call({
+    required String shiftId,
+    required String machineNumber,
+    required String statusId,
+    required String period,
+  }) async {
+    state = state.copyWith(status: GetMachineProgressStatus.loading);
+    try {
+      final result = await ref
+          .read(checklistRepositoryProvider)
+          .getMachineProgress(
+              shiftId: shiftId,
+              machineNumber: machineNumber,
+              statusId: statusId,
+              period: period);
+      state = state.copyWith(
+          status: GetMachineProgressStatus.success,
+          success: jsonEncode(result));
+    } on CustomError catch (e) {
+      state = state.copyWith(
+          status: GetMachineProgressStatus.failure, customError: e);
+    } catch (e) {
+      state = state.copyWith(
+          status: GetMachineProgressStatus.failure,
+          customError: CustomError(
+              errorCode: AppErrorCode.internalServerError,
+              errorMessage: AppErrorMessage.internalServerError));
     }
   }
 }

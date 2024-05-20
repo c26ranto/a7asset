@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:assets_mobile/data/models/checklist.dart';
 import 'package:assets_mobile/data/models/checklist_detail.dart';
 import 'package:assets_mobile/data/models/checklist_state.dart';
@@ -10,6 +12,7 @@ import 'package:assets_mobile/repositories/checklist/provider/checklist_reposito
 import 'package:assets_mobile/repositories/machines/provider/machine_repository_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
 import 'package:assets_mobile/utils/app_print.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -70,6 +73,10 @@ final cmcmlniyProvider = StateProvider<String>((ref) {
   return "";
 });
 
+final filesProvider = StateProvider<List<Uint8List>>((ref) {
+  return [];
+});
+
 @riverpod
 FutureOr<void> takePicture(TakePictureRef ref,
     {required TakePhotoChecklistType type}) async {
@@ -78,6 +85,11 @@ FutureOr<void> takePicture(TakePictureRef ref,
   final result = await picker.pickImage(source: ImageSource.camera);
 
   if (result != null) {
+    final bytes = await result.readAsBytes();
+    ref.read(filesProvider.notifier).update(
+          (state) => [...state, bytes],
+        );
+
     if (type == TakePhotoChecklistType.detail) {
       ref
           .read(imagesDetailChecklistProvider.notifier)
@@ -264,14 +276,25 @@ class SaveChecklist extends _$SaveChecklist {
     return SaveChecklistState.initial();
   }
 
-  Future callSaveChecklist(
-      {required String cmcmlniy,
-      required String cmacvl,
-      required String cdcdlniy}) async {
+  Future callSaveChecklist({
+    required String cmcmlniy,
+    required String cmacvl,
+    required String cdcdlniy,
+    Uint8List? file1,
+    Uint8List? file2,
+    Uint8List? file3,
+    Uint8List? file4,
+  }) async {
     state = state.copyWith(status: SaveChecklistStatus.loading);
     try {
       await ref.read(checklistRepositoryProvider).saveChecklist(
-          cmcmlniy: cmcmlniy, cmacvl: cmacvl, cdcdlniy: cdcdlniy);
+          cmcmlniy: cmcmlniy,
+          cmacvl: cmacvl,
+          cdcdlniy: cdcdlniy,
+          file1: file1,
+          file2: file2,
+          file3: file3,
+          file4: file4);
       state = state.copyWith(
           status: SaveChecklistStatus.success, success: "Success");
     } on CustomError catch (e) {

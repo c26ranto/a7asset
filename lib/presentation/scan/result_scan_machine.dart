@@ -25,6 +25,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/models/get_machine_progress_state.dart';
+
 class ResultScanMachineScreen extends ConsumerStatefulWidget {
   const ResultScanMachineScreen({super.key});
 
@@ -35,7 +37,7 @@ class ResultScanMachineScreen extends ConsumerStatefulWidget {
 
 class _ResultScanMachineScreenState
     extends ConsumerState<ResultScanMachineScreen> {
-  bool loading = false;
+  bool loading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +92,9 @@ class _ResultScanMachineScreenState
                               onPressed: () async {
                                 AppPrint.debugLog(
                                     "STATUS MACHINE: ${status[index]["tssycd"]}");
+                                setState(() {
+                                  loading = true;
+                                });
                                 await ref
                                     .read(generateClheadProvider.notifier)
                                     .callGenerateClhead(
@@ -100,9 +105,16 @@ class _ResultScanMachineScreenState
                                           .toString()
                                           .trim(),
                                     );
+                                await ref
+                                    .read(getMachineProgressProvider.notifier)
+                                    .call(
+                                      machineNumber: machineId,
+                                      shiftId: shift.id,
+                                      period: shift.period,
+                                      statusId: status[index]["tssycd"],
+                                    );
                                 if (status[index]["tssycd"] == "1") {
-                                  ref.read(routerProvider).pop();
-                                  final shift = ref.read(dataShiftProvider);
+                                  // ref.read(routerProvider).pop();
                                   ref.read(tssycdProvider.notifier).update(
                                       (state) => status[index]["tssycd"]
                                           .toString()
@@ -118,16 +130,16 @@ class _ResultScanMachineScreenState
                                                 .trim(),
                                           });
 
-                                  ref
-                                      .read(checklistProvider.notifier)
-                                      .callChecklist(
-                                        id: machineId,
-                                        shiftId: shift.id,
-                                        period: shift.period,
-                                        statusId: status[index]["tssycd"]
-                                            .toString()
-                                            .trim(),
-                                      );
+                                  // ref
+                                  //     .read(checklistProvider.notifier)
+                                  //     .callChecklist(
+                                  //       id: machineId,
+                                  //       shiftId: shift.id,
+                                  //       period: shift.period,
+                                  //       statusId: status[index]["tssycd"]
+                                  //           .toString()
+                                  //           .trim(),
+                                  //     );
                                 } else {
                                   ref.read(routerProvider).pop();
                                   if (mounted) {
@@ -159,6 +171,78 @@ class _ResultScanMachineScreenState
         default:
       }
     });
+
+    ref.listen(
+      getMachineProgressProvider,
+      (previous, next) {
+        switch (next.status) {
+          case GetMachineProgressStatus.success:
+            setState(() {
+              loading = false;
+            });
+            final data = jsonDecode(next.success ?? "");
+            AppPrint.debugLog("Hello: $data");
+            const stat = "10";
+
+            context.pop();
+            // switch (List.from(data["data"]["Data"]).first["clstat"]) {
+            switch (stat) {
+              case "05":
+                ref.read(checklistProvider.notifier).callChecklist(
+                      id: machineId,
+                      shiftId: shift.id,
+                      period: shift.period,
+                      statusId: "1",
+                    );
+              case "10":
+                AppDialog.customDialog(context, "",
+                    title: const SizedBox(),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("Machine Checklist is Onprogress"),
+                        3.h,
+                        const Text(
+                            "Machine Checklist is Onprogress, you can continue or scan other machine."),
+                      ],
+                    ),
+                    actions: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ButtonReusableWidget(
+                                onPressed: () {
+                                  context.pop();
+                                  context.pop();
+                                },
+                                title: "Cancel"),
+                          ),
+                          10.w,
+                          Expanded(
+                            child: ButtonReusableWidget(
+                                onPressed: () {
+                                  ref
+                                      .read(checklistProvider.notifier)
+                                      .callChecklist(
+                                        id: machineId,
+                                        shiftId: shift.id,
+                                        period: shift.period,
+                                        statusId: "1",
+                                      );
+                                  context.pop();
+                                },
+                                title: "Continue"),
+                          ),
+                        ],
+                      )
+                    ]);
+            }
+            break;
+          default:
+        }
+      },
+    );
 
     ref.listen<ChecklistState>(checklistProvider, (previous, next) {
       switch (next.status) {
@@ -240,11 +324,6 @@ class _ResultScanMachineScreenState
               break;
           }
 
-        case ChecklistStatus.loading:
-          setState(() {
-            loading = true;
-          });
-          break;
         case _:
       }
     });
@@ -433,7 +512,11 @@ class _ResultScanMachineScreenState
                           ],
                         ),
                         10.h,
-                        prevChecklistWidget,
+                        loading
+                            ? const Center(
+                                child: CircularProgressIndicator.adaptive(),
+                              )
+                            : prevChecklistWidget,
                       ],
                     ),
                   ),
