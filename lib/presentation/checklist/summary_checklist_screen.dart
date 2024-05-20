@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:assets_mobile/presentation/checklist/provider/checklist_provider.dart';
 import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
 import 'package:assets_mobile/presentation/widgets/background_image_image.dart';
@@ -85,10 +87,12 @@ class SummaryChecklistScreen extends ConsumerWidget {
                       final item = partData["part"]["item"][index];
                       final detailChecklist =
                           List.from(item["detailItemChecklist"]);
+
+                      AppPrint.debugLog("CD VALUE: ${item["cdvalu"]}");
                       return CustomLongCardWidget(
                         title: item["value"],
                         textLeading:
-                            "${item["cdvalu"] == null ? "0" : item["cdvalue"]}/${detailChecklist.length}",
+                            "${item["cdvalu"] == null ? "0" : item["cdvalu"] is int ? (item['cdvalu'].toString()) : item["cdvalu"]}/${detailChecklist.length}",
                         onTap: () {
                           AppPrint.debugLog(
                               "DATA FROM SUMMARY CHECKLIST: $detailChecklist");
