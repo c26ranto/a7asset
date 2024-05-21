@@ -50,10 +50,7 @@ class ChecklistRepository {
     required String cmacvl,
     required String cdcdlniy,
     String? note,
-    String? file1,
-    String? file2,
-    String? file3,
-    String? file4,
+    List<Uint8List>? files,
   }) async {
     return HttpClientRepository.safeApiCall(() =>
         checklistService.saveChecklist(
@@ -61,10 +58,7 @@ class ChecklistRepository {
             cmacvl: cmacvl,
             cdcdlniy: cdcdlniy,
             note: note,
-            file1: file1,
-            file2: file2,
-            file3: file3,
-            file4: file4));
+            files: files));
   }
 
   Future<Map<String, dynamic>> getMachineProgress({

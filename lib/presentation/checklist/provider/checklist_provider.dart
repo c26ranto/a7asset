@@ -74,7 +74,7 @@ final cmcmlniyProvider = StateProvider<String>((ref) {
   return "";
 });
 
-final filesProvider = StateProvider<List<String>>((ref) {
+final filesProvider = StateProvider<List<Uint8List>>((ref) {
   return [];
 });
 
@@ -83,16 +83,14 @@ FutureOr<void> takePicture(TakePictureRef ref,
     {required TakePhotoChecklistType type}) async {
   final ImagePicker picker = ImagePicker();
 
-  final result = await picker.pickImage(
-      source: ImageSource.camera, maxHeight: 200, maxWidth: 200);
-
-  AppPrint.debugLog("PATH: ${result?.path}");
+  final result =
+      await picker.pickImage(source: ImageSource.camera, imageQuality: 60);
 
   if (result != null) {
     final bytes = await result.readAsBytes();
-    final path = result.path;
+
     ref.read(filesProvider.notifier).update(
-          (state) => [...state, path],
+          (state) => [...state, bytes],
         );
 
     if (type == TakePhotoChecklistType.detail) {
@@ -291,10 +289,7 @@ class SaveChecklist extends _$SaveChecklist {
     required String cmacvl,
     required String cdcdlniy,
     String? note,
-    String? file1,
-    String? file2,
-    String? file3,
-    String? file4,
+    List<Uint8List>? files,
   }) async {
     state = state.copyWith(status: SaveChecklistStatus.loading);
     try {
@@ -303,10 +298,7 @@ class SaveChecklist extends _$SaveChecklist {
           cmacvl: cmacvl,
           cdcdlniy: cdcdlniy,
           note: note,
-          file1: file1,
-          file2: file2,
-          file3: file3,
-          file4: file4);
+          files: files);
       state = state.copyWith(
           status: SaveChecklistStatus.success, success: "Success");
     } on CustomError catch (e) {

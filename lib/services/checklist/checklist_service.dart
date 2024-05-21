@@ -153,25 +153,25 @@ class ChecklistService {
     required String cmacvl,
     required String cdcdlniy,
     String? note,
-    String? file1,
-    String? file2,
-    String? file3,
-    String? file4,
+    List<Uint8List>? files,
   }) async {
     try {
+      final Map<String, Uint8List> filesMap = {};
+
+      if (files != null) {
+        for (int i = 0; i < files.length; i++) {
+          filesMap["cmflk${i + 1}"] = files[i];
+        }
+      }
+
       final httpClientParams = HttpClientParams(
           path: "datadr",
           controller: "CLDETL",
           subMethod: "Update",
           method: "POST",
           isEdit: true,
-          files: {
-            "cmflk1": file1,
-            // "cmflk2": file2,
-            // "cmflk3": file3,
-            // "cmflk4": file4,
-          },
           postRequestType: PostRequestType.formdata,
+          files: filesMap,
           param: {
             "cmcmlniy": cmcmlniy,
             "cmacvl": cmacvl,

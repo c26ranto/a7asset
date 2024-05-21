@@ -22,11 +22,11 @@ Future<void> main() async {
         await SharedPreferencesHelper.getBool(AppKey.hasFirstInstall);
     await SharedPreferencesHelper.saveData(
         {AppKey.hasFirstInstall: hasFirstInstall});
-    runApp(ProviderScope(
+    runApp(const ProviderScope(
       observers: [
-        MyObserver(),
+        // MyObserver(),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ));
   }, (dynamic error, dynamic stack) {
     AppPrint.debugPrint(

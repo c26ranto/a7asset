@@ -64,8 +64,6 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     final detail = ref.watch(detailChecklistItemTestProvider);
     final cdcdlniy = ref.watch(cdcdlniyProvider);
 
-    final files = ref.watch(filesProvider);
-
     final saveChecklistState = ref.watch(saveChecklistProvider);
 
     ref.listen<SaveChecklistState>(
@@ -79,6 +77,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
               () => Navigator.pop(context),
             );
           case SaveChecklistStatus.success:
+            ref.invalidate(imagesDetailChecklistProvider);
+            ref.invalidate(imagesOnDialogProvider);
+            ref.invalidate(filesProvider);
             context.pop();
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text("Berhasil mengirim checklist...")));
@@ -180,6 +181,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                   final chooseCdcdlniy =
                                       ref.watch(chooseCdcdlniyProvider);
                                   final cdtype = ref.watch(cdtypeProvider);
+                                  final files = ref.watch(filesProvider);
 
                                   return SizedBox(
                                     width: MediaQuery.of(context).size.width,
@@ -399,62 +401,68 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                 ),
                                               ),
                                               10.h,
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  color: Colors.white,
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Row(
-                                                      children: List.generate(
-                                                          imagesDialog.isEmpty
-                                                              ? 1
-                                                              : imagesDialog
-                                                                  .length,
-                                                          (index) {
-                                                        if (imagesDialog
-                                                            .isEmpty) {
-                                                          return _emptyImage(
-                                                              takePhotoChecklistType:
-                                                                  TakePhotoChecklistType
-                                                                      .dialog);
-                                                        } else {
-                                                          return _image(
-                                                              imagesDialog[
-                                                                      index]
-                                                                  .path,
-                                                              index, () {
-                                                            ref
-                                                                .read(imagesOnDialogProvider
-                                                                    .notifier)
-                                                                .update(
-                                                                    (state) {
-                                                              return state = state
-                                                                  .where((element) =>
-                                                                      imagesDialog[
-                                                                          index] !=
-                                                                      element)
-                                                                  .toList();
+                                              SingleChildScrollView(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 8),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    color: Colors.white,
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      Row(
+                                                        children: List.generate(
+                                                            imagesDialog.isEmpty
+                                                                ? 1
+                                                                : imagesDialog
+                                                                    .length,
+                                                            (index) {
+                                                          if (imagesDialog
+                                                              .isEmpty) {
+                                                            return _emptyImage(
+                                                                takePhotoChecklistType:
+                                                                    TakePhotoChecklistType
+                                                                        .dialog);
+                                                          } else {
+                                                            return _image(
+                                                                imagesDialog[
+                                                                        index]
+                                                                    .path,
+                                                                index, () {
+                                                              ref
+                                                                  .read(imagesOnDialogProvider
+                                                                      .notifier)
+                                                                  .update(
+                                                                      (state) {
+                                                                return state = state
+                                                                    .where((element) =>
+                                                                        imagesDialog[
+                                                                            index] !=
+                                                                        element)
+                                                                    .toList();
+                                                              });
                                                             });
-                                                          });
-                                                        }
-                                                      }),
-                                                    ),
-                                                    10.w,
-                                                    if (imagesDialog.length <
-                                                            3 &&
-                                                        imagesDialog.isNotEmpty)
-                                                      _emptyImage(
-                                                          takePhotoChecklistType:
-                                                              TakePhotoChecklistType
-                                                                  .dialog),
-                                                  ],
+                                                          }
+                                                        }),
+                                                      ),
+                                                      10.w,
+                                                      if (imagesDialog.length <
+                                                              5 &&
+                                                          imagesDialog
+                                                              .isNotEmpty)
+                                                        _emptyImage(
+                                                            takePhotoChecklistType:
+                                                                TakePhotoChecklistType
+                                                                    .dialog),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                               10.h,
@@ -476,6 +484,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                               .pop();
                                                           ref.invalidate(
                                                               imagesOnDialogProvider);
+                                                          ref.invalidate(
+                                                              filesProvider);
                                                         },
                                                         title: "Cancel",
                                                         backgroundColor:
@@ -499,7 +509,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                 : false),
                                                         onPressed: () async {
                                                           AppPrint.debugLog(
-                                                              "MY ITEM: $item");
+                                                              "MY ITEM: $item -- FILES: ${files.length}");
+
                                                           if (files.isEmpty) {
                                                             ScaffoldMessenger
                                                                     .of(context)
@@ -509,29 +520,23 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                             Text("File Kosong...")));
                                                             return;
                                                           }
-                                                          ref
+                                                          await ref
                                                               .read(
                                                                   saveChecklistProvider
                                                                       .notifier)
                                                               .callSaveChecklist(
-                                                                  cmcmlniy:
-                                                                      cmcmlniy,
-                                                                  cmacvl:
-                                                                      _detailNoteDialogC
-                                                                          .text,
-                                                                  cdcdlniy:
-                                                                      cdcdlniy,
-                                                                  note:
-                                                                      _detailNoteDialogC
-                                                                          .text,
-                                                                  file1:
-                                                                      files[0],
-                                                                  file2:
-                                                                      files[0],
-                                                                  file3:
-                                                                      files[0],
-                                                                  file4:
-                                                                      files[0]);
+                                                                cmcmlniy:
+                                                                    cmcmlniy,
+                                                                cmacvl:
+                                                                    _detailNoteDialogC
+                                                                        .text,
+                                                                cdcdlniy:
+                                                                    cdcdlniy,
+                                                                note:
+                                                                    _detailNoteDialogC
+                                                                        .text,
+                                                                files: files,
+                                                              );
                                                         },
                                                         title: saveChecklist
                                                                     .status ==
@@ -664,6 +669,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                   onPressed: () {
                     ref.read(routerProvider).pop();
                     ref.invalidate(imagesDetailChecklistProvider);
+                    ref.invalidate(filesProvider);
                   },
                   title: "Cancel",
                   backgroundColor: AppColors.negativeColor),
@@ -673,16 +679,17 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                 child: ButtonReusableWidget(
                     disabled: images.isEmpty,
                     onPressed: () {
-                      ref
-                          .read(saveChecklistProvider.notifier)
-                          .callSaveChecklist(
-                              cmcmlniy: cmcmlniy,
-                              cmacvl: _detailNoteDialogC.text,
-                              cdcdlniy: cdcdlniy,
-                              file1: files.first,
-                              file2: files.first,
-                              file3: files.first,
-                              file4: files.first);
+                      // TODO
+                      // ref
+                      //     .read(saveChecklistProvider.notifier)
+                      //     .callSaveChecklist(
+                      //         cmcmlniy: cmcmlniy,
+                      //         cmacvl: _detailNoteDialogC.text,
+                      //         cdcdlniy: cdcdlniy,
+                      //         file1: files.first,
+                      //         file2: files.first,
+                      //         file3: files.first,
+                      //         file4: files.first);
                     },
                     title: "Save",
                     backgroundColor: AppColors.primaryColor)),

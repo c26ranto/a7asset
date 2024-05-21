@@ -54,10 +54,6 @@ class _ResultScanMachineScreenState
 
     ref.listen(getStatusMachineProvider, (previous, next) {
       switch (next.value?.status) {
-        case AuthStatus.loading:
-          Navigator.pop(context);
-          AppDialog.loadingDialog(context);
-          break;
         case AuthStatus.success:
           setState(() {
             loading = false;
@@ -97,6 +93,8 @@ class _ResultScanMachineScreenState
                                 setState(() {
                                   loading = true;
                                 });
+                                // POP THE DIALOG
+                                context.pop();
                                 ref.read(tssycdProvider.notifier).update(
                                     (state) => status[index]["tssycd"]
                                         .toString()
@@ -120,10 +118,6 @@ class _ResultScanMachineScreenState
                                       statusId: status[index]["tssycd"],
                                     );
                                 if (status[index]["tssycd"] == "1") {
-                                  ref.read(tssycdProvider.notifier).update(
-                                      (state) => status[index]["tssycd"]
-                                          .toString()
-                                          .trim());
                                   ref
                                       .read(dataGetChecklistProvider.notifier)
                                       .update((state) => {
@@ -135,14 +129,13 @@ class _ResultScanMachineScreenState
                                                 .trim(),
                                           });
                                 } else {
-                                  ref.read(routerProvider).pop();
                                   if (mounted) {
                                     await Future.delayed(Duration.zero, () {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(const SnackBar(
                                               content: Text(
                                                   "Checklist disimpan...")));
-                                      ref.read(routerProvider).pop();
+                                      context.pop();
                                     });
                                   }
                                 }
@@ -176,9 +169,11 @@ class _ResultScanMachineScreenState
             });
             final data = jsonDecode(next.success ?? "");
             AppPrint.debugLog("Hello: $data -- TSSYCD: $tssycd");
-            final stat = List.from(data["data"]["Data"]).first["clstat"];
+            final stat = List.from(data["data"]["Data"])
+                .first["clstat"]
+                .toString()
+                .trim();
 
-            context.pop();
             switch (stat) {
               case "05":
                 ref.read(checklistProvider.notifier).callChecklist(
@@ -328,7 +323,7 @@ class _ResultScanMachineScreenState
           child: Column(
             children: [
               LoadingShimmerWidget(
-                  height: 48,
+                  height: 56,
                   itemCount: 3,
                   width: MediaQuery.of(context).size.width),
             ],
@@ -369,7 +364,7 @@ class _ResultScanMachineScreenState
                           .read(partDataProvider.notifier)
                           .update((state) => dataPass);
 
-                      ref.read(routerProvider).push(RouteName.summaryChecklist);
+                      context.push(RouteName.summaryChecklist);
                     },
                     textLeading: "0/${part["item"]?.length}",
                     titleStye: AppTextStyle.subTitleTextStyle.copyWith(),
@@ -506,9 +501,10 @@ class _ResultScanMachineScreenState
                         ),
                         10.h,
                         loading
-                            ? const Center(
-                                child: CircularProgressIndicator.adaptive(),
-                              )
+                            ? const LoadingShimmerWidget(
+                                itemCount: 3,
+                                height: 56,
+                                width: double.infinity)
                             : prevChecklistWidget,
                       ],
                     ),

@@ -192,9 +192,7 @@ class HttpClient {
       final dataDecode = decode["Data"];
 
       final decodeData = List<String>.from(dataDecode);
-      AppPrint.debugLog("DECODE DATA HTTP CLIENT: $decodeData");
       final decrypt = decodeData.decryptA7;
-      AppPrint.debugLog("DECRYPT: $decrypt");
       data = {"code": response.statusCode, "data": decrypt};
     }
 
@@ -251,22 +249,17 @@ class HttpClient {
           for (var entry in files.entries) {
             final key = entry.key;
             final value = entry.value;
-            AppPrint.debugLog("KEY FILE: $key - $value");
+            AppPrint.debugLog("KEY FILE: $key");
 
-            final file = File(value);
+            // FROM PATH IMAGES NOT SEND
+            final multipartFile = http.MultipartFile.fromBytes(
+              key,
+              value,
+              filename: "${DateTime.now().millisecondsSinceEpoch}.jpg",
+              contentType: MediaType('image', 'jpeg'),
+            );
 
-            if (await file.exists()) {
-              final multipartFile = await http.MultipartFile.fromPath(
-                key,
-                file.path,
-                filename: "TestPhoto.png",
-                contentType: MediaType('image', 'png'),
-              );
-
-              request.files.add(multipartFile);
-            } else {
-              AppPrint.debugLog("File does not exist at path: $value");
-            }
+            request.files.add(multipartFile);
           }
         }
 
@@ -277,8 +270,8 @@ class HttpClient {
         } else {
           print("Gagal mengirim request: ${streamedResponse.statusCode}");
         }
-      } catch (e) {
-        AppPrint.debugLog("ERROR BRO: $e");
+      } catch (e, st) {
+        AppPrint.debugLog("ERROR BRO: $e $st");
       }
     } else if (uri.path.toString().toLowerCase().contains("refreshtoken")) {
       request = http.Request("POST", uri);
@@ -297,7 +290,7 @@ class HttpClient {
 
     if (isEdit != null && isEdit == false) {
       streamedResponse =
-          await request.send().timeout(const Duration(seconds: 7));
+          await request.send().timeout(const Duration(seconds: 10));
     }
     var responseBody = await streamedResponse.stream.bytesToString();
     AppPrint.debugLog("RESPONE BODY: $responseBody");
