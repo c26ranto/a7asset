@@ -102,6 +102,8 @@ class ChecklistService {
 
       final data = response["data"]["Data"];
 
+      if (data is String) return tempData;
+
       for (final a in data) {
         tempData.add(CldetlModel.fromMap(a));
       }
@@ -150,10 +152,11 @@ class ChecklistService {
     required String cmcmlniy,
     required String cmacvl,
     required String cdcdlniy,
-    Uint8List? file1,
-    Uint8List? file2,
-    Uint8List? file3,
-    Uint8List? file4,
+    String? note,
+    String? file1,
+    String? file2,
+    String? file3,
+    String? file4,
   }) async {
     try {
       final httpClientParams = HttpClientParams(
@@ -172,8 +175,12 @@ class ChecklistService {
           param: {
             "cmcmlniy": cmcmlniy,
             "cmacvl": cmacvl,
-            "cdcdlniy": cdcdlniy
+            "cdcdlniy": cdcdlniy,
           });
+
+      if (note != null) {
+        httpClientParams.param?["cmremk"] = note;
+      }
 
       AppPrint.debugLog(
           "HTTP CLIENT PARAMS FILE: ${httpClientParams.files?.keys}");

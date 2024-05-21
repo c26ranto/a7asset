@@ -46,6 +46,7 @@ class _ResultScanMachineScreenState
     final model = ref.watch(modelProvider);
     final statusChecklist = ref.read(statusChecklistProvider);
     final dataGetChecklist = ref.watch(dataGetChecklistProvider);
+    final tssycd = ref.watch(tssycdProvider);
 
     Widget prevChecklistWidget = const SizedBox.shrink();
 
@@ -58,6 +59,9 @@ class _ResultScanMachineScreenState
           AppDialog.loadingDialog(context);
           break;
         case AuthStatus.success:
+          setState(() {
+            loading = false;
+          });
           AppDialog.customDialog(context, "",
               barrierDismissible: false,
               title: Text(
@@ -90,11 +94,13 @@ class _ResultScanMachineScreenState
                           itemCount: status.length,
                           itemBuilder: (context, index) => ButtonReusableWidget(
                               onPressed: () async {
-                                AppPrint.debugLog(
-                                    "STATUS MACHINE: ${status[index]["tssycd"]}");
                                 setState(() {
                                   loading = true;
                                 });
+                                ref.read(tssycdProvider.notifier).update(
+                                    (state) => status[index]["tssycd"]
+                                        .toString()
+                                        .trim());
                                 await ref
                                     .read(generateClheadProvider.notifier)
                                     .callGenerateClhead(
@@ -114,7 +120,6 @@ class _ResultScanMachineScreenState
                                       statusId: status[index]["tssycd"],
                                     );
                                 if (status[index]["tssycd"] == "1") {
-                                  // ref.read(routerProvider).pop();
                                   ref.read(tssycdProvider.notifier).update(
                                       (state) => status[index]["tssycd"]
                                           .toString()
@@ -129,17 +134,6 @@ class _ResultScanMachineScreenState
                                                 .toString()
                                                 .trim(),
                                           });
-
-                                  // ref
-                                  //     .read(checklistProvider.notifier)
-                                  //     .callChecklist(
-                                  //       id: machineId,
-                                  //       shiftId: shift.id,
-                                  //       period: shift.period,
-                                  //       statusId: status[index]["tssycd"]
-                                  //           .toString()
-                                  //           .trim(),
-                                  //     );
                                 } else {
                                   ref.read(routerProvider).pop();
                                   if (mounted) {
@@ -181,18 +175,17 @@ class _ResultScanMachineScreenState
               loading = false;
             });
             final data = jsonDecode(next.success ?? "");
-            AppPrint.debugLog("Hello: $data");
-            const stat = "10";
+            AppPrint.debugLog("Hello: $data -- TSSYCD: $tssycd");
+            final stat = List.from(data["data"]["Data"]).first["clstat"];
 
             context.pop();
-            // switch (List.from(data["data"]["Data"]).first["clstat"]) {
             switch (stat) {
               case "05":
                 ref.read(checklistProvider.notifier).callChecklist(
                       id: machineId,
                       shiftId: shift.id,
                       period: shift.period,
-                      statusId: "1",
+                      statusId: tssycd,
                     );
               case "10":
                 AppDialog.customDialog(context, "",
@@ -228,7 +221,7 @@ class _ResultScanMachineScreenState
                                         id: machineId,
                                         shiftId: shift.id,
                                         period: shift.period,
-                                        statusId: "1",
+                                        statusId: tssycd,
                                       );
                                   context.pop();
                                 },

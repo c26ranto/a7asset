@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:assets_mobile/config/constants.dart';
 import 'package:assets_mobile/data/models/cutom_error.dart';
@@ -43,7 +42,6 @@ class HttpClient {
 
     Map<String, dynamic> param = {};
 
-    // TODO SIMPLIFIED THIS PARAM WITH JUST NECESSARY KEY
     if (httpClientParams.overrideParam != null) {
       param = httpClientParams.overrideParam!;
     } else {
@@ -52,8 +50,6 @@ class HttpClient {
         "username": "$username-name",
         "date": DateTime.now().toIso8601String(),
         "Date": DateTime.now().toIso8601String(),
-        // TODO CHANGE DB DYNAMIC
-        // "ApiDB": "dev-a7asset",
       };
     }
 
@@ -117,7 +113,8 @@ class HttpClient {
 
     if (token != null &&
         token.isNotEmpty &&
-        !httpClientParams.path.contains("getConnList")) {
+        (!httpClientParams.path.contains("getConnList") ||
+            !httpClientParams.path.contains("login"))) {
       final checkExpired = token.checkExpiredToken;
       AppPrint.debugLog("CHECK EXPIRED TOKEN: $checkExpired");
       // WHEN EXPIRED
@@ -247,19 +244,29 @@ class HttpClient {
         AppPrint.debugLog("FILES FROM HTTPCLIENT: ${files?.keys}");
 
         if (files != null) {
+          files.forEach((key, value) {
+            request.fields[key] = value.toString();
+          });
+
           for (var entry in files.entries) {
-            var key = entry.key;
-            var value = entry.value;
-            AppPrint.debugLog("KEY FILE: $key");
+            final key = entry.key;
+            final value = entry.value;
+            AppPrint.debugLog("KEY FILE: $key - $value");
 
-            var multipartFile = http.MultipartFile.fromBytes(
-              key,
-              Uint8List.fromList(value),
-              filename: "$key.png",
-              contentType: MediaType('image', 'jpeg'),
-            );
+            final file = File(value);
 
-            request.files.add(multipartFile);
+            if (await file.exists()) {
+              final multipartFile = await http.MultipartFile.fromPath(
+                key,
+                file.path,
+                filename: "TestPhoto.png",
+                contentType: MediaType('image', 'png'),
+              );
+
+              request.files.add(multipartFile);
+            } else {
+              AppPrint.debugLog("File does not exist at path: $value");
+            }
           }
         }
 

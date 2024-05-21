@@ -11,6 +11,7 @@ import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
 import 'package:assets_mobile/repositories/checklist/provider/checklist_repository_provider.dart';
 import 'package:assets_mobile/repositories/machines/provider/machine_repository_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
+import 'package:assets_mobile/utils/app_error_message.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +38,7 @@ final imagesOnDialogProvider = StateProvider.autoDispose<List<XFile>>((ref) {
   return [];
 });
 
-final tssycdProvider = StateProvider.autoDispose<String>((ref) {
+final tssycdProvider = StateProvider<String>((ref) {
   return "";
 });
 
@@ -73,7 +74,7 @@ final cmcmlniyProvider = StateProvider<String>((ref) {
   return "";
 });
 
-final filesProvider = StateProvider<List<Uint8List>>((ref) {
+final filesProvider = StateProvider<List<String>>((ref) {
   return [];
 });
 
@@ -82,12 +83,16 @@ FutureOr<void> takePicture(TakePictureRef ref,
     {required TakePhotoChecklistType type}) async {
   final ImagePicker picker = ImagePicker();
 
-  final result = await picker.pickImage(source: ImageSource.camera);
+  final result = await picker.pickImage(
+      source: ImageSource.camera, maxHeight: 200, maxWidth: 200);
+
+  AppPrint.debugLog("PATH: ${result?.path}");
 
   if (result != null) {
     final bytes = await result.readAsBytes();
+    final path = result.path;
     ref.read(filesProvider.notifier).update(
-          (state) => [...state, bytes],
+          (state) => [...state, path],
         );
 
     if (type == TakePhotoChecklistType.detail) {
@@ -265,6 +270,11 @@ class Checklist extends _$Checklist {
         success: null,
         customError: e,
       );
+    } catch (e) {
+      state = state.copyWith(
+          status: ChecklistStatus.failure,
+          customError: const CustomError(
+              errorMessage: "Data tidak ditemukan, silahkan coba lagi!"));
     }
   }
 }
@@ -280,10 +290,11 @@ class SaveChecklist extends _$SaveChecklist {
     required String cmcmlniy,
     required String cmacvl,
     required String cdcdlniy,
-    Uint8List? file1,
-    Uint8List? file2,
-    Uint8List? file3,
-    Uint8List? file4,
+    String? note,
+    String? file1,
+    String? file2,
+    String? file3,
+    String? file4,
   }) async {
     state = state.copyWith(status: SaveChecklistStatus.loading);
     try {
@@ -291,6 +302,7 @@ class SaveChecklist extends _$SaveChecklist {
           cmcmlniy: cmcmlniy,
           cmacvl: cmacvl,
           cdcdlniy: cdcdlniy,
+          note: note,
           file1: file1,
           file2: file2,
           file3: file3,

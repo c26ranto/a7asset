@@ -1,5 +1,6 @@
 import 'package:assets_mobile/data/models/cutom_error.dart';
 import 'package:assets_mobile/data/models/shift_model.dart';
+import 'package:assets_mobile/presentation/checklist/provider/checklist_provider.dart';
 import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
 import 'package:assets_mobile/presentation/widgets/background_image_image.dart';
 import 'package:assets_mobile/presentation/widgets/button_widget.dart';
@@ -31,14 +32,16 @@ class ChooseShift extends ConsumerWidget {
         appBar: CustomAppbarWidget(
           isCenter: true,
           title: "Checklist Schedule",
-          titleStye: AppTextStyle.subTitleTextStyle.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
+          titleStye: AppTextStyle.subTitleTextStyle
+              .copyWith(fontWeight: FontWeight.w700, color: Colors.white),
         ),
         body: Stack(
           children: [
             const BackgroundImageWidget(),
             SafeArea(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
                 children: [
                   FormFieldDateWidget(
                     title: "Date",
@@ -54,11 +57,14 @@ class ChooseShift extends ConsumerWidget {
                       DateTime? dt = await showDatePicker(
                           context: context,
                           initialDate: DateTime.now(),
-                          firstDate: DateTime.now().subtract(const Duration(days: 1)),
-                          lastDate: DateTime.now().add(const Duration(days: 1)));
+                          firstDate:
+                              DateTime.now().subtract(const Duration(days: 1)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 1)));
 
                       if (dt != null) {
-                        ref.read(shiftDateProvider.notifier).update((state) => DateFormat("dd-MMM-yyyy").format(dt));
+                        ref.read(shiftDateProvider.notifier).update(
+                            (state) => DateFormat("dd-MMM-yyyy").format(dt));
                       }
                     },
                   ),
@@ -69,7 +75,8 @@ class ChooseShift extends ConsumerWidget {
                       children: [
                         Text(
                           "SHIFT",
-                          style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                          style: AppTextStyle.subTitleTextStyle
+                              .copyWith(color: Colors.white),
                         ),
                         20.h,
                         ListView.builder(
@@ -79,18 +86,34 @@ class ChooseShift extends ConsumerWidget {
                           itemBuilder: (context, index) {
                             return CustomLongCardWidget(
                               title: data[index]["tssynm"],
-                              titleStye: shiftIndex == index ? AppTextStyle.subTitleTextStyle.copyWith() : AppTextStyle.commonTextStyle,
-                              border: shiftIndex == index ? Border.all(color: AppColors.skyBlue, width: 5, strokeAlign: BorderSide.strokeAlignOutside) : null,
+                              titleStye: shiftIndex == index
+                                  ? AppTextStyle.subTitleTextStyle.copyWith()
+                                  : AppTextStyle.commonTextStyle,
+                              border: shiftIndex == index
+                                  ? Border.all(
+                                      color: AppColors.skyBlue,
+                                      width: 5,
+                                      strokeAlign:
+                                          BorderSide.strokeAlignOutside)
+                                  : null,
                               isChoose: shiftIndex == index,
                               onTap: () {
-                                ref.read(chooseShiftIndexProvider.notifier).update((state) => index);
+                                ref
+                                    .read(chooseShiftIndexProvider.notifier)
+                                    .update((state) => index);
+                                ref.read(tssycdProvider.notifier).update(
+                                      (state) =>
+                                          data[index]["tssycd"].toString(),
+                                    );
                                 final shiftModel = ShiftModel.fromMap({
                                   "id": data[index]["tssycd"],
                                   "title": data[index]["tssycd"],
                                   "date": shiftDate,
                                   "period": "",
                                 });
-                                ref.read(dataShiftProvider.notifier).update((state) => shiftModel);
+                                ref
+                                    .read(dataShiftProvider.notifier)
+                                    .update((state) => shiftModel);
                               },
                             );
                           },
@@ -103,7 +126,8 @@ class ChooseShift extends ConsumerWidget {
                         child: CustomErrorWidget(
                           customErrorWidgetType: CustomErrorWidgetType.widget,
                           errorMessage: (error as CustomError).errorMessage,
-                          errorMessageStyle: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                          errorMessageStyle: AppTextStyle.subTitleTextStyle
+                              .copyWith(color: Colors.white),
                           action: () {
                             ref.invalidate(getShiftProvider);
                           },
@@ -131,7 +155,9 @@ class ChooseShift extends ConsumerWidget {
                   "title": dataShift.title,
                   "date": shiftDate,
                 });
-                ref.read(dataShiftProvider.notifier).update((state) => shiftModel);
+                ref
+                    .read(dataShiftProvider.notifier)
+                    .update((state) => shiftModel);
                 ref.read(routerProvider).push(RouteName.chooseChecklistPeriod);
               },
               title: "Continue",

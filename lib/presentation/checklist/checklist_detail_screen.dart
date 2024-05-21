@@ -494,6 +494,15 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                         onPressed: () async {
                                                           AppPrint.debugLog(
                                                               "MY ITEM: $item");
+                                                          if (files.isEmpty) {
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                                    const SnackBar(
+                                                                        content:
+                                                                            Text("File Kosong...")));
+                                                            return;
+                                                          }
                                                           ref
                                                               .read(
                                                                   saveChecklistProvider
@@ -506,6 +515,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                           .text,
                                                                   cdcdlniy:
                                                                       cdcdlniy,
+                                                                  note:
+                                                                      _detailNoteDialogC
+                                                                          .text,
                                                                   file1:
                                                                       files[0],
                                                                   file2:

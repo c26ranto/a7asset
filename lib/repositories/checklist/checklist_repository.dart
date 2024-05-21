@@ -49,16 +49,18 @@ class ChecklistRepository {
     required String cmcmlniy,
     required String cmacvl,
     required String cdcdlniy,
-    Uint8List? file1,
-    Uint8List? file2,
-    Uint8List? file3,
-    Uint8List? file4,
+    String? note,
+    String? file1,
+    String? file2,
+    String? file3,
+    String? file4,
   }) async {
     return HttpClientRepository.safeApiCall(() =>
         checklistService.saveChecklist(
             cmcmlniy: cmcmlniy,
             cmacvl: cmacvl,
             cdcdlniy: cdcdlniy,
+            note: note,
             file1: file1,
             file2: file2,
             file3: file3,
