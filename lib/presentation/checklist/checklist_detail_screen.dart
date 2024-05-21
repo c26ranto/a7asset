@@ -12,6 +12,7 @@ import 'package:assets_mobile/presentation/widgets/custom_error_widget.dart';
 import 'package:assets_mobile/presentation/widgets/custom_formfield_widget.dart';
 import 'package:assets_mobile/presentation/widgets/custom_long_card_widget.dart';
 import 'package:assets_mobile/presentation/widgets/form_date_widget.dart';
+import 'package:assets_mobile/presentation/widgets/loading_screen_widget.dart';
 import 'package:assets_mobile/route/route_provider.dart';
 import 'package:assets_mobile/utils/app_colors.dart';
 import 'package:assets_mobile/utils/app_dialog.dart';
@@ -65,22 +66,23 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
 
     final files = ref.watch(filesProvider);
 
+    final saveChecklistState = ref.watch(saveChecklistProvider);
+
     ref.listen<SaveChecklistState>(
       saveChecklistProvider,
       (previous, next) {
         switch (next.status) {
           case SaveChecklistStatus.failure:
-            context.pop();
             AppDialog.errorDialog(
               context,
               next.customError.errorMessage,
               () => Navigator.pop(context),
             );
-
-          default:
+          case SaveChecklistStatus.success:
             context.pop();
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text("Berhasil!")));
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text("Berhasil mengirim checklist...")));
+          case _:
         }
       },
     );
@@ -483,14 +485,18 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                     ButtonReusableWidget(
                                                         width: 150,
                                                         disabled: saveChecklist
-                                                                        .status ==
-                                                                    SaveChecklistStatus
-                                                                        .loading ||
-                                                                cdtype.toLowerCase() ==
-                                                                    'o'
-                                                            ? chooseCdcdlniy ==
-                                                                99
-                                                            : false,
+                                                                    .status ==
+                                                                SaveChecklistStatus
+                                                                    .loading ||
+                                                            (cdtype.toLowerCase() ==
+                                                                        'o' &&
+                                                                    saveChecklist
+                                                                            .status !=
+                                                                        SaveChecklistStatus
+                                                                            .loading
+                                                                ? chooseCdcdlniy ==
+                                                                    99
+                                                                : false),
                                                         onPressed: () async {
                                                           AppPrint.debugLog(
                                                               "MY ITEM: $item");
@@ -645,6 +651,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
               ),
             ),
           ),
+          if (saveChecklistState.status == SaveChecklistStatus.loading)
+            const LoadingScreenWidget()
         ],
       ),
       bottomNavigationBar: Container(
