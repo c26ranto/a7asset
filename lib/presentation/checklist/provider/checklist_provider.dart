@@ -78,6 +78,18 @@ final filesProvider = StateProvider<List<Uint8List>>((ref) {
   return [];
 });
 
+final cdvaluProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final noteDialogProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final ckcknoiyProvider = StateProvider<String>((ref) {
+  return "";
+});
+
 @riverpod
 FutureOr<void> takePicture(TakePictureRef ref,
     {required TakePhotoChecklistType type}) async {
@@ -288,6 +300,8 @@ class SaveChecklist extends _$SaveChecklist {
     required String cmcmlniy,
     required String cmacvl,
     required String cdcdlniy,
+    required SaveChecklistType saveChecklistType,
+    String? ckcknoiy,
     String? note,
     List<Uint8List>? files,
   }) async {
@@ -298,6 +312,8 @@ class SaveChecklist extends _$SaveChecklist {
           cmacvl: cmacvl,
           cdcdlniy: cdcdlniy,
           note: note,
+          saveChecklistType: saveChecklistType,
+          ckcknoiy: ckcknoiy,
           files: files);
       state = state.copyWith(
           status: SaveChecklistStatus.success, success: "Success");
@@ -336,19 +352,63 @@ class ChecklistController extends _$ChecklistController {
         final cdunms = item.cdunms;
         final chchnm = item.chchnm;
 
+        final files = [
+          {
+            "cmflk1": item.cmflk1,
+            "cmfln1": item.cmfln1,
+          },
+          {
+            "cmflk2": item.cmflk2,
+            "cmfln2": item.cmfln2,
+          },
+          {
+            "cmflk2": item.cmflk2,
+            "cmfln2": item.cmfln2,
+          },
+          {
+            "cmflk3": item.cmflk3,
+            "cmfln3": item.cmfln3,
+          },
+          {
+            "cmflk4": item.cmflk4,
+            "cmfln4": item.cmfln4,
+          },
+          {
+            "cmflk5": item.cmflk5,
+            "cmfln5": item.cmfln5,
+          },
+        ];
+
+        final filesItem = [
+          {
+            "ckflk1": item.ckflk1,
+            "ckfln1": item.ckfln1,
+          },
+          {
+            "ckflk2": item.ckflk2,
+            "ckfln2": item.ckfln2,
+          },
+          {
+            "ckflk2": item.ckflk2,
+            "ckfln2": item.ckfln2,
+          },
+          {
+            "ckflk3": item.ckflk3,
+            "ckfln3": item.ckfln3,
+          },
+          {
+            "ckflk4": item.ckflk4,
+            "ckfln4": item.ckfln4,
+          },
+          {
+            "ckflk5": item.ckflk5,
+            "ckfln5": item.ckfln5,
+          },
+        ];
+
         final detailItemChecklist = {
-          "mrmrnm": mrmrnm,
-          "mrrlcdiy": mrrlcdiy,
-          "chchcdiy": chchcdiy,
-          "cdtype": cdtype,
-          "cmcmlniy": cmcmlniy,
-          "cmacvl": cmacvl,
-          "cmcdlniy": cmcdlniy,
-          "cdcdds": cdcdds,
-          "cdrguv": cdrguv,
-          "chchnm": chchnm,
-          "cdvalu": cdvalu,
-          "cdunms": cdunms,
+          ...item.toMap(),
+          "filesChecklist": files,
         };
 
         if (!groupingPart.any((element) => element.containsKey(mpmpcdiy))) {
@@ -360,6 +420,7 @@ class ChecklistController extends _$ChecklistController {
               "cmcmlniy": item.cmcmlniy,
               "cmacvl": item.cmacvl,
               "cdcdlniy": item.cdcdlniy,
+              "files": filesItem,
               "item": [
                 {
                   "id": mimicdiy,
@@ -416,4 +477,13 @@ class ChecklistController extends _$ChecklistController {
 
     return groupingPart;
   }
+}
+
+@riverpod
+FutureOr getImagesChecklist(GetImagesChecklistRef ref,
+    {required String fileKey, required String fileName}) async {
+  final response = await ref
+      .read(checklistRepositoryProvider)
+      .getImagesChecklist(fileKey: fileKey, fileName: fileName);
+  return response;
 }
