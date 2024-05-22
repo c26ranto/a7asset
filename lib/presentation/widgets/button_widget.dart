@@ -31,7 +31,8 @@ class ButtonReusableWidget extends StatelessWidget {
     return ElevatedButton(
         onPressed: disabled != null && disabled == true ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          fixedSize: Size(width ?? MediaQuery.of(context).size.width, height ?? 50),
+          fixedSize:
+              Size(width ?? MediaQuery.sizeOf(context).width, height ?? 50),
           padding: padding ?? const EdgeInsets.symmetric(vertical: 8),
           backgroundColor: backgroundColor ?? AppColors.thirdColor,
           shape: RoundedRectangleBorder(

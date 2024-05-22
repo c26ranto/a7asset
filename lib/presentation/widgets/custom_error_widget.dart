@@ -44,8 +44,8 @@ class CustomErrorWidget extends ConsumerWidget {
               Image.asset(
                 imageUrl ?? AppAssets.errorImage,
                 fit: BoxFit.cover,
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.sizeOf(context).height,
+                width: MediaQuery.sizeOf(context).width,
               ),
               Positioned(
                 bottom: 200,
@@ -61,7 +61,8 @@ class CustomErrorWidget extends ConsumerWidget {
                     ),
                     5.h,
                     Text(
-                      errorMessage ?? 'Oops! The page you are looking for\nis not found',
+                      errorMessage ??
+                          'Oops! The page you are looking for\nis not found',
                       style: _kSubtitleTextStyle.copyWith(
                         color: Colors.white54,
                       ),
@@ -80,7 +81,8 @@ class CustomErrorWidget extends ConsumerWidget {
                   childTextColor: Colors.black,
                   onPressed: action ??
                       () async {
-                        final token = await SharedPreferencesHelper.getString(AppKey.token);
+                        final token = await SharedPreferencesHelper.getString(
+                            AppKey.token);
                         if (token.isEmpty) {
                           ref.read(routerProvider).go(RouteName.main);
                         } else {
@@ -103,7 +105,8 @@ class CustomErrorWidget extends ConsumerWidget {
             ButtonReusableWidget(
                 onPressed: action ??
                     () async {
-                      final token = await SharedPreferencesHelper.getString(AppKey.token);
+                      final token =
+                          await SharedPreferencesHelper.getString(AppKey.token);
                       if (token.isEmpty) {
                         ref.read(routerProvider).go(RouteName.main);
                       } else {
@@ -152,7 +155,7 @@ class _ReusablePrimaryButton extends StatelessWidget {
       onTap: onPressed as VoidCallback,
       child: Container(
         height: 40,
-        width: MediaQuery.of(context).size.width / 2,
+        width: MediaQuery.sizeOf(context).width / 2,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           color: buttonColor,

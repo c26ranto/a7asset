@@ -251,24 +251,37 @@ class ChecklistService {
     }
   }
 
-  Future getImagesChecklist(
-      {required String fileKey, required String fileName}) async {
+  Future<List<String>> getImagesChecklist(
+      {required List<Map<String, dynamic>> files}) async {
     try {
-      final httpClientParams = HttpClientParams(
-          path: "datadr",
-          controller: "Ajax",
-          subMethod: "setFile",
-          param: {
-            "FileKey": fileKey,
-            "FileName": fileName,
-          });
+      List<String> result = [];
 
-      final response =
-          await ref.read(httpClientProvider(httpClientParams)).callHttp;
-      AppPrint.debugLog("RESPONSE GET IMAGE: $response");
-      return response;
-    } catch (e) {
-      AppPrint.debugLog("ERROR GET IMAGES CHECKLIST: $e");
+      AppPrint.debugLog("FILESS: $files");
+
+      for (int i = 0; i < files.length; i++) {
+        AppPrint.debugLog("GET IMAGE");
+        final httpClientParams = HttpClientParams(
+            path: "datadr",
+            controller: "Ajax",
+            subMethod: "setFile",
+            param: {
+              "FileKey": files[i]["cmflk${i + 1}"],
+              "FileName": files[i]["cmfln${i + 1}"],
+            });
+
+        final response =
+            await ref.read(httpClientProvider(httpClientParams)).callHttp;
+
+        AppPrint.debugLog("RESPONSE GET IMAGE: $response");
+
+        final data = response["data"]["File"];
+
+        result.add(data);
+      }
+
+      return result;
+    } catch (e, st) {
+      AppPrint.debugLog("ERROR GET IMAGES CHECKLIST: $e $st");
       rethrow;
     }
   }

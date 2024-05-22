@@ -121,7 +121,7 @@ class ChooseShift extends ConsumerWidget {
                       ],
                     ),
                     error: (error, stackTrace) => SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.2,
+                      height: MediaQuery.sizeOf(context).height * 0.2,
                       child: Center(
                         child: CustomErrorWidget(
                           customErrorWidgetType: CustomErrorWidgetType.widget,

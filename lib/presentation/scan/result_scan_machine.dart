@@ -232,7 +232,7 @@ class _ResultScanMachineScreenState
                 style: AppTextStyle.subTitleTextStyle.copyWith(),
               ),
               content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.4,
+                width: MediaQuery.sizeOf(context).width * 0.4,
                 height: 250,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -273,6 +273,14 @@ class _ResultScanMachineScreenState
                                     period: shift.period,
                                     statusId:
                                         status["tssycd"].toString().trim(),
+                                  );
+                              await ref
+                                  .read(checklistProvider.notifier)
+                                  .callChecklist(
+                                    id: machineId,
+                                    shiftId: shift.id,
+                                    period: shift.period,
+                                    statusId: tssycd,
                                   );
                               if (status["tssycd"] == "1") {
                                 ref
@@ -425,7 +433,7 @@ class _ResultScanMachineScreenState
               LoadingShimmerWidget(
                   height: 56,
                   itemCount: 3,
-                  width: MediaQuery.of(context).size.width),
+                  width: MediaQuery.sizeOf(context).width),
             ],
           ),
         );

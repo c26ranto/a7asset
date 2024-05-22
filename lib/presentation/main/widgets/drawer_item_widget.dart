@@ -31,11 +31,13 @@ class DrawerItemWidget extends ConsumerWidget {
       decoration: const BoxDecoration(color: AppColors.appBarColor),
       accountName: Text(
         userName,
-        style: AppTextStyle.commonTextStyle.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+        style: AppTextStyle.commonTextStyle
+            .copyWith(fontWeight: FontWeight.bold, color: Colors.white),
       ),
       accountEmail: Text(
         userName,
-        style: AppTextStyle.commonTextStyle.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+        style: AppTextStyle.commonTextStyle
+            .copyWith(fontWeight: FontWeight.bold, color: Colors.white),
       ),
       currentAccountPicture: Row(
         children: [
@@ -44,7 +46,10 @@ class DrawerItemWidget extends ConsumerWidget {
               Navigator.pop(context);
               context.push(RouteName.profile);
             },
-            child: CircleAvatar(radius: 30, backgroundImage: const AssetImage(AppAssets.userImage), backgroundColor: Colors.black.withOpacity(0)),
+            child: CircleAvatar(
+                radius: 30,
+                backgroundImage: const AssetImage(AppAssets.userImage),
+                backgroundColor: Colors.black.withOpacity(0)),
           ),
         ],
       ),
@@ -80,7 +85,10 @@ class DrawerItemWidget extends ConsumerWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Container(height: 1, width: double.infinity, color: Colors.blueGrey[200]),
+                child: Container(
+                    height: 1,
+                    width: double.infinity,
+                    color: Colors.blueGrey[200]),
               ),
               ListTile(
                 textColor: Colors.black,
@@ -100,12 +108,18 @@ class DrawerItemWidget extends ConsumerWidget {
                 onTap: () {
                   // Navigator.pop(context);
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SizedBox()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SizedBox()));
                 },
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Container(height: 1, width: double.infinity, color: Colors.blueGrey[200]),
+                child: Container(
+                    height: 1,
+                    width: double.infinity,
+                    color: Colors.blueGrey[200]),
               ),
               ListTile(
                 textColor: Colors.black,
@@ -129,7 +143,10 @@ class DrawerItemWidget extends ConsumerWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Container(height: 1, width: double.infinity, color: Colors.blueGrey[200]),
+                child: Container(
+                    height: 1,
+                    width: double.infinity,
+                    color: Colors.blueGrey[200]),
               ),
             ],
           ),
@@ -153,10 +170,14 @@ class DrawerItemWidget extends ConsumerWidget {
                     switch (next.status) {
                       case AuthStatus.failure:
                         context.pop();
-                        AppDialog.errorDialog(context, (next.error).errorMessage, () => context.pop());
+                        AppDialog.errorDialog(context,
+                            (next.error).errorMessage, () => context.pop());
                         break;
                       case AuthStatus.success:
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully change password!')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Successfully change password!')));
                         ref.read(routerProvider).pop();
                         ref.read(routerProvider).go(RouteName.login);
                         break;
@@ -165,7 +186,7 @@ class DrawerItemWidget extends ConsumerWidget {
                   });
 
                   return SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.5,
+                    width: MediaQuery.sizeOf(context).width * 0.5,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -197,10 +218,14 @@ class DrawerItemWidget extends ConsumerWidget {
                             Expanded(
                               child: ButtonReusableWidget(
                                 onPressed: () async {
-                                  await ref.read(logoutProvider.notifier).callLogout();
+                                  await ref
+                                      .read(logoutProvider.notifier)
+                                      .callLogout();
                                 },
                                 disabled: status == AuthStatus.loading,
-                                title: status == AuthStatus.loading ? "Loading..." : "Logout",
+                                title: status == AuthStatus.loading
+                                    ? "Loading..."
+                                    : "Logout",
                                 height: 38,
                               ),
                             ),
@@ -216,7 +241,10 @@ class DrawerItemWidget extends ConsumerWidget {
           },
           child: Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(color: Colors.red, border: Border(top: BorderSide(color: Colors.black12, width: 1))),
+            decoration: const BoxDecoration(
+                color: Colors.red,
+                border:
+                    Border(top: BorderSide(color: Colors.black12, width: 1))),
             child: Row(
               children: [
                 const Icon(Icons.logout, color: Colors.white),
@@ -225,7 +253,8 @@ class DrawerItemWidget extends ConsumerWidget {
                 ),
                 Text(
                   "Logout",
-                  style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                  style: AppTextStyle.subTitleTextStyle
+                      .copyWith(color: Colors.white),
                 ),
                 const Expanded(
                     child: Align(

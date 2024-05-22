@@ -289,25 +289,23 @@ class _GetChecklistProviderElement
 }
 
 String _$getImagesChecklistHash() =>
-    r'94b27a354f1c3a3bb4fed2edcf342eb1245a147b';
+    r'1eaa8c1e0bbd6885a881d986bbb324a697be381f';
 
 /// See also [getImagesChecklist].
 @ProviderFor(getImagesChecklist)
 const getImagesChecklistProvider = GetImagesChecklistFamily();
 
 /// See also [getImagesChecklist].
-class GetImagesChecklistFamily extends Family<AsyncValue> {
+class GetImagesChecklistFamily extends Family<AsyncValue<List<String>>> {
   /// See also [getImagesChecklist].
   const GetImagesChecklistFamily();
 
   /// See also [getImagesChecklist].
   GetImagesChecklistProvider call({
-    required String fileKey,
-    required String fileName,
+    required List<Map<String, dynamic>> files,
   }) {
     return GetImagesChecklistProvider(
-      fileKey: fileKey,
-      fileName: fileName,
+      files: files,
     );
   }
 
@@ -316,8 +314,7 @@ class GetImagesChecklistFamily extends Family<AsyncValue> {
     covariant GetImagesChecklistProvider provider,
   ) {
     return call(
-      fileKey: provider.fileKey,
-      fileName: provider.fileName,
+      files: provider.files,
     );
   }
 
@@ -337,16 +334,15 @@ class GetImagesChecklistFamily extends Family<AsyncValue> {
 }
 
 /// See also [getImagesChecklist].
-class GetImagesChecklistProvider extends AutoDisposeFutureProvider<Object?> {
+class GetImagesChecklistProvider
+    extends AutoDisposeFutureProvider<List<String>> {
   /// See also [getImagesChecklist].
   GetImagesChecklistProvider({
-    required String fileKey,
-    required String fileName,
+    required List<Map<String, dynamic>> files,
   }) : this._internal(
           (ref) => getImagesChecklist(
             ref as GetImagesChecklistRef,
-            fileKey: fileKey,
-            fileName: fileName,
+            files: files,
           ),
           from: getImagesChecklistProvider,
           name: r'getImagesChecklistProvider',
@@ -357,8 +353,7 @@ class GetImagesChecklistProvider extends AutoDisposeFutureProvider<Object?> {
           dependencies: GetImagesChecklistFamily._dependencies,
           allTransitiveDependencies:
               GetImagesChecklistFamily._allTransitiveDependencies,
-          fileKey: fileKey,
-          fileName: fileName,
+          files: files,
         );
 
   GetImagesChecklistProvider._internal(
@@ -368,16 +363,14 @@ class GetImagesChecklistProvider extends AutoDisposeFutureProvider<Object?> {
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.fileKey,
-    required this.fileName,
+    required this.files,
   }) : super.internal();
 
-  final String fileKey;
-  final String fileName;
+  final List<Map<String, dynamic>> files;
 
   @override
   Override overrideWith(
-    FutureOr<Object?> Function(GetImagesChecklistRef provider) create,
+    FutureOr<List<String>> Function(GetImagesChecklistRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -388,51 +381,43 @@ class GetImagesChecklistProvider extends AutoDisposeFutureProvider<Object?> {
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        fileKey: fileKey,
-        fileName: fileName,
+        files: files,
       ),
     );
   }
 
   @override
-  AutoDisposeFutureProviderElement<Object?> createElement() {
+  AutoDisposeFutureProviderElement<List<String>> createElement() {
     return _GetImagesChecklistProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is GetImagesChecklistProvider &&
-        other.fileKey == fileKey &&
-        other.fileName == fileName;
+    return other is GetImagesChecklistProvider && other.files == files;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, fileKey.hashCode);
-    hash = _SystemHash.combine(hash, fileName.hashCode);
+    hash = _SystemHash.combine(hash, files.hashCode);
 
     return _SystemHash.finish(hash);
   }
 }
 
-mixin GetImagesChecklistRef on AutoDisposeFutureProviderRef<Object?> {
-  /// The parameter `fileKey` of this provider.
-  String get fileKey;
-
-  /// The parameter `fileName` of this provider.
-  String get fileName;
+mixin GetImagesChecklistRef on AutoDisposeFutureProviderRef<List<String>> {
+  /// The parameter `files` of this provider.
+  List<Map<String, dynamic>> get files;
 }
 
 class _GetImagesChecklistProviderElement
-    extends AutoDisposeFutureProviderElement<Object?>
+    extends AutoDisposeFutureProviderElement<List<String>>
     with GetImagesChecklistRef {
   _GetImagesChecklistProviderElement(super.provider);
 
   @override
-  String get fileKey => (origin as GetImagesChecklistProvider).fileKey;
-  @override
-  String get fileName => (origin as GetImagesChecklistProvider).fileName;
+  List<Map<String, dynamic>> get files =>
+      (origin as GetImagesChecklistProvider).files;
 }
 
 String _$generateClheadHash() => r'3e053a238e0f48e05fb4751ba7f0bc7edac1e9e1';
@@ -451,7 +436,7 @@ final generateClheadProvider =
 );
 
 typedef _$GenerateClhead = AutoDisposeNotifier<GenerateClheadState>;
-String _$checklistHash() => r'0b83b72d60bf68b04a6e8d44400fbbd9eb04a0fa';
+String _$checklistHash() => r'a9b27beb88ad27512a4ddf07146111b621c33afe';
 
 /// See also [Checklist].
 @ProviderFor(Checklist)
@@ -466,7 +451,7 @@ final checklistProvider =
 );
 
 typedef _$Checklist = AutoDisposeNotifier<ChecklistState>;
-String _$saveChecklistHash() => r'3a7bdb5b7e455a0f3e3df7625a15481d8b23dbef';
+String _$saveChecklistHash() => r'0b22efd4bda568760048162a252978e3164bac2b';
 
 /// See also [SaveChecklist].
 @ProviderFor(SaveChecklist)
@@ -483,7 +468,7 @@ final saveChecklistProvider =
 
 typedef _$SaveChecklist = AutoDisposeNotifier<SaveChecklistState>;
 String _$checklistControllerHash() =>
-    r'ec6a714c74c8c7f194813ca759c46f23b1529635';
+    r'89231cf2bd44214524b4e09316399b81bb36dadc';
 
 /// See also [ChecklistController].
 @ProviderFor(ChecklistController)

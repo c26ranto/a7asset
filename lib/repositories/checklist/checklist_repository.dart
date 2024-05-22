@@ -77,11 +77,10 @@ class ChecklistRepository {
     );
   }
 
-  Future getImagesChecklist(
-      {required String fileKey, required String fileName}) async {
+  Future<List<String>> getImagesChecklist(
+      {required List<Map<String, dynamic>> files}) async {
     return HttpClientRepository.safeApiCall(
-      () => checklistService.getImagesChecklist(
-          fileKey: fileKey, fileName: fileName),
+      () => checklistService.getImagesChecklist(files: files),
     );
   }
 }

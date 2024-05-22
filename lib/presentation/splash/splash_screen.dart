@@ -71,7 +71,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         children: [
           const BackgroundImageWidget(),
           Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.5,
+            bottom: MediaQuery.sizeOf(context).height * 0.5,
             left: 18,
             right: 18,
             child: Column(

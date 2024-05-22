@@ -207,13 +207,13 @@ extension EncryptA7<K, V> on Map<K, V> {
 
 extension Size on double {
   double percentageWidth(BuildContext context) {
-    return MediaQuery.of(context).size.width * (this / 100);
+    return MediaQuery.sizeOf(context).width * (this / 100);
   }
 
   double percentageHeight(
     BuildContext context,
   ) {
-    return MediaQuery.of(context).size.height * (this / 100);
+    return MediaQuery.sizeOf(context).height * (this / 100);
   }
 }
 

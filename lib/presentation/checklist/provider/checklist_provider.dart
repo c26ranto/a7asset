@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:assets_mobile/data/models/checklist.dart';
 import 'package:assets_mobile/data/models/checklist_detail.dart';
 import 'package:assets_mobile/data/models/checklist_state.dart';
@@ -11,7 +9,6 @@ import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
 import 'package:assets_mobile/repositories/checklist/provider/checklist_repository_provider.dart';
 import 'package:assets_mobile/repositories/machines/provider/machine_repository_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
-import 'package:assets_mobile/utils/app_error_message.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,6 +89,18 @@ final noteDialogProvider = StateProvider<String>((ref) {
 });
 
 final ckcknoiyProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final ckflkFilesProvider = StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
+final cmflkFilesProvider = StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
+final cmcdlniyProvider = StateProvider<String>((ref) {
   return "";
 });
 
@@ -212,14 +221,14 @@ class Checklist extends _$Checklist {
             List.from(groupingItem[i][groupingItem[i]["tempId"]]["item"]);
 
         doneChecklist =
-            item.where((element) => element["cdvalu"] != null).length;
+            item.where((element) => element["cdcdlniy"] != null).length;
         tempTotalChecklist += item.length;
 
         for (final a in item) {
           final detail = List.from(a["detailItemChecklist"]);
 
           int doneItemsInCurrentDetail = detail.where((element) {
-            return element["cdvalu"] == 1;
+            return element["cdcdlniy"] != null;
           }).length;
 
           doneChecklistItem += doneItemsInCurrentDetail;
@@ -353,6 +362,8 @@ class ChecklistController extends _$ChecklistController {
 
   List<Map<String, dynamic>> mergeData(List<ChecklistModel> mergedList) {
     List<Map<String, dynamic>> groupingPart = [];
+    ref.invalidate(ckflkFilesProvider);
+    ref.invalidate(cmflkFilesProvider);
 
     try {
       for (final item in mergedList) {
@@ -372,14 +383,12 @@ class ChecklistController extends _$ChecklistController {
         final cdunms = item.cdunms;
         final chchnm = item.chchnm;
 
-        final files = [
+        // cdcdlniy <- for existing value not cdvalu
+
+        final filesChecklist = [
           {
             "cmflk1": item.cmflk1,
             "cmfln1": item.cmfln1,
-          },
-          {
-            "cmflk2": item.cmflk2,
-            "cmfln2": item.cmfln2,
           },
           {
             "cmflk2": item.cmflk2,
@@ -397,16 +406,15 @@ class ChecklistController extends _$ChecklistController {
             "cmflk5": item.cmflk5,
             "cmfln5": item.cmfln5,
           },
-        ];
+        ]
+            .where((map) =>
+                map.values.any((value) => value != null && value.isNotEmpty))
+            .toList();
 
         final filesItem = [
           {
             "ckflk1": item.ckflk1,
             "ckfln1": item.ckfln1,
-          },
-          {
-            "ckflk2": item.ckflk2,
-            "ckfln2": item.ckfln2,
           },
           {
             "ckflk2": item.ckflk2,
@@ -424,11 +432,14 @@ class ChecklistController extends _$ChecklistController {
             "ckflk5": item.ckflk5,
             "ckfln5": item.ckfln5,
           },
-        ];
+        ]
+            .where((map) =>
+                map.values.any((value) => value != null && value.isNotEmpty))
+            .toList();
 
         final detailItemChecklist = {
           ...item.toMap(),
-          "filesChecklist": files,
+          "filesChecklist": filesChecklist.isEmpty ? [] : filesChecklist,
         };
 
         if (!groupingPart.any((element) => element.containsKey(mpmpcdiy))) {
@@ -440,7 +451,7 @@ class ChecklistController extends _$ChecklistController {
               "cmcmlniy": item.cmcmlniy,
               "cmacvl": item.cmacvl,
               "cdcdlniy": item.cdcdlniy,
-              "files": filesItem,
+              "files": filesItem.isEmpty ? [] : filesItem,
               "item": [
                 {
                   "id": mimicdiy,
@@ -500,10 +511,11 @@ class ChecklistController extends _$ChecklistController {
 }
 
 @riverpod
-FutureOr getImagesChecklist(GetImagesChecklistRef ref,
-    {required String fileKey, required String fileName}) async {
+FutureOr<List<String>> getImagesChecklist(GetImagesChecklistRef ref,
+    {required List<Map<String, dynamic>> files}) async {
+  if (files.isEmpty) return [];
   final response = await ref
       .read(checklistRepositoryProvider)
-      .getImagesChecklist(fileKey: fileKey, fileName: fileName);
+      .getImagesChecklist(files: files);
   return response;
 }

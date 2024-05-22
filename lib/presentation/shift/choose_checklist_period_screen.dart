@@ -17,10 +17,12 @@ class ChooseChecklistPeriodScreen extends ConsumerStatefulWidget {
   const ChooseChecklistPeriodScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _ChooseChecklistPeriodScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ChooseChecklistPeriodScreenState();
 }
 
-class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPeriodScreen> {
+class _ChooseChecklistPeriodScreenState
+    extends ConsumerState<ChooseChecklistPeriodScreen> {
   final _machineIdC = TextEditingController();
 
   @override
@@ -38,7 +40,8 @@ class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPer
       appBar: CustomAppbarWidget(
         isCenter: true,
         title: "Choose Checklist Period",
-        titleStye: AppTextStyle.subTitleTextStyle.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
+        titleStye: AppTextStyle.subTitleTextStyle
+            .copyWith(fontWeight: FontWeight.w700, color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -57,11 +60,13 @@ class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPer
                       children: [
                         Text(
                           "DATE",
-                          style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                          style: AppTextStyle.subTitleTextStyle
+                              .copyWith(color: Colors.white),
                         ),
                         Text(
                           ": ${dataShift.date}",
-                          style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                          style: AppTextStyle.subTitleTextStyle
+                              .copyWith(color: Colors.white),
                         ),
                       ],
                     ),
@@ -69,11 +74,13 @@ class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPer
                       children: [
                         Text(
                           "SHIFT",
-                          style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                          style: AppTextStyle.subTitleTextStyle
+                              .copyWith(color: Colors.white),
                         ),
                         Text(
                           ": ${dataShift.title}",
-                          style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                          style: AppTextStyle.subTitleTextStyle
+                              .copyWith(color: Colors.white),
                         ),
                       ],
                     ),
@@ -84,11 +91,12 @@ class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPer
                   data: (data) {
                     if (data.isEmpty) {
                       return SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.3,
+                        height: MediaQuery.sizeOf(context).height * 0.3,
                         child: Center(
                           child: Text(
                             "Data tidak ada tersedia, silahkan coba lagi!",
-                            style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                            style: AppTextStyle.subTitleTextStyle
+                                .copyWith(color: Colors.white),
                           ),
                         ),
                       );
@@ -100,9 +108,16 @@ class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPer
                         title: data[index]["mtmtnm"],
                         onTap: () async {
                           AppPrint.debugLog("SHIFFT: ${data[index]}");
-                          final shiftModel = ShiftModel(date: dataShift.date, id: dataShift.id, title: dataShift.title, period: data[index]["mtmtnm"]);
-                          ref.read(dataShiftProvider.notifier).update((state) => shiftModel);
-                          AppDialog.popupScan(context, data[index]["mtmtcdiy"].toString(), _machineIdC);
+                          final shiftModel = ShiftModel(
+                              date: dataShift.date,
+                              id: dataShift.id,
+                              title: dataShift.title,
+                              period: data[index]["mtmtnm"]);
+                          ref
+                              .read(dataShiftProvider.notifier)
+                              .update((state) => shiftModel);
+                          AppDialog.popupScan(context,
+                              data[index]["mtmtcdiy"].toString(), _machineIdC);
                         },
                         icon: const Icon(
                           Icons.fact_check,
@@ -112,19 +127,23 @@ class _ChooseChecklistPeriodScreenState extends ConsumerState<ChooseChecklistPer
                     ));
                   },
                   error: (error, stackTrace) => SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.2,
+                    height: MediaQuery.sizeOf(context).height * 0.2,
                     child: Center(
                       child: CustomErrorWidget(
                         customErrorWidgetType: CustomErrorWidgetType.widget,
                         errorMessage: (error as CustomError).errorMessage,
-                        errorMessageStyle: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                        errorMessageStyle: AppTextStyle.subTitleTextStyle
+                            .copyWith(color: Colors.white),
                         action: () {
                           ref.invalidate(getChecklistPeriodProvider);
                         },
                       ),
                     ),
                   ),
-                  loading: () => LoadingShimmerWidget(itemCount: 3, height: 64, width: MediaQuery.of(context).size.width),
+                  loading: () => LoadingShimmerWidget(
+                      itemCount: 3,
+                      height: 64,
+                      width: MediaQuery.sizeOf(context).width),
                 ),
               ],
             ),

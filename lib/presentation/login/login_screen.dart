@@ -51,7 +51,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       switch (next.status) {
         case AuthStatus.failure:
-          AppDialog.errorDialog(context, (next.error).errorMessage, () => context.pop());
+          AppDialog.errorDialog(
+              context, (next.error).errorMessage, () => context.pop());
           break;
         case AuthStatus.success:
           ref.read(routerProvider).go(RouteName.main);
@@ -66,11 +67,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Stack(
           children: [
             Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.sizeOf(context).width,
+              height: MediaQuery.sizeOf(context).height,
               alignment: Alignment.center,
               decoration: const BoxDecoration(
-                image: DecorationImage(image: AssetImage(AppAssets.backgroundImage), fit: BoxFit.cover),
+                image: DecorationImage(
+                    image: AssetImage(AppAssets.backgroundImage),
+                    fit: BoxFit.cover),
               ),
               child: SafeArea(
                 child: SingleChildScrollView(
@@ -80,15 +83,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         alignment: Alignment.center,
                         child: Container(
                           width: 90.0.percentageWidth(context),
-                          margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.white),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 18),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white),
                           child: Center(
                             child: Column(
                               children: [
                                 Image.asset(
-                                  !isDemo ? AppAssets.logoAdr : AppAssets.logoImage,
-                                  height: MediaQuery.of(context).size.height * 0.17,
+                                  !isDemo
+                                      ? AppAssets.logoAdr
+                                      : AppAssets.logoImage,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 0.17,
                                   fit: BoxFit.cover,
                                 ),
                                 Text(
@@ -109,7 +119,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       color: AppColors.textDisableColor,
                                     ),
                                   ),
-                                  labelStyle: AppTextStyle.commonTextStyle.copyWith(
+                                  labelStyle:
+                                      AppTextStyle.commonTextStyle.copyWith(
                                     color: AppColors.borderColor,
                                   ),
                                   prefixIcon: const Icon(
@@ -135,7 +146,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       color: AppColors.textDisableColor,
                                     ),
                                   ),
-                                  labelStyle: AppTextStyle.commonTextStyle.copyWith(
+                                  labelStyle:
+                                      AppTextStyle.commonTextStyle.copyWith(
                                     color: AppColors.borderColor,
                                   ),
                                   prefixIcon: const Icon(
@@ -147,8 +159,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   isObsecure: obsecurePassword,
                                   label: "Password",
                                   suffixIcon: IconButton(
-                                      onPressed: () => ref.read(loginProvider.notifier).changeObsecure(),
-                                      icon: Icon(obsecurePassword ? Icons.visibility : Icons.visibility_off)),
+                                      onPressed: () => ref
+                                          .read(loginProvider.notifier)
+                                          .changeObsecure(),
+                                      icon: Icon(obsecurePassword
+                                          ? Icons.visibility
+                                          : Icons.visibility_off)),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return "Password tidak boleh kosong";
@@ -164,7 +180,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       height: 20,
                                     ),
                                     Text("Server",
-                                        style: AppTextStyle.subTitleTextStyle.copyWith(
+                                        style: AppTextStyle.subTitleTextStyle
+                                            .copyWith(
                                           color: Colors.black,
                                         )),
                                     const SizedBox(
@@ -174,22 +191,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       data: (data) {
                                         AppPrint.debugLog("dropdown: $data");
                                         return Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 0, horizontal: 10),
                                           decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(7),
-                                              border: Border.all(color: AppColors.borderColor, width: 1),
+                                              borderRadius:
+                                                  BorderRadius.circular(7),
+                                              border: Border.all(
+                                                  color: AppColors.borderColor,
+                                                  width: 1),
                                               color: Colors.white),
                                           child: DropdownButtonHideUnderline(
-                                            child: DropdownButton<Map<String, dynamic>>(
+                                            child: DropdownButton<
+                                                Map<String, dynamic>>(
                                               isExpanded: true,
                                               // Step 3.
-                                              value: server.isNotEmpty ? server : data.first,
+                                              value: server.isNotEmpty
+                                                  ? server
+                                                  : data.first,
                                               // Step 4.
-                                              items: data.map<DropdownMenuItem<Map<String, dynamic>>>((Map<String, dynamic> value) {
-                                                return DropdownMenuItem<Map<String, dynamic>>(
+                                              items: data.map<
+                                                      DropdownMenuItem<
+                                                          Map<String,
+                                                              dynamic>>>(
+                                                  (Map<String, dynamic> value) {
+                                                return DropdownMenuItem<
+                                                    Map<String, dynamic>>(
                                                   value: value,
                                                   child: Padding(
-                                                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 5,
+                                                        horizontal: 5),
                                                     child: Row(
                                                       children: [
                                                         const Icon(
@@ -203,10 +235,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                         Expanded(
                                                           child: Text(
                                                             value["label"],
-                                                            overflow: TextOverflow.fade,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .fade,
                                                             maxLines: 1,
                                                             softWrap: false,
-                                                            style: AppTextStyle.subTitleTextStyle.copyWith(),
+                                                            style: AppTextStyle
+                                                                .subTitleTextStyle
+                                                                .copyWith(),
                                                           ),
                                                         ),
                                                       ],
@@ -217,7 +253,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                               // Step 5.
                                               onChanged: (newValue) {
                                                 setState(() {
-                                                  ref.read(serverProvider.notifier).update((state) => newValue!);
+                                                  ref
+                                                      .read(serverProvider
+                                                          .notifier)
+                                                      .update(
+                                                          (state) => newValue!);
                                                 });
                                               },
                                             ),
@@ -227,11 +267,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       error: (error, stackTrace) => Center(
                                         child: Column(
                                           children: [
-                                            Text((error as CustomError).errorMessage),
+                                            Text((error as CustomError)
+                                                .errorMessage),
                                             5.h,
                                             ButtonReusableWidget(
                                                 onPressed: () {
-                                                  ref.invalidate(getConListProvider);
+                                                  ref.invalidate(
+                                                      getConListProvider);
                                                 },
                                                 title: "Get Server"),
                                           ],
@@ -245,13 +287,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 25.h,
                                 ButtonReusableWidget(
-                                    disabled: ref.watch(loginProvider).status == AuthStatus.loading || server.isEmpty,
+                                    disabled: ref.watch(loginProvider).status ==
+                                            AuthStatus.loading ||
+                                        server.isEmpty,
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
-                                        ref.read(loginProvider.notifier).signIn(_usernameC.text, _passwordC.text, server["value"]);
+                                        ref.read(loginProvider.notifier).signIn(
+                                            _usernameC.text,
+                                            _passwordC.text,
+                                            server["value"]);
                                       }
                                     },
-                                    title: ref.watch(loginProvider).status == AuthStatus.loading ? "Loading..." : "Login"),
+                                    title: ref.watch(loginProvider).status ==
+                                            AuthStatus.loading
+                                        ? "Loading..."
+                                        : "Login"),
                                 20.h,
                                 Text(
                                   "Version $versi",
@@ -269,8 +319,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         // }
                                       },
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           // isPublic
                                           //     ? Icon(
@@ -313,7 +365,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             ),
-            if (ref.watch(loginProvider).status == AuthStatus.loading) const LoadingScreenWidget()
+            if (ref.watch(loginProvider).status == AuthStatus.loading)
+              const LoadingScreenWidget()
           ],
         ),
       ),

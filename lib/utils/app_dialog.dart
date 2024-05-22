@@ -22,7 +22,7 @@ class AppDialog {
         builder: (context) {
           return CupertinoAlertDialog(
             content: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
+              height: MediaQuery.sizeOf(context).height * 0.5,
               width: 58,
               child: const Center(
                 child: CircularProgressIndicator.adaptive(),
@@ -38,7 +38,7 @@ class AppDialog {
         builder: (context) {
           return AlertDialog(
             content: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
+              height: MediaQuery.sizeOf(context).height * 0.5,
               width: 58,
               child: const Center(
                 child: CircularProgressIndicator.adaptive(),

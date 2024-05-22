@@ -258,7 +258,7 @@ class HttpClient {
             final multipartFile = http.MultipartFile.fromBytes(
               key,
               value,
-              filename: "${DateTime.now().millisecondsSinceEpoch}.jpg",
+              filename: "${key}_${DateTime.now().millisecondsSinceEpoch}.jpg",
               contentType: MediaType('image', 'jpeg'),
             );
 
@@ -291,10 +291,9 @@ class HttpClient {
 
     request.headers.addAll(headers);
 
-    if (isEdit != null && isEdit == false) {
-      streamedResponse =
-          await request.send().timeout(const Duration(seconds: 10));
-    }
+    streamedResponse =
+        await request.send().timeout(const Duration(seconds: 10));
+
     var responseBody = await streamedResponse.stream.bytesToString();
     AppPrint.debugLog("RESPONE BODY: $responseBody");
 
