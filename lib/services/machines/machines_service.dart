@@ -39,20 +39,6 @@ class MachinesService {
     }
   }
 
-  // TODO GET PROGRESS
-  // Future getProgress({required String id, required String type, required String templateId, required String date, required String shift}) async {
-  //   try {
-  //     final httpClient = HttpClientParams(path: "datadr", controller: "TBLSYS", subMethod: "LoadGridPopup", param: {"sqlCondition": "and tsdscd = 'STSM'"});
-
-  //     final response = await ref.read(httpClientProvider(httpClient)).callHttp;
-
-  //     AppPrint.debugLog("RESPONSE: $response");
-  //   } catch (e, st) {
-  //     AppPrint.debugLog("ERROR GET PROGRESS MACHINE: $e $st");
-  //     rethrow;
-  //   }
-  // }
-
   Future<List<Map<String, dynamic>>> getMachineData(String machineId) async {
     try {
       final httpClientParams = HttpClientParams(

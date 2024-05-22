@@ -193,7 +193,10 @@ class HttpClient {
 
       final decodeData = List<String>.from(dataDecode);
       final decrypt = decodeData.decryptA7;
-      data = {"code": response.statusCode, "data": decrypt};
+      data = {
+        "code": response.statusCode,
+        "data": decrypt,
+      };
     }
 
     AppPrint.debugLog("DATA HTTP CLIENT GET: $data");

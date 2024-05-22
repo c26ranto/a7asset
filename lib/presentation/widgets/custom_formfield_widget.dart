@@ -26,6 +26,7 @@ class CustomFormfieldWidget extends StatelessWidget {
       this.fill,
       this.inputFormatters,
       this.fillColor,
+      this.onChanged,
       required this.label});
 
   final String label;
@@ -55,7 +56,7 @@ class CustomFormfieldWidget extends StatelessWidget {
 
   final FormFieldValidator<String>? validator;
   final CrossAxisAlignment crossAxisAlignment;
-
+  final void Function(String)? onChanged;
   final List<TextInputFormatter>? inputFormatters;
 
   @override
@@ -74,6 +75,7 @@ class CustomFormfieldWidget extends StatelessWidget {
           validator: validator,
           obscureText: isObsecure ?? false,
           inputFormatters: inputFormatters,
+          onChanged: onChanged,
           decoration: InputDecoration(
             filled: fill,
             fillColor: fillColor,

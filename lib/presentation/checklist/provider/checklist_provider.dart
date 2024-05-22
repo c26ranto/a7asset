@@ -38,6 +38,11 @@ final imagesOnDialogProvider = StateProvider.autoDispose<List<XFile>>((ref) {
   return [];
 });
 
+final statusChecklistItemProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
 final tssycdProvider = StateProvider<String>((ref) {
   return "";
 });
@@ -213,8 +218,11 @@ class Checklist extends _$Checklist {
         for (final a in item) {
           final detail = List.from(a["detailItemChecklist"]);
 
-          doneChecklistItem =
-              detail.where((element) => element["cdvalu"] != null).length;
+          int doneItemsInCurrentDetail = detail.where((element) {
+            return element["cdvalu"] == 1;
+          }).length;
+
+          doneChecklistItem += doneItemsInCurrentDetail;
           tempTotalChecklistItem += detail.length;
         }
       }
@@ -280,7 +288,8 @@ class Checklist extends _$Checklist {
         success: null,
         customError: e,
       );
-    } catch (e) {
+    } catch (e, st) {
+      AppPrint.debugLog("Error call checklist provider: $e $st");
       state = state.copyWith(
           status: ChecklistStatus.failure,
           customError: const CustomError(
@@ -306,6 +315,10 @@ class SaveChecklist extends _$SaveChecklist {
     List<Uint8List>? files,
   }) async {
     state = state.copyWith(status: SaveChecklistStatus.loading);
+    final machineId = ref.watch(idQrCodeProvider);
+    final shift = ref.watch(dataShiftProvider);
+    final tssycd = ref.watch(tssycdProvider);
+
     try {
       await ref.read(checklistRepositoryProvider).saveChecklist(
           cmcmlniy: cmcmlniy,
@@ -315,6 +328,13 @@ class SaveChecklist extends _$SaveChecklist {
           saveChecklistType: saveChecklistType,
           ckcknoiy: ckcknoiy,
           files: files);
+
+      await ref.read(checklistProvider.notifier).callChecklist(
+          id: machineId,
+          shiftId: shift.id,
+          statusId: tssycd,
+          period: shift.period);
+
       state = state.copyWith(
           status: SaveChecklistStatus.success, success: "Success");
     } on CustomError catch (e) {

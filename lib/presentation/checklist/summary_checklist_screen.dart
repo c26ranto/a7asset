@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:assets_mobile/presentation/checklist/provider/checklist_provider.dart';
 import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
 import 'package:assets_mobile/presentation/widgets/background_image_image.dart';
@@ -21,6 +19,7 @@ class SummaryChecklistScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusChecklist = ref.watch(statusChecklistItemProvider);
     final partData = ref.watch(partDataProvider);
+    final partDataChecklist = ref.watch(partChecklistDataProvider);
     return Scaffold(
       appBar: CustomAppbarWidget(
         isCenter: true,
@@ -82,20 +81,25 @@ class SummaryChecklistScreen extends ConsumerWidget {
                 10.h,
                 Expanded(
                   child: ListView.builder(
-                    itemCount: partData["part"]["item"].length,
+                    itemCount: partDataChecklist[0]
+                            [partDataChecklist[0]["tempId"]]["item"]
+                        .length,
                     itemBuilder: (context, index) {
-                      final item = partData["part"]["item"][index];
+                      final item = partDataChecklist[0]
+                          [partDataChecklist[0]["tempId"]]["item"][index];
+                      AppPrint.debugLog("CD VALLL: ${item["cdvalu"]}");
                       final detailChecklist =
                           List.from(item["detailItemChecklist"]);
-
-                      AppPrint.debugLog("CD VALUE: ${item["cdvalu"]}");
                       return CustomLongCardWidget(
                         title: item["value"],
                         textLeading:
-                            "${item["cdvalu"] == null ? "0" : item["cdvalu"] is int ? (item['cdvalu'].toString()) : item["cdvalu"]}/${detailChecklist.length}",
+                            "${item["cdvalu"] ?? "1"}/${detailChecklist.length}",
                         onTap: () {
                           AppPrint.debugLog(
                               "DATA FROM SUMMARY CHECKLIST: $detailChecklist");
+                          ref.read(ckcknoiyProvider.notifier).update(
+                                (state) => item["ckcknoiy"].toString().trim(),
+                              );
                           ref
                               .read(cdchcdiyProvider.notifier)
                               .update((state) => item["id"].toString());

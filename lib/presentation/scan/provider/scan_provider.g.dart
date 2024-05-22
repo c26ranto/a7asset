@@ -40,7 +40,7 @@ final getMachineStatusProvider =
 
 typedef _$GetMachineStatus = AutoDisposeNotifier<AuthState>;
 String _$getMachineProgressHash() =>
-    r'1b8c0a0b05d6c3ebed7e99c31691dfd42016fc75';
+    r'7a41d9daa69312ec7d4e239db5e7f76af47ff9d8';
 
 /// See also [GetMachineProgress].
 @ProviderFor(GetMachineProgress)

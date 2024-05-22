@@ -63,6 +63,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     final cmcmlniy = ref.watch(cmcmlniyProvider);
     final detail = ref.watch(detailChecklistItemTestProvider);
     final cdcdlniy = ref.watch(cdcdlniyProvider);
+    final files = ref.watch(filesProvider);
+    final ckcknoiy = ref.watch(ckcknoiyProvider);
 
     final saveChecklistState = ref.watch(saveChecklistProvider);
 
@@ -156,10 +158,13 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                         return CustomLongCardWidget(
                             title: data["chchnm"].toString(),
                             onTap: () async {
-                              AppPrint.debugLog("clickkk: $data");
+                              AppPrint.debugLog(
+                                  "ON TAP DETAIL CHECKLIST: $data");
                               ref.invalidate(chooseCdcdlniyProvider);
                               ref.invalidate(imagesOnDialogProvider);
                               ref.invalidate(cdcdlniyProvider);
+                              ref.invalidate(cdvaluProvider);
+                              ref.invalidate(noteDialogProvider);
 
                               ref.read(cmcmlniyProvider.notifier).update(
                                     (state) => data["cmcmlniy"].toString(),
@@ -174,6 +179,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                       getChecklistProvider(
                                           cdchcdiy:
                                               data["chchcdiy"].toString()));
+
                                   final imagesDialog =
                                       ref.watch(imagesOnDialogProvider);
                                   final saveChecklist =
@@ -182,6 +188,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                       ref.watch(chooseCdcdlniyProvider);
                                   final cdtype = ref.watch(cdtypeProvider);
                                   final files = ref.watch(filesProvider);
+                                  final cdvalu = ref.watch(cdvaluProvider);
+                                  final noteDialog =
+                                      ref.watch(noteDialogProvider);
 
                                   return SizedBox(
                                     width: MediaQuery.of(context).size.width,
@@ -249,16 +258,28 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                       : Colors
                                                                           .black,
                                                             ),
-                                                            color: chooseCdcdlniy ==
-                                                                    index
-                                                                ? Colors.green
-                                                                : const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    227,
-                                                                    227,
-                                                                    227),
+                                                            color: (() {
+                                                              if (chooseCdcdlniy ==
+                                                                  index) {
+                                                                if (item.cdvalu ==
+                                                                    0) {
+                                                                  return Colors
+                                                                      .red;
+                                                                } else {
+                                                                  return Colors
+                                                                      .green;
+                                                                }
+                                                              }
+                                                              return const Color
+                                                                  .fromARGB(
+                                                                  255,
+                                                                  227,
+                                                                  227,
+                                                                  227);
+                                                            }()),
                                                             onTap: () {
+                                                              AppPrint.debugLog(
+                                                                  "cmcmlniy from item check: $cmcmlniy");
                                                               ref
                                                                   .read(chooseCdcdlniyProvider
                                                                       .notifier)
@@ -267,14 +288,20 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                         index,
                                                                   );
                                                               ref
+                                                                  .read(cdvaluProvider
+                                                                      .notifier)
+                                                                  .update(
+                                                                    (state) => item
+                                                                        .cdvalu
+                                                                        .toString(),
+                                                                  );
+                                                              ref
                                                                   .read(cdcdlniyProvider
                                                                       .notifier)
                                                                   .update((state) => result[
                                                                           index]
                                                                       .cdcdlniy
                                                                       .toString());
-                                                              AppPrint.debugLog(
-                                                                  "WELLLLLLL: ${result[index].toMap()}");
                                                             })
                                                         : item.cdtype
                                                                     ?.toLowerCase() ==
@@ -377,6 +404,17 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                 ),
                                               ),
                                               10.h,
+                                              // FOR NOTE DIALOG
+                                              if (cdvalu == "0" &&
+                                                  noteDialog.isEmpty)
+                                                Text(
+                                                  "Note Wajib Diisi",
+                                                  style: AppTextStyle
+                                                      .commonTextStyle
+                                                      .copyWith(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -388,9 +426,17 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                   color: Colors.white,
                                                 ),
                                                 child: CustomFormfieldWidget(
-                                                  controller:
-                                                      _detailNoteDialogC,
                                                   conditionColor: false,
+                                                  onChanged: (p0) => ref
+                                                      .read(noteDialogProvider
+                                                          .notifier)
+                                                      .update((state) => p0),
+                                                  validator: (value) {
+                                                    if (cdvalu == "0") {
+                                                      return "Note wajib diisi";
+                                                    }
+                                                    return null;
+                                                  },
                                                   label: "Note",
                                                   labelStyle: AppTextStyle
                                                       .subTitleTextStyle
@@ -494,7 +540,11 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                     10.w,
                                                     ButtonReusableWidget(
                                                         width: 150,
-                                                        disabled: saveChecklist
+                                                        disabled: cdvalu ==
+                                                                    "0" &&
+                                                                noteDialog
+                                                                    .isEmpty ||
+                                                            saveChecklist
                                                                     .status ==
                                                                 SaveChecklistStatus
                                                                     .loading ||
@@ -508,18 +558,6 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                     99
                                                                 : false),
                                                         onPressed: () async {
-                                                          AppPrint.debugLog(
-                                                              "MY ITEM: $item -- FILES: ${files.length}");
-
-                                                          if (files.isEmpty) {
-                                                            ScaffoldMessenger
-                                                                    .of(context)
-                                                                .showSnackBar(
-                                                                    const SnackBar(
-                                                                        content:
-                                                                            Text("File Kosong...")));
-                                                            return;
-                                                          }
                                                           await ref
                                                               .read(
                                                                   saveChecklistProvider
@@ -527,14 +565,14 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                               .callSaveChecklist(
                                                                 cmcmlniy:
                                                                     cmcmlniy,
-                                                                cmacvl:
-                                                                    _detailNoteDialogC
-                                                                        .text,
+                                                                cmacvl: cdvalu,
                                                                 cdcdlniy:
                                                                     cdcdlniy,
+                                                                saveChecklistType:
+                                                                    SaveChecklistType
+                                                                        .dialog,
                                                                 note:
-                                                                    _detailNoteDialogC
-                                                                        .text,
+                                                                    noteDialog,
                                                                 files: files,
                                                               );
                                                         },
@@ -619,36 +657,39 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
                     ),
-                    child: Row(
-                      children: [
-                        Row(
-                          children: List.generate(
-                              images.isEmpty ? 1 : images.length, (index) {
-                            if (images.isEmpty) {
-                              return _emptyImage(
-                                  takePhotoChecklistType:
-                                      TakePhotoChecklistType.detail);
-                            } else {
-                              return _image(images[index].path, index, () {
-                                ref
-                                    .read(
-                                        imagesDetailChecklistProvider.notifier)
-                                    .update((state) {
-                                  return state = state
-                                      .where(
-                                          (element) => images[index] != element)
-                                      .toList();
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Row(
+                            children: List.generate(
+                                images.isEmpty ? 1 : images.length, (index) {
+                              if (images.isEmpty) {
+                                return _emptyImage(
+                                    takePhotoChecklistType:
+                                        TakePhotoChecklistType.detail);
+                              } else {
+                                return _image(images[index].path, index, () {
+                                  ref
+                                      .read(imagesDetailChecklistProvider
+                                          .notifier)
+                                      .update((state) {
+                                    return state = state
+                                        .where((element) =>
+                                            images[index] != element)
+                                        .toList();
+                                  });
                                 });
-                              });
-                            }
-                          }),
-                        ),
-                        10.w,
-                        if (images.length < 3 && images.isNotEmpty)
-                          _emptyImage(
-                              takePhotoChecklistType:
-                                  TakePhotoChecklistType.detail),
-                      ],
+                              }
+                            }),
+                          ),
+                          10.w,
+                          if (images.length < 5 && images.isNotEmpty)
+                            _emptyImage(
+                                takePhotoChecklistType:
+                                    TakePhotoChecklistType.detail),
+                        ],
+                      ),
                     ),
                   ),
                   10.h,
@@ -677,19 +718,20 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             10.w,
             Expanded(
                 child: ButtonReusableWidget(
-                    disabled: images.isEmpty,
+                    disabled: images.isEmpty ||
+                        saveChecklistState.status ==
+                            SaveChecklistStatus.loading,
                     onPressed: () {
-                      // TODO
-                      // ref
-                      //     .read(saveChecklistProvider.notifier)
-                      //     .callSaveChecklist(
-                      //         cmcmlniy: cmcmlniy,
-                      //         cmacvl: _detailNoteDialogC.text,
-                      //         cdcdlniy: cdcdlniy,
-                      //         file1: files.first,
-                      //         file2: files.first,
-                      //         file3: files.first,
-                      //         file4: files.first);
+                      ref
+                          .read(saveChecklistProvider.notifier)
+                          .callSaveChecklist(
+                              cmcmlniy: cmcmlniy,
+                              cmacvl: "",
+                              cdcdlniy: cdcdlniy,
+                              note: _detailNoteC.text,
+                              saveChecklistType: SaveChecklistType.page,
+                              ckcknoiy: ckcknoiy,
+                              files: files);
                     },
                     title: "Save",
                     backgroundColor: AppColors.primaryColor)),
