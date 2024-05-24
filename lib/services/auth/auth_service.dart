@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:assets_mobile/config/constants.dart';
@@ -12,6 +13,7 @@ import 'package:assets_mobile/utils/app_key.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService {
   final Ref ref;
@@ -134,26 +136,34 @@ class AuthService {
         await SharedPreferencesHelper.getString(AppKey.refreshToken);
 
     try {
-      final httpClientParams = HttpClientParams(
-          path: "refreshToken",
-          method: "POST",
-          token: "",
-          postRequestType: PostRequestType.body,
-          body: {
-            "refresh_token": refreshToken,
-          });
-
       final response =
-          await ref.read(httpClientProvider(httpClientParams)).callHttp;
+          await http.post(Uri.parse("${BaseUrl.ipAddressApi}/refreshToken"),
+              body: jsonEncode({
+                "refresh_token": refreshToken,
+              }));
 
-      AppPrint.debugLog("RESPONSE REFRESH: $response");
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      // final httpClientParams = HttpClientParams(
+      //     path: "refreshToken",
+      //     method: "POST",
+      //     token: "",
+      //     postRequestType: PostRequestType.body,
+      //     body: {
+      //       "refresh_token": refreshToken,
+      //     });
+
+      // final response =
+      //     await ref.read(httpClientProvider(httpClientParams)).callHttp;
+
+      AppPrint.debugLog("RESPONSE REFRESH: $data");
 
       await SharedPreferencesHelper.saveData({
-        AppKey.token: response["access_token"],
-        AppKey.refreshToken: response["refresh_token"]
+        AppKey.token: data["access_token"],
+        AppKey.refreshToken: data["refresh_token"]
       });
 
-      return response;
+      return data;
     } catch (e, st) {
       AppPrint.debugLog("ERROR REFRESH TOKEN: $e $st");
       rethrow;

@@ -18,7 +18,6 @@ import 'package:assets_mobile/utils/app_print.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 final httpClientProvider =
     Provider.family((ref, HttpClientParams httpClientParams) {
@@ -34,14 +33,15 @@ class HttpClient {
   Future<Map<String, dynamic>> get callHttp async {
     String? username =
         await SharedPreferencesHelper.getString(AppKey.username) ?? "";
-    String? token = await SharedPreferencesHelper.getString(AppKey.token);
+    String token = await SharedPreferencesHelper.getString(AppKey.token);
     String? refreshToken =
         await SharedPreferencesHelper.getString(AppKey.refreshToken);
 
     String? encryptParam;
 
-    if (httpClientParams.token != null) {
-      token = httpClientParams.token;
+    if (httpClientParams.token != null && httpClientParams.token!.isNotEmpty) {
+      AppPrint.debugLog("OVERRIDE TOKEN");
+      token = httpClientParams.token!;
     }
 
     Map<String, dynamic> param = {};
@@ -115,7 +115,7 @@ class HttpClient {
 
     AppPrint.debugLog("DATA REQUEST: $data -- TOKEN: $token");
 
-    if (token == null || token.isEmpty) {
+    if (token.isEmpty) {
       ref.read(routerProvider).go(RouteName.login);
     } else if (refreshToken.isNotEmpty &&
         (!httpClientParams.path.contains("getConnList") &&
@@ -177,7 +177,7 @@ class HttpClient {
     });
 
     int statusCode = response.statusCode;
-    AppPrint.debugLog("GET DATA: ${response.body} --- ${response.statusCode}");
+    AppPrint.debugLog("GET DATA:  ${response.statusCode}");
 
     if (statusCode != 200) {
       throw CustomError(errorCode: statusCode, errorMessage: response.body);
