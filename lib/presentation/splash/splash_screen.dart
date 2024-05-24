@@ -31,6 +31,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   void delayed() {
     Future.delayed(const Duration(seconds: 1), () async {
+
+      if (!await BaseUrl.checkLocal()){
+        BaseUrl.ipAddressApi = BaseUrl.ipAddressApiOnline;
+        BaseUrl.urlFileImage = BaseUrl.urlFileImageOnline;
+      }
+
       final token = await SharedPreferencesHelper.getString(AppKey.token);
       final username = await SharedPreferencesHelper.getString(AppKey.username);
       final email = await SharedPreferencesHelper.getString(AppKey.email);
