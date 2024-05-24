@@ -101,26 +101,39 @@ class _ResultScanMachineScreenState
                       style: AppTextStyle.subTitleTextStyle.copyWith(),
                     ),
                     actions: [
-                      ButtonReusableWidget(
-                        onPressed: () => context.pop(),
-                        title: "Back",
-                      ),
-                      ButtonReusableWidget(
-                        onPressed: () async {
-                          context.pop();
-                          await ref
-                              .read(checklistProvider.notifier)
-                              .callChecklist(
-                                id: machineId,
-                                shiftId: shift.id,
-                                period: shift.period,
-                                statusId: tssycd,
-                              );
-                          await ref
-                              .read(getStatusMachineProvider.notifier)
-                              .getStatusMachine();
-                        },
-                        title: "Create New",
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ButtonReusableWidget(
+                              onPressed: () {
+                                context.pop();
+                                context.pop();
+                              },
+                              title: "Back",
+                            ),
+                          ),
+                          10.w,
+                          Expanded(
+                            child: ButtonReusableWidget(
+                              backgroundColor: Colors.green,
+                              onPressed: () async {
+                                context.pop();
+                                await ref
+                                    .read(checklistProvider.notifier)
+                                    .callChecklist(
+                                      id: machineId,
+                                      shiftId: shift.id,
+                                      period: shift.period,
+                                      statusId: tssycd,
+                                    );
+                                await ref
+                                    .read(getStatusMachineProvider.notifier)
+                                    .getStatusMachine();
+                              },
+                              title: "Create New",
+                            ),
+                          ),
+                        ],
                       ),
                     ]);
                 break;
