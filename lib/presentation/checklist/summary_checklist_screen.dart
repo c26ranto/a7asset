@@ -123,6 +123,10 @@ class SummaryChecklistScreen extends ConsumerWidget {
                                 (state) => detailChecklist.first["cmremk"],
                               );
 
+                          ref.read(cmcmlniyProvider.notifier).update(
+                                (state) => item["cmcmlniy"].toString(),
+                              );
+
                           if (detailChecklist.first["cdcdlniy"] != null) {
                             ref.read(cdcdlniyProvider.notifier).update(
                                   (state) => detailChecklist.first["cdcdlniy"]

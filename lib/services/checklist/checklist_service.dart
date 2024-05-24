@@ -202,6 +202,8 @@ class ChecklistService {
         }
       }
 
+      AppPrint.debugLog("PARAM CALL SAVE CHECKLIST: $param");
+
       final response =
           await ref.read(httpClientProvider(httpClientParams)).callHttp;
 

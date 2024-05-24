@@ -180,7 +180,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                               ref.invalidate(chooseCdcdlniyProvider);
                               ref.invalidate(imagesOnDialogProvider);
 
-                              ref.invalidate(cdvaluProvider);
+                              // ref.invalidate(cdvaluProvider);
                               ref.invalidate(noteDialogProvider);
 
                               ref.read(cmcmlniyProvider.notifier).update(
@@ -205,7 +205,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                       ref.watch(chooseCdcdlniyProvider);
                                   final cdtype = ref.watch(cdtypeProvider);
                                   final files = ref.watch(filesProvider);
-                                  final cdvalu = ref.watch(cdvaluProvider);
+                                  final cdvaluDialog =
+                                      ref.watch(cdvaluProvider);
                                   final noteDialog =
                                       ref.watch(noteDialogProvider);
                                   final cdcdlniy = ref.watch(cdcdlniyProvider);
@@ -296,7 +297,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                           cmcdlniy) ==
                                                                       index,
                                                               int.tryParse(
-                                                                      cdvalu) ??
+                                                                      cdvaluDialog) ??
                                                                   -1,
                                                               cmcdlniy,
                                                               cdcdlniy,
@@ -308,8 +309,6 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                         cdcdlniy
                                                                 ? null
                                                                 : () {
-                                                                    AppPrint.debugLog(
-                                                                        "cmcmlniy from item check: $cmcmlniy -- ${item.cdcdlniy} -- ${result[index].cdcdlniy}");
                                                                     ref
                                                                         .read(chooseCdcdlniyProvider
                                                                             .notifier)
@@ -331,6 +330,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                         .update((state) => item
                                                                             .cdcdlniy
                                                                             .toString());
+                                                                    AppPrint.debugLog(
+                                                                        "cmcmlniy from tap item checklist: $cmcmlniy -- ${item.cdcdlniy} -- $cdvaluDialog");
                                                                   })
                                                         : item.cdtype
                                                                     ?.toLowerCase() ==
@@ -434,7 +435,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                               ),
                                               10.h,
                                               // FOR NOTE DIALOG
-                                              if (cdvalu == "0" &&
+                                              if (cdvaluDialog == "0" &&
                                                   noteDialog.isEmpty)
                                                 Text(
                                                   "Note Wajib Diisi",
@@ -470,7 +471,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                         "NOTEE: $cmcdlniy -- $cdcdlniy");
                                                   },
                                                   validator: (value) {
-                                                    if (cdvalu == "0") {
+                                                    if (cdvaluDialog == "0") {
                                                       return "Note wajib diisi";
                                                     }
                                                     return null;
@@ -675,7 +676,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                     .isNotEmpty &&
                                                                 cmcdlniy ==
                                                                     cdcdlniy ||
-                                                            cdvalu == "0" &&
+                                                            cdvaluDialog ==
+                                                                    "0" &&
                                                                 noteDialog
                                                                     .isEmpty ||
                                                             saveChecklist
@@ -699,7 +701,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                               .callSaveChecklist(
                                                                 cmcmlniy:
                                                                     cmcmlniy,
-                                                                cmacvl: cdvalu,
+                                                                cmacvl:
+                                                                    cdvaluDialog,
                                                                 cdcdlniy:
                                                                     cdcdlniy,
                                                                 saveChecklistType:
@@ -969,7 +972,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
 
     AppPrint.debugLog("DATA BUILD COLOR OPTIONS: $dataBuildColorOptions");
     if (isChoose) {
-      if (int.tryParse(cmacvl) == 0) {
+      if (cdvalu == 0) {
         return Colors.red;
       } else {
         return Colors.green;
