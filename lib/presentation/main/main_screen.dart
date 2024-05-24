@@ -17,24 +17,30 @@ class MainScreen extends ConsumerWidget {
     final database = ref.watch(databaseProvider);
     final versi = ref.watch(versiProvider);
     final apiUrl = ref.watch(apiUrlProvider);
-    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
 
     return Scaffold(
       drawer: Drawer(
-        width: !isPortrait ? MediaQuery.of(context).size.width * 0.5 : MediaQuery.of(context).size.width * 0.8,
+        width: !isPortrait
+            ? MediaQuery.sizeOf(context).width * 0.5
+            : MediaQuery.sizeOf(context).width * 0.8,
         child: const DrawerItemWidget(),
       ),
       appBar: CustomAppbarWidget(
         isCenter: true,
         title: "ADR ASSET",
-        titleStye: AppTextStyle.subTitleTextStyle.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
+        titleStye: AppTextStyle.subTitleTextStyle
+            .copyWith(fontWeight: FontWeight.w700, color: Colors.white),
       ),
       body: Stack(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height,
+            height: MediaQuery.sizeOf(context).height,
             decoration: const BoxDecoration(
-              image: DecorationImage(image: AssetImage(AppAssets.backgroundImage), fit: BoxFit.cover),
+              image: DecorationImage(
+                  image: AssetImage(AppAssets.backgroundImage),
+                  fit: BoxFit.cover),
             ),
           ),
           Align(
@@ -45,7 +51,8 @@ class MainScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 18, horizontal: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.white,
@@ -61,7 +68,11 @@ class MainScreen extends ConsumerWidget {
                               const SizedBox(
                                 width: 16,
                               ),
-                              Text("Welcome, $username", style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.black, fontWeight: FontWeight.w400))
+                              Text("Welcome, $username",
+                                  style: AppTextStyle.subTitleTextStyle
+                                      .copyWith(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400))
                             ],
                           ),
                           const SizedBox(
@@ -79,7 +90,8 @@ class MainScreen extends ConsumerWidget {
                       )),
                   20.h,
                   Container(
-                      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 18, horizontal: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.white,

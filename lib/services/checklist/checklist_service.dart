@@ -1,8 +1,10 @@
 import 'package:assets_mobile/config/http_client.dart';
 import 'package:assets_mobile/data/models/checklist_detail.dart';
 import 'package:assets_mobile/data/models/cldetl.dart';
+import 'package:assets_mobile/data/models/cutom_error.dart';
 import 'package:assets_mobile/data/models/http_client_params.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
+import 'package:assets_mobile/utils/app_error_message.dart';
 import 'package:assets_mobile/utils/app_key.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:flutter/foundation.dart';
@@ -98,16 +100,14 @@ class ChecklistService {
 
       List<CldetlModel> tempData = [];
 
-      AppPrint.debugLog("Resp generate cldetl: $response");
+      AppPrint.debugLog("Resp get generate cldetl: $response");
 
       final data = response["data"]["Data"];
 
+      if (data is String) return tempData;
+
       for (final a in data) {
         tempData.add(CldetlModel.fromMap(a));
-      }
-
-      for (final item in tempData) {
-        AppPrint.debugLog("RESPONSE GET GENERATE CLDETL: ${item.toMap()}");
       }
 
       return tempData;
@@ -150,31 +150,61 @@ class ChecklistService {
     required String cmcmlniy,
     required String cmacvl,
     required String cdcdlniy,
-    Uint8List? file1,
-    Uint8List? file2,
-    Uint8List? file3,
-    Uint8List? file4,
+    required SaveChecklistType saveChecklistType,
+    String? ckcknoiy,
+    String? note,
+    List<Uint8List>? files,
   }) async {
     try {
+      final Map<String, Uint8List> filesMap = {};
+      Map<String, dynamic> param = {};
+
+      if (files != null) {
+        if (saveChecklistType == SaveChecklistType.dialog) {
+          for (int i = 0; i < files.length; i++) {
+            filesMap["cmflk${i + 1}"] = files[i];
+          }
+        } else {
+          for (int i = 0; i < files.length; i++) {
+            filesMap["ckflk${i + 1}"] = files[i];
+          }
+        }
+      }
+
+      if (saveChecklistType == SaveChecklistType.dialog) {
+        param = {
+          "cmcmlniy": cmcmlniy,
+          "cmacvl": cmacvl,
+          "cdcdlniy": cdcdlniy,
+        };
+      } else {
+        param = {
+          "ckcknoiy": ckcknoiy,
+        };
+      }
+
+      final controller =
+          saveChecklistType == SaveChecklistType.dialog ? "CLDETL" : "CLLINE";
+
       final httpClientParams = HttpClientParams(
           path: "datadr",
-          controller: "CLDETL",
+          controller: controller,
           subMethod: "Update",
+          method: "POST",
           isEdit: true,
-          files: {
-            "cmflk1": file1,
-            "cmflk2": file2,
-            "cmflk3": file3,
-            "cmflk4": file4,
-          },
           postRequestType: PostRequestType.formdata,
-          param: {
-            "cmcmlniy": cmcmlniy,
-            "cmacvl": cmacvl,
-            "cdcdlniy": cdcdlniy
-          });
+          files: filesMap,
+          param: param);
 
-      AppPrint.debugLog("HTTP CLIENT PARAMS FILE: ${httpClientParams.files}");
+      if (note != null) {
+        if (saveChecklistType == SaveChecklistType.dialog) {
+          httpClientParams.param?["cmremk"] = note;
+        } else {
+          httpClientParams.param?["ckremk"] = note;
+        }
+      }
+
+      AppPrint.debugLog("PARAM CALL SAVE CHECKLIST: $param");
 
       final response =
           await ref.read(httpClientProvider(httpClientParams)).callHttp;
@@ -189,7 +219,6 @@ class ChecklistService {
   Future<Map<String, dynamic>> getMachineProgress({
     required String shiftId,
     required String machineNumber,
-    required String statusId,
     required String period,
   }) async {
     preferences = await SharedPreferences.getInstance();
@@ -200,8 +229,6 @@ class ChecklistService {
     try {
       final params = {
         "trlsno": machineNumber,
-        "clshft": shiftId,
-        "clstsm": statusId,
         "mtmtnm": period,
         "cltrdt": date,
         "Mode": "A",
@@ -224,6 +251,41 @@ class ChecklistService {
       return response;
     } catch (e) {
       AppPrint.debugLog("ERROR GET MACHINE PROGRESS: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<String>> getImagesChecklist(
+      {required List<Map<String, dynamic>> files}) async {
+    try {
+      List<String> result = [];
+
+      AppPrint.debugLog("FILESS: $files");
+
+      for (int i = 0; i < files.length; i++) {
+        AppPrint.debugLog("GET IMAGE");
+        final httpClientParams = HttpClientParams(
+            path: "datadr",
+            controller: "Ajax",
+            subMethod: "setFile",
+            param: {
+              "FileKey": files[i]["cmflk${i + 1}"],
+              "FileName": files[i]["cmfln${i + 1}"],
+            });
+
+        final response =
+            await ref.read(httpClientProvider(httpClientParams)).callHttp;
+
+        AppPrint.debugLog("RESPONSE GET IMAGE: $response");
+
+        final data = response["data"]["File"];
+
+        result.add(data);
+      }
+
+      return result;
+    } catch (e, st) {
+      AppPrint.debugLog("ERROR GET IMAGES CHECKLIST: $e $st");
       rethrow;
     }
   }

@@ -46,7 +46,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: CustomAppbarWidget(
         isCenter: true,
         title: "Profile",
-        titleStye: AppTextStyle.subTitleTextStyle.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
+        titleStye: AppTextStyle.subTitleTextStyle
+            .copyWith(fontWeight: FontWeight.w700, color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -61,8 +62,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      width: MediaQuery.sizeOf(context).width,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         color: Colors.white,
@@ -101,40 +103,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               key: _formKey,
                               child: Consumer(
                                 builder: (_, ref, __) {
-                                  final obsecureNewPassword = ref.watch(obsecureNewPasswordProvider);
-                                  final obsecureNewConfirmPassword = ref.watch(obsecureNewConfirmPasswordProvider);
-                                  final status = ref.watch(changePasswordProvider).status;
+                                  final obsecureNewPassword =
+                                      ref.watch(obsecureNewPasswordProvider);
+                                  final obsecureNewConfirmPassword = ref.watch(
+                                      obsecureNewConfirmPasswordProvider);
+                                  final status =
+                                      ref.watch(changePasswordProvider).status;
 
-                                  ref.listen<AuthState>(changePasswordProvider, (previous, next) {
+                                  ref.listen<AuthState>(changePasswordProvider,
+                                      (previous, next) {
                                     switch (next.status) {
                                       case AuthStatus.failure:
-                                        AppDialog.errorDialog(context, (next.error).errorMessage, () => context.pop());
+                                        AppDialog.errorDialog(
+                                            context,
+                                            (next.error).errorMessage,
+                                            () => context.pop());
                                         break;
                                       case AuthStatus.success:
                                         ref.read(routerProvider).pop();
-                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully change password!')));
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    'Successfully change password!')));
                                         break;
                                       default:
                                     }
                                   });
 
                                   return SizedBox(
-                                    width: MediaQuery.of(context).size.width * 0.6,
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 0.6,
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         CustomFormfieldWidget(
                                           controller: _newPass,
                                           conditionColor: false,
                                           label: "New Password",
                                           enabled: status != AuthStatus.loading,
-                                          labelStyle: AppTextStyle.commonTextStyle.copyWith(color: AppColors.textDisableColor),
+                                          labelStyle: AppTextStyle
+                                              .commonTextStyle
+                                              .copyWith(
+                                                  color: AppColors
+                                                      .textDisableColor),
                                           isObsecure: obsecureNewPassword,
                                           isPassword: true,
                                           suffixIcon: IconButton(
-                                              onPressed: () => ref.read(obsecureNewPasswordProvider.notifier).update((state) => !state),
-                                              icon: Icon(obsecureNewPassword ? Icons.visibility : Icons.visibility_off)),
+                                              onPressed: () => ref
+                                                  .read(
+                                                      obsecureNewPasswordProvider
+                                                          .notifier)
+                                                  .update((state) => !state),
+                                              icon: Icon(obsecureNewPassword
+                                                  ? Icons.visibility
+                                                  : Icons.visibility_off)),
                                         ),
                                         5.h,
                                         CustomFormfieldWidget(
@@ -142,16 +166,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           controller: _confirmNewPass,
                                           label: "Confirm New Password",
                                           enabled: status != AuthStatus.loading,
-                                          labelStyle: AppTextStyle.commonTextStyle.copyWith(color: AppColors.textDisableColor),
-                                          isObsecure: obsecureNewConfirmPassword,
+                                          labelStyle: AppTextStyle
+                                              .commonTextStyle
+                                              .copyWith(
+                                                  color: AppColors
+                                                      .textDisableColor),
+                                          isObsecure:
+                                              obsecureNewConfirmPassword,
                                           isPassword: true,
                                           suffixIcon: IconButton(
-                                              onPressed: () => ref.read(obsecureNewConfirmPasswordProvider.notifier).update((state) => !state),
-                                              icon: Icon(obsecureNewConfirmPassword ? Icons.visibility : Icons.visibility_off)),
+                                              onPressed: () => ref
+                                                  .read(
+                                                      obsecureNewConfirmPasswordProvider
+                                                          .notifier)
+                                                  .update((state) => !state),
+                                              icon: Icon(
+                                                  obsecureNewConfirmPassword
+                                                      ? Icons.visibility
+                                                      : Icons.visibility_off)),
                                         ),
                                         10.h,
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             ButtonReusableWidget(
@@ -164,10 +201,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                             Expanded(
                                               child: ButtonReusableWidget(
                                                 onPressed: () {
-                                                  ref.read(changePasswordProvider.notifier).callChange(_newPass.text);
+                                                  ref
+                                                      .read(
+                                                          changePasswordProvider
+                                                              .notifier)
+                                                      .callChange(
+                                                          _newPass.text);
                                                 },
-                                                disabled: status == AuthStatus.loading,
-                                                title: status == AuthStatus.loading ? "Loading..." : "Change",
+                                                disabled: status ==
+                                                    AuthStatus.loading,
+                                                title:
+                                                    status == AuthStatus.loading
+                                                        ? "Loading..."
+                                                        : "Change",
                                                 width: 150,
                                               ),
                                             ),
@@ -199,34 +245,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               builder: (_, ref, __) {
                                 final status = ref.watch(logoutProvider).status;
 
-                                ref.listen<AuthState>(logoutProvider, (previous, next) {
+                                ref.listen<AuthState>(logoutProvider,
+                                    (previous, next) {
                                   switch (next.status) {
                                     case AuthStatus.failure:
                                       context.pop();
-                                      AppDialog.errorDialog(context, (next.error).errorMessage, () => context.pop());
+                                      AppDialog.errorDialog(
+                                          context,
+                                          (next.error).errorMessage,
+                                          () => context.pop());
                                       break;
                                     case AuthStatus.success:
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Successfully change password!')));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'Successfully change password!')));
                                       ref.read(routerProvider).pop();
-                                      ref.read(routerProvider).go(RouteName.login);
+                                      ref
+                                          .read(routerProvider)
+                                          .go(RouteName.login);
                                       break;
                                     default:
                                   }
                                 });
 
                                 return SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.5,
+                                  width: MediaQuery.sizeOf(context).width * 0.5,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         "Are you sure wanna logout?",
-                                        style: AppTextStyle.commonTextStyle.copyWith(),
+                                        style: AppTextStyle.commonTextStyle
+                                            .copyWith(),
                                       ),
                                       10.h,
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Expanded(
@@ -234,8 +292,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                               onPressed: () {
                                                 _confirmNewPass.clear();
                                                 _newPass.clear();
-                                                ref.invalidate(obsecureNewConfirmPasswordProvider);
-                                                ref.invalidate(obsecureNewPasswordProvider);
+                                                ref.invalidate(
+                                                    obsecureNewConfirmPasswordProvider);
+                                                ref.invalidate(
+                                                    obsecureNewPasswordProvider);
                                                 context.pop();
                                               },
                                               title: "Cancel",
@@ -247,10 +307,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           Expanded(
                                             child: ButtonReusableWidget(
                                               onPressed: () async {
-                                                await ref.read(logoutProvider.notifier).callLogout();
+                                                await ref
+                                                    .read(
+                                                        logoutProvider.notifier)
+                                                    .callLogout();
                                               },
-                                              disabled: status == AuthStatus.loading,
-                                              title: status == AuthStatus.loading ? "Loading..." : "Logout",
+                                              disabled:
+                                                  status == AuthStatus.loading,
+                                              title:
+                                                  status == AuthStatus.loading
+                                                      ? "Loading..."
+                                                      : "Logout",
                                               height: 38,
                                             ),
                                           ),
@@ -269,11 +336,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       height: 56,
                     ),
                     InkWell(
-                      onTap: () async => await ref.read(authRepositoryProvider).refreshToken(),
+                      onTap: () async =>
+                          await ref.read(authRepositoryProvider).refreshToken(),
                       child: Center(
                           child: Text(
                         "App Version $versi",
-                        style: AppTextStyle.subTitleTextStyle.copyWith(color: Colors.white),
+                        style: AppTextStyle.subTitleTextStyle
+                            .copyWith(color: Colors.white),
                       )),
                     )
                   ],

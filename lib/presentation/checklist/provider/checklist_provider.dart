@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:assets_mobile/data/models/checklist.dart';
 import 'package:assets_mobile/data/models/checklist_detail.dart';
 import 'package:assets_mobile/data/models/checklist_state.dart';
@@ -12,6 +10,7 @@ import 'package:assets_mobile/repositories/checklist/provider/checklist_reposito
 import 'package:assets_mobile/repositories/machines/provider/machine_repository_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
 import 'package:assets_mobile/utils/app_print.dart';
+import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,7 +36,12 @@ final imagesOnDialogProvider = StateProvider.autoDispose<List<XFile>>((ref) {
   return [];
 });
 
-final tssycdProvider = StateProvider.autoDispose<String>((ref) {
+final statusChecklistItemProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
+final tssycdProvider = StateProvider<String>((ref) {
   return "";
 });
 
@@ -77,15 +81,53 @@ final filesProvider = StateProvider<List<Uint8List>>((ref) {
   return [];
 });
 
+final cdvaluProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final noteDialogProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final ckcknoiyProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final ckflkFilesProvider = StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
+final cmflkFilesProvider = StateProvider<List<Map<String, dynamic>>>((ref) {
+  return [];
+});
+
+final cmcdlniyProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final cmremkProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final cmremkItemProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final cmacvlProvider = StateProvider<String>((ref) {
+  return "";
+});
+
 @riverpod
 FutureOr<void> takePicture(TakePictureRef ref,
     {required TakePhotoChecklistType type}) async {
   final ImagePicker picker = ImagePicker();
 
-  final result = await picker.pickImage(source: ImageSource.camera);
+  final result = await picker.pickImage(
+      source: ImageSource.camera, maxHeight: 720, maxWidth: 720);
 
   if (result != null) {
     final bytes = await result.readAsBytes();
+
     ref.read(filesProvider.notifier).update(
           (state) => [...state, bytes],
         );
@@ -192,14 +234,17 @@ class Checklist extends _$Checklist {
             List.from(groupingItem[i][groupingItem[i]["tempId"]]["item"]);
 
         doneChecklist =
-            item.where((element) => element["cdvalu"] != null).length;
+            item.where((element) => element["cdcdlniy"] != null).length;
         tempTotalChecklist += item.length;
 
         for (final a in item) {
           final detail = List.from(a["detailItemChecklist"]);
 
-          doneChecklistItem =
-              detail.where((element) => element["cdvalu"] != null).length;
+          int doneItemsInCurrentDetail = detail.where((element) {
+            return element["cdcdlniy"] != null;
+          }).length;
+
+          doneChecklistItem += doneItemsInCurrentDetail;
           tempTotalChecklistItem += detail.length;
         }
       }
@@ -265,6 +310,12 @@ class Checklist extends _$Checklist {
         success: null,
         customError: e,
       );
+    } catch (e, st) {
+      AppPrint.debugLog("Error call checklist provider: $e $st");
+      state = state.copyWith(
+          status: ChecklistStatus.failure,
+          customError: const CustomError(
+              errorMessage: "Data tidak ditemukan, silahkan coba lagi!"));
     }
   }
 }
@@ -280,21 +331,34 @@ class SaveChecklist extends _$SaveChecklist {
     required String cmcmlniy,
     required String cmacvl,
     required String cdcdlniy,
-    Uint8List? file1,
-    Uint8List? file2,
-    Uint8List? file3,
-    Uint8List? file4,
+    required SaveChecklistType saveChecklistType,
+    String? ckcknoiy,
+    String? note,
+    List<Uint8List>? files,
   }) async {
+    AppPrint.debugLog(
+        "CMCMLNIY: $cmcmlniy -- CMACVL: $cmacvl -- CDCDLNIY: $cdcdlniy -- CKCKNOIY: $ckcknoiy");
     state = state.copyWith(status: SaveChecklistStatus.loading);
+    final machineId = ref.watch(idQrCodeProvider);
+    final shift = ref.watch(dataShiftProvider);
+    final tssycd = ref.watch(tssycdProvider);
+
     try {
       await ref.read(checklistRepositoryProvider).saveChecklist(
           cmcmlniy: cmcmlniy,
           cmacvl: cmacvl,
           cdcdlniy: cdcdlniy,
-          file1: file1,
-          file2: file2,
-          file3: file3,
-          file4: file4);
+          note: note,
+          saveChecklistType: saveChecklistType,
+          ckcknoiy: ckcknoiy,
+          files: files);
+
+      await ref.read(checklistProvider.notifier).callChecklist(
+          id: machineId,
+          shiftId: shift.id,
+          statusId: tssycd,
+          period: shift.period);
+
       state = state.copyWith(
           status: SaveChecklistStatus.success, success: "Success");
     } on CustomError catch (e) {
@@ -313,38 +377,71 @@ class ChecklistController extends _$ChecklistController {
 
   List<Map<String, dynamic>> mergeData(List<ChecklistModel> mergedList) {
     List<Map<String, dynamic>> groupingPart = [];
+    ref.invalidate(ckflkFilesProvider);
+    ref.invalidate(cmflkFilesProvider);
 
     try {
       for (final item in mergedList) {
         final mpmpcdiy = item.mpmpcdiy.toString();
         final mimicdiy = item.mimicdiy;
         final miminm = item.miminm;
-        final mrrlcdiy = item.mrrlcdiy;
-        final mrmrnm = item.mrmrnm;
         final chchcdiy = item.chchcdiy;
-        final cdtype = item.cdtype;
-        final cmcmlniy = item.cmcmlniy;
-        final cmacvl = item.cmacvl;
-        final cmcdlniy = item.cmcdlniy;
-        final cdcdds = item.cdcdds;
-        final cdvalu = item.cdvalu;
-        final cdrguv = item.cdrguv;
-        final cdunms = item.cdunms;
-        final chchnm = item.chchnm;
+
+        final filesChecklist = [
+          {
+            "cmflk1": item.cmflk1,
+            "cmfln1": item.cmfln1,
+          },
+          {
+            "cmflk2": item.cmflk2,
+            "cmfln2": item.cmfln2,
+          },
+          {
+            "cmflk3": item.cmflk3,
+            "cmfln3": item.cmfln3,
+          },
+          {
+            "cmflk4": item.cmflk4,
+            "cmfln4": item.cmfln4,
+          },
+          {
+            "cmflk5": item.cmflk5,
+            "cmfln5": item.cmfln5,
+          },
+        ]
+            .where((map) =>
+                map.values.any((value) => value != null && value.isNotEmpty))
+            .toList();
+
+        final filesItem = [
+          {
+            "ckflk1": item.ckflk1,
+            "ckfln1": item.ckfln1,
+          },
+          {
+            "ckflk2": item.ckflk2,
+            "ckfln2": item.ckfln2,
+          },
+          {
+            "ckflk3": item.ckflk3,
+            "ckfln3": item.ckfln3,
+          },
+          {
+            "ckflk4": item.ckflk4,
+            "ckfln4": item.ckfln4,
+          },
+          {
+            "ckflk5": item.ckflk5,
+            "ckfln5": item.ckfln5,
+          },
+        ]
+            .where((map) =>
+                map.values.any((value) => value != null && value.isNotEmpty))
+            .toList();
 
         final detailItemChecklist = {
-          "mrmrnm": mrmrnm,
-          "mrrlcdiy": mrrlcdiy,
-          "chchcdiy": chchcdiy,
-          "cdtype": cdtype,
-          "cmcmlniy": cmcmlniy,
-          "cmacvl": cmacvl,
-          "cmcdlniy": cmcdlniy,
-          "cdcdds": cdcdds,
-          "cdrguv": cdrguv,
-          "chchnm": chchnm,
-          "cdvalu": cdvalu,
-          "cdunms": cdunms,
+          ...item.toMap(),
+          "filesChecklist": filesChecklist.isEmpty ? [] : filesChecklist,
         };
 
         if (!groupingPart.any((element) => element.containsKey(mpmpcdiy))) {
@@ -356,6 +453,7 @@ class ChecklistController extends _$ChecklistController {
               "cmcmlniy": item.cmcmlniy,
               "cmacvl": item.cmacvl,
               "cdcdlniy": item.cdcdlniy,
+              "files": filesItem.isEmpty ? [] : filesItem,
               "item": [
                 {
                   "id": mimicdiy,
@@ -412,4 +510,15 @@ class ChecklistController extends _$ChecklistController {
 
     return groupingPart;
   }
+}
+
+@riverpod
+FutureOr<List<String>> getImagesChecklist(GetImagesChecklistRef ref,
+    {required List<Map<String, dynamic>> files}) async {
+  if (files.isEmpty) return [];
+  final response = await ref
+      .read(checklistRepositoryProvider)
+      .getImagesChecklist(files: files);
+  ref.cacheFor(const Duration(minutes: 2));
+  return response;
 }

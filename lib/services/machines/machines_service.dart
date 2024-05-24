@@ -12,7 +12,8 @@ class MachinesService {
   final Ref ref;
   late SharedPreferences preferences;
 
-  Future<List<Map<String, dynamic>>> getAllMachines({required String id, required String type}) async {
+  Future<List<Map<String, dynamic>>> getAllMachines(
+      {required String id, required String type}) async {
     try {
       final httpClient = HttpClientParams(
         path: "datadr",
@@ -38,29 +39,22 @@ class MachinesService {
     }
   }
 
-  // TODO GET PROGRESS
-  // Future getProgress({required String id, required String type, required String templateId, required String date, required String shift}) async {
-  //   try {
-  //     final httpClient = HttpClientParams(path: "datadr", controller: "TBLSYS", subMethod: "LoadGridPopup", param: {"sqlCondition": "and tsdscd = 'STSM'"});
-
-  //     final response = await ref.read(httpClientProvider(httpClient)).callHttp;
-
-  //     AppPrint.debugLog("RESPONSE: $response");
-  //   } catch (e, st) {
-  //     AppPrint.debugLog("ERROR GET PROGRESS MACHINE: $e $st");
-  //     rethrow;
-  //   }
-  // }
-
   Future<List<Map<String, dynamic>>> getMachineData(String machineId) async {
     try {
-      final httpClientParams = HttpClientParams(path: "datadr", controller: "MCMCTH_MCMCTD", subMethod: "LoadData", param: {"trlsno": machineId});
-      final response = await ref.read(httpClientProvider(httpClientParams)).callHttp;
+      final httpClientParams = HttpClientParams(
+          path: "datadr",
+          controller: "MCMCTH_MCMCTD",
+          subMethod: "LoadData",
+          param: {"trlsno": machineId});
+      final response =
+          await ref.read(httpClientProvider(httpClientParams)).callHttp;
       AppPrint.debugLog("GET MACHINE DATA: $response");
       final data = response["data"]["Data"];
 
       if (data is List) {
         if (data.isEmpty) return [];
+      } else {
+        return [];
       }
 
       return List<Map<String, dynamic>>.from(data);
@@ -81,7 +75,8 @@ class MachinesService {
         start: 1,
       );
       final response = await ref.read(httpClientProvider(httpClient)).callHttp;
-      AppPrint.debugLog("RESPONSE GET DATA CHECKLIST: ${response["data"]["data"]}");
+      AppPrint.debugLog(
+          "RESPONSE GET DATA CHECKLIST: ${response["data"]["data"]}");
       return List<Map<String, dynamic>>.from(response["data"]["data"]["items"]);
     } catch (e, st) {
       AppPrint.debugLog("ERROR GET DATA CHECKLIST: $e $st");
@@ -92,9 +87,14 @@ class MachinesService {
   Future<Map<String, dynamic>> getStatusMachine() async {
     AppPrint.debugLog("GET STATUS MACHINE API SERVICE CALLED");
     try {
-      final httpClient = HttpClientParams(path: "datadr", controller: "TBLSYS", subMethod: "LoadGridPopup", param: {"sqlCondition": "and tsdscd = 'STSM'"});
+      final httpClient = HttpClientParams(
+          path: "datadr",
+          controller: "TBLSYS",
+          subMethod: "LoadGridPopup",
+          param: {"sqlCondition": "and tsdscd = 'STSM'"});
       final response = await ref.read(httpClientProvider(httpClient)).callHttp;
-      AppPrint.debugLog("RESPONSE GET STATUS MACHINE: ${response["data"]["data"]}");
+      AppPrint.debugLog(
+          "RESPONSE GET STATUS MACHINE: ${response["data"]["data"]}");
       final data = jsonDecode(jsonEncode(response["data"]["data"]));
 
       return data;

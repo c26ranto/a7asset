@@ -19,6 +19,7 @@ class SummaryChecklistScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusChecklist = ref.watch(statusChecklistItemProvider);
     final partData = ref.watch(partDataProvider);
+    final partDataChecklist = ref.watch(partChecklistDataProvider);
     return Scaffold(
       appBar: CustomAppbarWidget(
         isCenter: true,
@@ -43,7 +44,7 @@ class SummaryChecklistScreen extends ConsumerWidget {
           top: 10,
           bottom: 20,
           child: SizedBox(
-            height: MediaQuery.of(context).size.height,
+            height: MediaQuery.sizeOf(context).height,
             child: Column(
               children: [
                 Column(
@@ -80,18 +81,88 @@ class SummaryChecklistScreen extends ConsumerWidget {
                 10.h,
                 Expanded(
                   child: ListView.builder(
-                    itemCount: partData["part"]["item"].length,
+                    itemCount: partDataChecklist[0]
+                            [partDataChecklist[0]["tempId"]]["item"]
+                        .length,
                     itemBuilder: (context, index) {
-                      final item = partData["part"]["item"][index];
+                      final item = partDataChecklist[0]
+                          [partDataChecklist[0]["tempId"]]["item"][index];
                       final detailChecklist =
                           List.from(item["detailItemChecklist"]);
                       return CustomLongCardWidget(
                         title: item["value"],
                         textLeading:
-                            "${item["cdvalu"] == null ? "0" : item["cdvalue"]}/${detailChecklist.length}",
+                            "${item["cdcdlniy"] != null ? "1" : "0"}/${detailChecklist.length}",
                         onTap: () {
+                          ref.invalidate(ckflkFilesProvider);
+                          ref.invalidate(cmflkFilesProvider);
+                          ref.invalidate(cmcdlniyProvider);
+                          ref.invalidate(cdcdlniyProvider);
+                          ref.invalidate(cdvaluProvider);
+                          ref.invalidate(cmremkItemProvider);
+                          ref.invalidate(cmremkProvider);
+                          ref.invalidate(cmacvlProvider);
+
                           AppPrint.debugLog(
-                              "DATA FROM SUMMARY CHECKLIST: $detailChecklist");
+                              "DATA FROM SUMMARY CHECKLIST: $item");
+
+                          ref.read(cmacvlProvider.notifier).update(
+                                (state) => item["cmacvl"],
+                              );
+
+                          // PASSING CDVALU
+                          ref.read(cdvaluProvider.notifier).update(
+                                (state) => item["cdvalu"].toString(),
+                              );
+
+                          // PASSING CMREMK
+                          ref.read(cmremkProvider.notifier).update(
+                                (state) => item["cmremk"] ?? "",
+                              );
+                          ref.read(cmremkItemProvider.notifier).update(
+                                (state) =>
+                                    detailChecklist.first["cmremk"] ?? "",
+                              );
+
+                          ref.read(cmcmlniyProvider.notifier).update(
+                                (state) => item["cmcmlniy"].toString(),
+                              );
+
+                          if (detailChecklist.first["cdcdlniy"] != null) {
+                            ref.read(cdcdlniyProvider.notifier).update(
+                                  (state) => detailChecklist.first["cdcdlniy"]
+                                      .toString(),
+                                );
+                          }
+
+                          if (detailChecklist.first["cmcdlniy"] != null) {
+                            ref.read(cmcdlniyProvider.notifier).update(
+                                  (state) => detailChecklist.first["cmcdlniy"]
+                                      .toString(),
+                                );
+                          }
+
+                          if (item.containsKey("files") &&
+                              item["files"].isNotEmpty) {
+                            ref.read(ckflkFilesProvider.notifier).update(
+                                (state) => [...state, ...item["files"]]);
+                          }
+
+                          for (final detailItem in detailChecklist) {
+                            if (detailItem.containsKey("filesChecklist") &&
+                                List.from(detailItem["filesChecklist"])
+                                    .isNotEmpty) {
+                              ref.read(ckflkFilesProvider.notifier).update(
+                                  (state) => [
+                                        ...state,
+                                        ...detailItem["filesChecklist"]
+                                      ]);
+                            }
+                          }
+
+                          ref.read(ckcknoiyProvider.notifier).update(
+                                (state) => item["ckcknoiy"].toString().trim(),
+                              );
                           ref
                               .read(cdchcdiyProvider.notifier)
                               .update((state) => item["id"].toString());

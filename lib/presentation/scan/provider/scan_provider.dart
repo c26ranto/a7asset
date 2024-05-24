@@ -41,14 +41,6 @@ final totalChecklistProvider = StateProvider<String>((ref) {
   return "0";
 });
 
-final doneProvider = StateProvider<String>((ref) {
-  return "0";
-});
-
-final notDoneProvider = StateProvider<String>((ref) {
-  return "0";
-});
-
 @riverpod
 FutureOr<List<Map<String, dynamic>>> getDataChecklist(Ref ref) async {
   final response = await ref.read(machineRepositoryProvider).getDataChecklist();
@@ -89,7 +81,6 @@ class GetMachineProgress extends _$GetMachineProgress {
   Future<void> call({
     required String shiftId,
     required String machineNumber,
-    required String statusId,
     required String period,
   }) async {
     state = state.copyWith(status: GetMachineProgressStatus.loading);
@@ -97,13 +88,23 @@ class GetMachineProgress extends _$GetMachineProgress {
       final result = await ref
           .read(checklistRepositoryProvider)
           .getMachineProgress(
-              shiftId: shiftId,
-              machineNumber: machineNumber,
-              statusId: statusId,
-              period: period);
-      state = state.copyWith(
-          status: GetMachineProgressStatus.success,
-          success: jsonEncode(result));
+              shiftId: shiftId, machineNumber: machineNumber, period: period);
+      AppPrint.debugLog("GET MACHINE PROGRESS STATUS PROVIDER: $result");
+
+      if (result.containsKey("data")) {
+        if (result["data"]["Data"] is String) {
+          AppPrint.debugLog("NO DATA");
+          state = state.copyWith(
+              status: GetMachineProgressStatus.failure,
+              customError: const CustomError(
+                  errorMessage: "Data tidak ditemukan.",
+                  errorCode: AppErrorCode.internalServerError));
+        } else {
+          state = state.copyWith(
+              status: GetMachineProgressStatus.success,
+              success: jsonEncode(result));
+        }
+      }
     } on CustomError catch (e) {
       state = state.copyWith(
           status: GetMachineProgressStatus.failure, customError: e);

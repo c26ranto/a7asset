@@ -6,7 +6,7 @@ part of 'checklist_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$takePictureHash() => r'4ef2fcfac6ed2155f0daa55019cf47b4211bfac1';
+String _$takePictureHash() => r'642b48f68aa359178eb2d9721f3356dad7bcfb23';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -288,6 +288,138 @@ class _GetChecklistProviderElement
   String get cdchcdiy => (origin as GetChecklistProvider).cdchcdiy;
 }
 
+String _$getImagesChecklistHash() =>
+    r'1eaa8c1e0bbd6885a881d986bbb324a697be381f';
+
+/// See also [getImagesChecklist].
+@ProviderFor(getImagesChecklist)
+const getImagesChecklistProvider = GetImagesChecklistFamily();
+
+/// See also [getImagesChecklist].
+class GetImagesChecklistFamily extends Family<AsyncValue<List<String>>> {
+  /// See also [getImagesChecklist].
+  const GetImagesChecklistFamily();
+
+  /// See also [getImagesChecklist].
+  GetImagesChecklistProvider call({
+    required List<Map<String, dynamic>> files,
+  }) {
+    return GetImagesChecklistProvider(
+      files: files,
+    );
+  }
+
+  @override
+  GetImagesChecklistProvider getProviderOverride(
+    covariant GetImagesChecklistProvider provider,
+  ) {
+    return call(
+      files: provider.files,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getImagesChecklistProvider';
+}
+
+/// See also [getImagesChecklist].
+class GetImagesChecklistProvider
+    extends AutoDisposeFutureProvider<List<String>> {
+  /// See also [getImagesChecklist].
+  GetImagesChecklistProvider({
+    required List<Map<String, dynamic>> files,
+  }) : this._internal(
+          (ref) => getImagesChecklist(
+            ref as GetImagesChecklistRef,
+            files: files,
+          ),
+          from: getImagesChecklistProvider,
+          name: r'getImagesChecklistProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$getImagesChecklistHash,
+          dependencies: GetImagesChecklistFamily._dependencies,
+          allTransitiveDependencies:
+              GetImagesChecklistFamily._allTransitiveDependencies,
+          files: files,
+        );
+
+  GetImagesChecklistProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.files,
+  }) : super.internal();
+
+  final List<Map<String, dynamic>> files;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<String>> Function(GetImagesChecklistRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: GetImagesChecklistProvider._internal(
+        (ref) => create(ref as GetImagesChecklistRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        files: files,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<String>> createElement() {
+    return _GetImagesChecklistProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetImagesChecklistProvider && other.files == files;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, files.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+mixin GetImagesChecklistRef on AutoDisposeFutureProviderRef<List<String>> {
+  /// The parameter `files` of this provider.
+  List<Map<String, dynamic>> get files;
+}
+
+class _GetImagesChecklistProviderElement
+    extends AutoDisposeFutureProviderElement<List<String>>
+    with GetImagesChecklistRef {
+  _GetImagesChecklistProviderElement(super.provider);
+
+  @override
+  List<Map<String, dynamic>> get files =>
+      (origin as GetImagesChecklistProvider).files;
+}
+
 String _$generateClheadHash() => r'3e053a238e0f48e05fb4751ba7f0bc7edac1e9e1';
 
 /// See also [GenerateClhead].
@@ -304,7 +436,7 @@ final generateClheadProvider =
 );
 
 typedef _$GenerateClhead = AutoDisposeNotifier<GenerateClheadState>;
-String _$checklistHash() => r'89b1400b533e01abe901feb7c9f4b78560d4c2a1';
+String _$checklistHash() => r'a9b27beb88ad27512a4ddf07146111b621c33afe';
 
 /// See also [Checklist].
 @ProviderFor(Checklist)
@@ -319,7 +451,7 @@ final checklistProvider =
 );
 
 typedef _$Checklist = AutoDisposeNotifier<ChecklistState>;
-String _$saveChecklistHash() => r'ba5a0b356fe13ed1774b4f50ac9347f03d544f9d';
+String _$saveChecklistHash() => r'0b22efd4bda568760048162a252978e3164bac2b';
 
 /// See also [SaveChecklist].
 @ProviderFor(SaveChecklist)
@@ -336,7 +468,7 @@ final saveChecklistProvider =
 
 typedef _$SaveChecklist = AutoDisposeNotifier<SaveChecklistState>;
 String _$checklistControllerHash() =>
-    r'814b8f815f35c627194301cd8332be8df6dd47bb';
+    r'89231cf2bd44214524b4e09316399b81bb36dadc';
 
 /// See also [ChecklistController].
 @ProviderFor(ChecklistController)

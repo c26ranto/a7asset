@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:assets_mobile/config/constants.dart';
+import 'package:assets_mobile/config/shared_preferences_config.dart';
 import 'package:assets_mobile/data/models/cutom_error.dart';
 import 'package:assets_mobile/data/models/http_client_params.dart';
 import 'package:assets_mobile/presentation/splash/provider/splash_provider.dart';
 import 'package:assets_mobile/repositories/auth/provider/auth_repository_provider.dart';
+import 'package:assets_mobile/route/route_name.dart';
+import 'package:assets_mobile/route/route_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:assets_mobile/utils/app_error_code.dart';
 import 'package:assets_mobile/utils/app_error_message.dart';
 import 'package:assets_mobile/utils/app_key.dart';
@@ -14,7 +18,6 @@ import 'package:assets_mobile/utils/app_print.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 final httpClientProvider =
     Provider.family((ref, HttpClientParams httpClientParams) {
@@ -28,20 +31,21 @@ class HttpClient {
   const HttpClient({required this.ref, required this.httpClientParams});
 
   Future<Map<String, dynamic>> get callHttp async {
-    final prefs = await SharedPreferences.getInstance();
-
-    String? username = prefs.getString(AppKey.username) ?? "";
-    String? token = prefs.getString(AppKey.token);
+    String? username =
+        await SharedPreferencesHelper.getString(AppKey.username) ?? "";
+    String token = await SharedPreferencesHelper.getString(AppKey.token);
+    String? refreshToken =
+        await SharedPreferencesHelper.getString(AppKey.refreshToken);
 
     String? encryptParam;
 
-    if (httpClientParams.token != null) {
-      token = httpClientParams.token;
+    if (httpClientParams.token != null && httpClientParams.token!.isNotEmpty) {
+      AppPrint.debugLog("OVERRIDE TOKEN");
+      token = httpClientParams.token!;
     }
 
     Map<String, dynamic> param = {};
 
-    // TODO SIMPLIFIED THIS PARAM WITH JUST NECESSARY KEY
     if (httpClientParams.overrideParam != null) {
       param = httpClientParams.overrideParam!;
     } else {
@@ -50,8 +54,6 @@ class HttpClient {
         "username": "$username-name",
         "date": DateTime.now().toIso8601String(),
         "Date": DateTime.now().toIso8601String(),
-        // TODO CHANGE DB DYNAMIC
-        // "ApiDB": "dev-a7asset",
       };
     }
 
@@ -111,13 +113,15 @@ class HttpClient {
       "encrypt_param": encryptParam,
     };
 
-    AppPrint.debugLog("DATA REQUEST: $data");
+    AppPrint.debugLog("DATA REQUEST: $data -- TOKEN: $token");
 
-    if (token != null &&
-        token.isNotEmpty &&
-        !httpClientParams.path.contains("getConnList")) {
+    if (token.isEmpty) {
+      ref.read(routerProvider).go(RouteName.login);
+    } else if (refreshToken.isNotEmpty &&
+        (!httpClientParams.path.contains("getConnList") &&
+            !httpClientParams.path.contains("login"))) {
       final checkExpired = token.checkExpiredToken;
-      AppPrint.debugLog("CHECK EXPIRED TOKEN: $checkExpired");
+      AppPrint.debugLog("CHECK EXPIRED TOKEN HTTP CLIENT: $checkExpired");
       // WHEN EXPIRED
       // CALL REFRESH TOKEN
       if (checkExpired == true) {
@@ -173,7 +177,7 @@ class HttpClient {
     });
 
     int statusCode = response.statusCode;
-    AppPrint.debugLog("GET DATA: ${response.body} --- ${response.statusCode}");
+    AppPrint.debugLog("GET DATA:  ${response.statusCode}");
 
     if (statusCode != 200) {
       throw CustomError(errorCode: statusCode, errorMessage: response.body);
@@ -193,10 +197,11 @@ class HttpClient {
       final dataDecode = decode["Data"];
 
       final decodeData = List<String>.from(dataDecode);
-      AppPrint.debugLog("DECODE DATA HTTP CLIENT: $decodeData");
       final decrypt = decodeData.decryptA7;
-      AppPrint.debugLog("DECRYPT: $decrypt");
-      data = {"code": response.statusCode, "data": decrypt};
+      data = {
+        "code": response.statusCode,
+        "data": decrypt,
+      };
     }
 
     AppPrint.debugLog("DATA HTTP CLIENT GET: $data");
@@ -215,8 +220,6 @@ class HttpClient {
 
     Map<String, String> headers = {};
 
-    AppPrint.debugLog("TOKENN: $token");
-
     // CASE FOR NOT LOGIN FUNC
     // AND REFRESH TOKEN
     if (token != null || !uri.path.toLowerCase().contains("refreshtoken")) {
@@ -227,7 +230,7 @@ class HttpClient {
       "encrypt": encryptParam,
       "path": path,
       "token": token,
-      "files": files,
+      "files": files?.keys,
       "requestType": postRequestType,
       "url": uri.path,
     };
@@ -235,34 +238,55 @@ class HttpClient {
     AppPrint.debugLog("Post Method Call: $paramsPost");
 
     dynamic request;
+    dynamic streamedResponse;
 
     if (postRequestType == PostRequestType.formdata) {
       try {
-        if (isEdit != null && isEdit) {
-          method = "PUT";
-        }
         request = http.MultipartRequest(method, uri)
           ..fields["Data"] = encryptParam
-          ..headers['Content-Type'] = "multipart/form-data";
+          ..headers['Content-Type'] = "multipart/form-data"
+          ..headers['Authorization'] = "Bearer $token";
 
-        AppPrint.debugLog("FILES FROM HTTPCLIENT: $files");
+        AppPrint.debugLog("FILES FROM HTTPCLIENT: ${files?.keys}");
 
         if (files != null) {
-          files.forEach(
-            (key, value) {
-              AppPrint.debugLog("KEY FILE: $key - $value");
+          files.forEach((key, value) {
+            request.fields[key] = value.toString();
+          });
 
-              request.fields[key] = value;
-            },
-          );
+          for (var entry in files.entries) {
+            final key = entry.key;
+            final value = entry.value;
+            AppPrint.debugLog("KEY FILE: $key");
+
+            // FROM PATH IMAGES NOT SEND
+            final multipartFile = http.MultipartFile.fromBytes(
+              key,
+              value,
+              filename: "${key}_${DateTime.now().millisecondsSinceEpoch}.jpg",
+              contentType: MediaType('image', 'jpeg'),
+            );
+
+            request.files.add(multipartFile);
+          }
         }
-      } catch (e) {
-        AppPrint.debugLog("ERROR BRO: $e");
+
+        streamedResponse = await request.send();
+
+        if (streamedResponse.statusCode == 200) {
+          print("Request berhasil dikirim!");
+        } else {
+          print("Gagal mengirim request: ${streamedResponse.statusCode}");
+        }
+      } catch (e, st) {
+        AppPrint.debugLog("ERROR BRO: $e $st");
       }
     } else if (uri.path.toString().toLowerCase().contains("refreshtoken")) {
       request = http.Request("POST", uri);
       request.body = encryptParam;
       headers['Content-Type'] = 'application/json';
+      streamedResponse =
+          await request.send().timeout(const Duration(seconds: 10));
     } else {
       request = http.Request('POST', uri);
       request.body = jsonEncode(encryptParam);
@@ -274,8 +298,11 @@ class HttpClient {
 
     request.headers.addAll(headers);
 
-    var streamedResponse =
-        await request.send().timeout(const Duration(seconds: 7));
+    // IF PUT METHOD
+    if (isEdit != null && isEdit == false) {
+      streamedResponse =
+          await request.send().timeout(const Duration(seconds: 10));
+    }
     var responseBody = await streamedResponse.stream.bytesToString();
     AppPrint.debugLog("RESPONE BODY: $responseBody");
 

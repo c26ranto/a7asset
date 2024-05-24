@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:assets_mobile/data/models/auth_state.dart';
 import 'package:assets_mobile/data/models/checklist_state.dart';
 import 'package:assets_mobile/data/models/generate_clhead_state.dart';
+import 'package:assets_mobile/data/models/get_status_machine_state.dart';
+import 'package:assets_mobile/data/models/save_checklist_state.dart';
 import 'package:assets_mobile/presentation/checklist/provider/checklist_provider.dart';
 import 'package:assets_mobile/presentation/scan/provider/scan_provider.dart';
 import 'package:assets_mobile/presentation/shift/provider/shift_provider.dart';
@@ -37,7 +39,29 @@ class ResultScanMachineScreen extends ConsumerStatefulWidget {
 
 class _ResultScanMachineScreenState
     extends ConsumerState<ResultScanMachineScreen> {
-  bool loading = true;
+  bool loading = false;
+
+  @override
+  void initState() {
+    getAllMachines();
+
+    super.initState();
+  }
+
+  void getAllMachines() async {
+    setState(() {
+      loading = true;
+    });
+    await Future.delayed(Duration.zero, () async {
+      final shift = ref.read(dataShiftProvider);
+      final id = ref.read(idQrCodeProvider);
+      await ref.read(getMachineProgressProvider.notifier).call(
+            machineNumber: id,
+            shiftId: shift.id,
+            period: shift.period,
+          );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,131 +70,13 @@ class _ResultScanMachineScreenState
     final model = ref.watch(modelProvider);
     final statusChecklist = ref.read(statusChecklistProvider);
     final dataGetChecklist = ref.watch(dataGetChecklistProvider);
+    final tssycd = ref.watch(tssycdProvider);
 
     Widget prevChecklistWidget = const SizedBox.shrink();
 
     final checklistState = ref.watch(checklistProvider);
-
-    ref.listen(getStatusMachineProvider, (previous, next) {
-      switch (next.value?.status) {
-        case AuthStatus.loading:
-          Navigator.pop(context);
-          AppDialog.loadingDialog(context);
-          break;
-        case AuthStatus.success:
-          AppDialog.customDialog(context, "",
-              barrierDismissible: false,
-              title: Text(
-                "Kondisi Mesin",
-                style: AppTextStyle.subTitleTextStyle.copyWith(),
-              ),
-              content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.4,
-                height: 250,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Kondisi Mesin Saat Ini: ",
-                      style: AppTextStyle.commonTextStyle.copyWith(),
-                    ),
-                    10.h,
-                    next.when(
-                      data: (data) {
-                        final status = jsonDecode(data.result!);
-                        return Expanded(
-                            child: ListView.separated(
-                          separatorBuilder: (context, index) => const SizedBox(
-                            height: 8,
-                          ),
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: status.length,
-                          itemBuilder: (context, index) => ButtonReusableWidget(
-                              onPressed: () async {
-                                AppPrint.debugLog(
-                                    "STATUS MACHINE: ${status[index]["tssycd"]}");
-                                setState(() {
-                                  loading = true;
-                                });
-                                await ref
-                                    .read(generateClheadProvider.notifier)
-                                    .callGenerateClhead(
-                                      machineNumber: machineId,
-                                      shiftId: shift.id,
-                                      period: shift.period,
-                                      statusId: status[index]["tssycd"]
-                                          .toString()
-                                          .trim(),
-                                    );
-                                await ref
-                                    .read(getMachineProgressProvider.notifier)
-                                    .call(
-                                      machineNumber: machineId,
-                                      shiftId: shift.id,
-                                      period: shift.period,
-                                      statusId: status[index]["tssycd"],
-                                    );
-                                if (status[index]["tssycd"] == "1") {
-                                  // ref.read(routerProvider).pop();
-                                  ref.read(tssycdProvider.notifier).update(
-                                      (state) => status[index]["tssycd"]
-                                          .toString()
-                                          .trim());
-                                  ref
-                                      .read(dataGetChecklistProvider.notifier)
-                                      .update((state) => {
-                                            "id": machineId,
-                                            "shiftId": shift.id,
-                                            "period": shift.period,
-                                            "statusId": status[index]["tssycd"]
-                                                .toString()
-                                                .trim(),
-                                          });
-
-                                  // ref
-                                  //     .read(checklistProvider.notifier)
-                                  //     .callChecklist(
-                                  //       id: machineId,
-                                  //       shiftId: shift.id,
-                                  //       period: shift.period,
-                                  //       statusId: status[index]["tssycd"]
-                                  //           .toString()
-                                  //           .trim(),
-                                  //     );
-                                } else {
-                                  ref.read(routerProvider).pop();
-                                  if (mounted) {
-                                    await Future.delayed(Duration.zero, () {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                              content: Text(
-                                                  "Checklist disimpan...")));
-                                      ref.read(routerProvider).pop();
-                                    });
-                                  }
-                                }
-                              },
-                              title: "${status[index]["tssynm"]}"),
-                        ));
-                      },
-                      error: (error, stackTrace) => const SizedBox(),
-                      loading: () => const SizedBox(),
-                    )
-                  ],
-                ),
-              ),
-              actions: []);
-          break;
-        case AuthStatus.failure:
-          Navigator.pop(context);
-          AppDialog.errorDialog(context, next.value!.error.errorMessage,
-              () => Navigator.pop(context));
-        default:
-      }
-    });
+    final getMachineProgressState = ref.watch(getMachineProgressProvider);
+    final machineState = ref.watch(machinesProvider);
 
     ref.listen(
       getMachineProgressProvider,
@@ -181,22 +87,67 @@ class _ResultScanMachineScreenState
               loading = false;
             });
             final data = jsonDecode(next.success ?? "");
-            AppPrint.debugLog("Hello: $data");
-            const stat = "10";
+            String stat = List.from(data["data"]["Data"])
+                .first["clstat"]
+                .toString()
+                .trim();
 
-            context.pop();
-            // switch (List.from(data["data"]["Data"]).first["clstat"]) {
             switch (stat) {
+              case "90":
+                AppDialog.customDialog(context, "",
+                    barrierDismissible: false,
+                    title: Text(
+                      "Machine checklist is finished\nPress create new to check again",
+                      style: AppTextStyle.subTitleTextStyle.copyWith(),
+                    ),
+                    actions: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ButtonReusableWidget(
+                              onPressed: () {
+                                context.pop();
+                                context.pop();
+                              },
+                              title: "Back",
+                            ),
+                          ),
+                          10.w,
+                          Expanded(
+                            child: ButtonReusableWidget(
+                              backgroundColor: Colors.green,
+                              onPressed: () async {
+                                context.pop();
+                                await ref
+                                    .read(checklistProvider.notifier)
+                                    .callChecklist(
+                                      id: machineId,
+                                      shiftId: shift.id,
+                                      period: shift.period,
+                                      statusId: tssycd,
+                                    );
+                                await ref
+                                    .read(getStatusMachineProvider.notifier)
+                                    .getStatusMachine();
+                              },
+                              title: "Create New",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]);
+                break;
               case "05":
                 ref.read(checklistProvider.notifier).callChecklist(
                       id: machineId,
                       shiftId: shift.id,
                       period: shift.period,
-                      statusId: "1",
+                      statusId: tssycd,
                     );
               case "10":
                 AppDialog.customDialog(context, "",
                     title: const SizedBox(),
+                    barrierDismissible: false,
                     content: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -216,33 +167,175 @@ class _ResultScanMachineScreenState
                                   context.pop();
                                   context.pop();
                                 },
+                                backgroundColor: Colors.red,
                                 title: "Cancel"),
                           ),
                           10.w,
                           Expanded(
                             child: ButtonReusableWidget(
-                                onPressed: () {
+                                onPressed: () async {
+                                  context.pop();
                                   ref
                                       .read(checklistProvider.notifier)
                                       .callChecklist(
                                         id: machineId,
                                         shiftId: shift.id,
                                         period: shift.period,
-                                        statusId: "1",
+                                        statusId: tssycd,
+                                      );
+                                  await ref
+                                      .read(getStatusMachineProvider.notifier)
+                                      .getStatusMachine();
+                                },
+                                title: "Create New"),
+                          ),
+                          10.w,
+                          Expanded(
+                            child: ButtonReusableWidget(
+                                onPressed: () async {
+                                  ref
+                                      .read(checklistProvider.notifier)
+                                      .callChecklist(
+                                        id: machineId,
+                                        shiftId: shift.id,
+                                        period: shift.period,
+                                        statusId: tssycd,
                                       );
                                   context.pop();
                                 },
+                                backgroundColor: Colors.green,
                                 title: "Continue"),
                           ),
                         ],
                       )
                     ]);
             }
+          case GetMachineProgressStatus.failure:
+            setState(() {
+              loading = false;
+            });
+            AppDialog.errorDialog(context, next.customError.errorMessage, () {
+              context.pop();
+              context.pop();
+            });
             break;
-          default:
+          case _:
+          // default:
+          //   ref.read(checklistProvider.notifier).callChecklist(
+          //         id: machineId,
+          //         shiftId: shift.id,
+          //         period: shift.period,
+          //         statusId: tssycd,
+          //       );
         }
       },
     );
+
+    ref.listen(getStatusMachineProvider, (previous, next) {
+      switch (next.status) {
+        case GetStatusMachineStatus.loading:
+          AppDialog.loadingDialog(context);
+        case GetStatusMachineStatus.success:
+          context.pop();
+          final data = jsonDecode(next.success ?? "");
+          AppDialog.customDialog(context, "",
+              barrierDismissible: false,
+              title: Text(
+                "Kondisi Mesin",
+                style: AppTextStyle.subTitleTextStyle.copyWith(),
+              ),
+              content: SizedBox(
+                width: MediaQuery.sizeOf(context).width * 0.4,
+                height: 250,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Kondisi Mesin Saat Ini: ",
+                      style: AppTextStyle.commonTextStyle.copyWith(),
+                    ),
+                    10.h,
+                    Expanded(
+                        child: ListView.separated(
+                      separatorBuilder: (context, index) => const SizedBox(
+                        height: 8,
+                      ),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: data["status"].length,
+                      itemBuilder: (context, index) {
+                        final status = data["status"][index];
+                        return ButtonReusableWidget(
+                            onPressed: () async {
+                              setState(() {
+                                loading = true;
+                              });
+                              AppPrint.debugLog("STATUS: ${status["tssycd"]}");
+                              // POP THE DIALOG
+                              context.pop();
+                              ref.read(tssycdProvider.notifier).update(
+                                  (state) =>
+                                      status["tssycd"].toString().trim());
+                              await ref
+                                  .read(generateClheadProvider.notifier)
+                                  .callGenerateClhead(
+                                    machineNumber: machineId,
+                                    shiftId: shift.id,
+                                    period: shift.period,
+                                    statusId:
+                                        status["tssycd"].toString().trim(),
+                                  );
+                              await ref
+                                  .read(checklistProvider.notifier)
+                                  .callChecklist(
+                                    id: machineId,
+                                    shiftId: shift.id,
+                                    period: shift.period,
+                                    statusId: tssycd,
+                                  );
+                              if (status["tssycd"] == "1") {
+                                ref
+                                    .read(dataGetChecklistProvider.notifier)
+                                    .update((state) => {
+                                          "id": machineId,
+                                          "shiftId": shift.id,
+                                          "period": shift.period,
+                                          "statusId": status["tssycd"]
+                                              .toString()
+                                              .trim(),
+                                        });
+                              } else {
+                                if (mounted) {
+                                  await Future.delayed(Duration.zero, () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content:
+                                                Text("Checklist disimpan...")));
+                                    context.pop();
+                                  });
+                                }
+                              }
+                              setState(() {
+                                loading = false;
+                              });
+                            },
+                            title: "${status["tssynm"]}");
+                      },
+                    )),
+                  ],
+                ),
+              ),
+              actions: []);
+          break;
+        case GetStatusMachineStatus.failure:
+          context.pop();
+          AppDialog.errorDialog(
+              context, next.customError.errorMessage, () => context.pop());
+        default:
+      }
+    });
 
     ref.listen<ChecklistState>(checklistProvider, (previous, next) {
       switch (next.status) {
@@ -255,6 +348,7 @@ class _ResultScanMachineScreenState
           setState(() {
             loading = false;
           });
+          AppPrint.debugLog("NEXTXXXX: ${next.success}");
           final status = next.success?.first["clstat"] ?? "0";
           AppPrint.debugLog("HELLO STATUS $status");
           switch (status.trim()) {
@@ -272,7 +366,19 @@ class _ResultScanMachineScreenState
                     ),
                     ButtonReusableWidget(
                       onPressed: () async {
+                        AppPrint.debugLog("STATUS: ${status["tssycd"]}");
+                        // POP THE DIALOG
                         context.pop();
+                        ref.read(tssycdProvider.notifier).update(
+                            (state) => status["tssycd"].toString().trim());
+                        await ref
+                            .read(generateClheadProvider.notifier)
+                            .callGenerateClhead(
+                              machineNumber: machineId,
+                              shiftId: shift.id,
+                              period: shift.period,
+                              statusId: status["tssycd"].toString().trim(),
+                            );
                       },
                       title: "Create New",
                     ),
@@ -292,7 +398,10 @@ class _ResultScanMachineScreenState
                     children: [
                       Expanded(
                         child: ButtonReusableWidget(
-                          onPressed: () => context.pop(),
+                          onPressed: () {
+                            context.pop();
+                            context.pop();
+                          },
                           backgroundColor: Colors.red,
                           title: "Back",
                         ),
@@ -335,9 +444,9 @@ class _ResultScanMachineScreenState
           child: Column(
             children: [
               LoadingShimmerWidget(
-                  height: 48,
+                  height: 56,
                   itemCount: 3,
-                  width: MediaQuery.of(context).size.width),
+                  width: MediaQuery.sizeOf(context).width),
             ],
           ),
         );
@@ -368,7 +477,7 @@ class _ResultScanMachineScreenState
                         "chchnm": part["chchnm"]
                       };
 
-                      AppPrint.debugLog("DATAA: $data");
+                      AppPrint.debugLog("DATA CHECKLIST SCREEN: $data");
 
                       ref.read(cmcmlniyProvider.notifier).update(
                           (state) => dataPass["part"]["cmcmlniy"].toString());
@@ -376,9 +485,10 @@ class _ResultScanMachineScreenState
                           .read(partDataProvider.notifier)
                           .update((state) => dataPass);
 
-                      ref.read(routerProvider).push(RouteName.summaryChecklist);
+                      context.push(RouteName.summaryChecklist);
                     },
-                    textLeading: "0/${part["item"]?.length}",
+                    textLeading:
+                        "${statusChecklist[1]["value"]}/${part["item"]?.length}",
                     titleStye: AppTextStyle.subTitleTextStyle.copyWith(),
                     textLeadingStyle: AppTextStyle.subTitleTextStyle.copyWith(),
                   );
@@ -513,9 +623,10 @@ class _ResultScanMachineScreenState
                         ),
                         10.h,
                         loading
-                            ? const Center(
-                                child: CircularProgressIndicator.adaptive(),
-                              )
+                            ? const LoadingShimmerWidget(
+                                itemCount: 3,
+                                height: 56,
+                                width: double.infinity)
                             : prevChecklistWidget,
                       ],
                     ),

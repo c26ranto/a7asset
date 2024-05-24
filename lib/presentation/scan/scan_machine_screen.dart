@@ -13,7 +13,8 @@ class ScanMachineScreen extends ConsumerStatefulWidget {
   const ScanMachineScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _ScanMachineScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ScanMachineScreenState();
 }
 
 class _ScanMachineScreenState extends ConsumerState<ScanMachineScreen> {
@@ -51,7 +52,10 @@ class _ScanMachineScreenState extends ConsumerState<ScanMachineScreen> {
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
-    var scanArea = (MediaQuery.of(context).size.width < 400 || MediaQuery.of(context).size.height < 400) ? 350.0 : 350.0;
+    var scanArea = (MediaQuery.sizeOf(context).width < 400 ||
+            MediaQuery.sizeOf(context).height < 400)
+        ? 350.0
+        : 350.0;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller
     return QRView(
@@ -64,7 +68,9 @@ class _ScanMachineScreenState extends ConsumerState<ScanMachineScreen> {
           Navigator.pop(context, scanData.code);
 
           if (scanData.code != null) {
-            ref.read(idQrCodeProvider.notifier).update((state) => scanData.code!);
+            ref
+                .read(idQrCodeProvider.notifier)
+                .update((state) => scanData.code!);
             AppPrint.debugLog("DATA BARCODE TIDAK NULL ${scanData.code}");
             ref.invalidate(qrControllerProvider);
             ref.invalidate(barcodeProvider);
@@ -75,7 +81,12 @@ class _ScanMachineScreenState extends ConsumerState<ScanMachineScreen> {
         });
       },
       // cameraFacing: CameraFacing.back, // di real device ini gak work
-      overlay: QrScannerOverlayShape(borderColor: Colors.red, borderRadius: 10, borderLength: 30, borderWidth: 10, cutOutSize: scanArea),
+      overlay: QrScannerOverlayShape(
+          borderColor: Colors.red,
+          borderRadius: 10,
+          borderLength: 30,
+          borderWidth: 10,
+          cutOutSize: scanArea),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
   }

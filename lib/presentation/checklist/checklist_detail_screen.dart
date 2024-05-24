@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:assets_mobile/data/models/cutom_error.dart';
@@ -12,6 +13,8 @@ import 'package:assets_mobile/presentation/widgets/custom_error_widget.dart';
 import 'package:assets_mobile/presentation/widgets/custom_formfield_widget.dart';
 import 'package:assets_mobile/presentation/widgets/custom_long_card_widget.dart';
 import 'package:assets_mobile/presentation/widgets/form_date_widget.dart';
+import 'package:assets_mobile/presentation/widgets/loading_screen_widget.dart';
+import 'package:assets_mobile/presentation/widgets/loading_shimmer.dart';
 import 'package:assets_mobile/route/route_provider.dart';
 import 'package:assets_mobile/utils/app_colors.dart';
 import 'package:assets_mobile/utils/app_dialog.dart';
@@ -21,8 +24,10 @@ import 'package:assets_mobile/utils/app_text_Style.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChecklistDetailScreen extends ConsumerStatefulWidget {
   const ChecklistDetailScreen({super.key});
@@ -35,21 +40,26 @@ class ChecklistDetailScreen extends ConsumerStatefulWidget {
 class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   final _detailNoteC = TextEditingController();
-  final _detailNoteDialogC = TextEditingController();
   final _numeriC = TextEditingController();
   final _freeTextC = TextEditingController();
+  String cdValuColor = "";
+
+  @override
+  void initState() {
+    cdValuColor = ref.read(cdvaluProvider);
+
+    super.initState();
+  }
 
   @override
   void dispose() {
     _detailNoteC.dispose();
-    _detailNoteDialogC.dispose();
     _freeTextC.dispose();
     _numeriC.dispose();
     super.dispose();
   }
 
   void clearController() {
-    _detailNoteDialogC.clear();
     _freeTextC.clear();
     _numeriC.clear();
   }
@@ -62,25 +72,37 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     final cmcmlniy = ref.watch(cmcmlniyProvider);
     final detail = ref.watch(detailChecklistItemTestProvider);
     final cdcdlniy = ref.watch(cdcdlniyProvider);
-
     final files = ref.watch(filesProvider);
+    final ckcknoiy = ref.watch(ckcknoiyProvider);
+    final cmflkFiles = ref.watch(cmflkFilesProvider);
+    final ckflkFiles = ref.watch(ckflkFilesProvider);
+    final cmcdlniy = ref.watch(cmcdlniyProvider);
+    final cmremk = ref.watch(cmremkItemProvider);
+    final cmremkItem = ref.watch(cmremkItemProvider);
+    final cmacvl = ref.watch(cmacvlProvider);
+
+    final saveChecklistState = ref.watch(saveChecklistProvider);
+
+    final getImages = ref.watch(getImagesChecklistProvider(files: cmflkFiles));
 
     ref.listen<SaveChecklistState>(
       saveChecklistProvider,
       (previous, next) {
         switch (next.status) {
           case SaveChecklistStatus.failure:
-            context.pop();
             AppDialog.errorDialog(
               context,
               next.customError.errorMessage,
-              () => context.pop(),
+              () => Navigator.pop(context),
             );
-
-          default:
+          case SaveChecklistStatus.success:
+            ref.invalidate(imagesDetailChecklistProvider);
+            ref.invalidate(imagesOnDialogProvider);
+            ref.invalidate(filesProvider);
             context.pop();
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text("Berhasil!")));
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text("Berhasil mengirim checklist...")));
+          case _:
         }
       },
     );
@@ -110,22 +132,22 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             top: 10,
             bottom: 20,
             child: SizedBox(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery.sizeOf(context).height,
               child: ListView(
                 children: [
                   10.h,
-                  const FormFieldDateWidget(
+                  FormFieldDateWidget(
                     title: "Note",
-                    label: "Tidak ada note",
+                    label: cmremk.isNotEmpty ? cmremk : "Tidak ada note",
                     fill: true,
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.photo,
                       size: 32,
                       color: Colors.white,
                     ),
                     disabled: false,
                     fillColor: Colors.white,
-                    outlineBorder: OutlineInputBorder(
+                    outlineBorder: const OutlineInputBorder(
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -153,10 +175,13 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                         return CustomLongCardWidget(
                             title: data["chchnm"].toString(),
                             onTap: () async {
-                              AppPrint.debugLog("clickkk: $data");
+                              AppPrint.debugLog(
+                                  "ON TAP DETAIL CHECKLIST: $data");
                               ref.invalidate(chooseCdcdlniyProvider);
                               ref.invalidate(imagesOnDialogProvider);
-                              ref.invalidate(cdcdlniyProvider);
+
+                              // ref.invalidate(cdvaluProvider);
+                              ref.invalidate(noteDialogProvider);
 
                               ref.read(cmcmlniyProvider.notifier).update(
                                     (state) => data["cmcmlniy"].toString(),
@@ -171,6 +196,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                       getChecklistProvider(
                                           cdchcdiy:
                                               data["chchcdiy"].toString()));
+
                                   final imagesDialog =
                                       ref.watch(imagesOnDialogProvider);
                                   final saveChecklist =
@@ -178,15 +204,24 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                   final chooseCdcdlniy =
                                       ref.watch(chooseCdcdlniyProvider);
                                   final cdtype = ref.watch(cdtypeProvider);
+                                  final files = ref.watch(filesProvider);
+                                  final cdvaluDialog =
+                                      ref.watch(cdvaluProvider);
+                                  final noteDialog =
+                                      ref.watch(noteDialogProvider);
+                                  final cdcdlniy = ref.watch(cdcdlniyProvider);
+
+                                  final getImagesDialog = ref.watch(
+                                      getImagesChecklistProvider(
+                                          files: ckflkFiles));
 
                                   return SizedBox(
-                                    width: MediaQuery.of(context).size.width,
+                                    width: MediaQuery.sizeOf(context).width,
                                     child: checklist.when(
                                       data: (result) {
                                         if (result.isEmpty) {
                                           return SizedBox(
-                                            height: MediaQuery.of(context)
-                                                    .size
+                                            height: MediaQuery.sizeOf(context)
                                                     .height *
                                                 0.3,
                                             child: const Center(
@@ -214,10 +249,10 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                               ),
                                               10.h,
                                               SizedBox(
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.2,
+                                                height:
+                                                    MediaQuery.sizeOf(context)
+                                                            .height *
+                                                        0.2,
                                                 child: ListView.builder(
                                                   shrinkWrap: true,
                                                   itemCount: result.length,
@@ -238,40 +273,66 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                 .subTitleTextStyle
                                                                 .copyWith(
                                                               color:
-                                                                  chooseCdcdlniy ==
-                                                                          index
-                                                                      ? Colors
-                                                                          .white
-                                                                      : Colors
-                                                                          .black,
-                                                            ),
-                                                            color: chooseCdcdlniy ==
-                                                                    index
-                                                                ? Colors.green
-                                                                : const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    227,
-                                                                    227,
-                                                                    227),
-                                                            onTap: () {
-                                                              ref
-                                                                  .read(chooseCdcdlniyProvider
-                                                                      .notifier)
-                                                                  .update(
-                                                                    (state) =>
+                                                                  _buildTextColor(
+                                                                index,
+                                                                chooseCdcdlniy ==
+                                                                        index ||
+                                                                    int.tryParse(
+                                                                            cmcdlniy) ==
                                                                         index,
-                                                                  );
-                                                              ref
-                                                                  .read(cdcdlniyProvider
-                                                                      .notifier)
-                                                                  .update((state) => result[
-                                                                          index]
-                                                                      .cdcdlniy
-                                                                      .toString());
-                                                              AppPrint.debugLog(
-                                                                  "WELLLLLLL: ${result[index].toMap()}");
-                                                            })
+                                                                int.tryParse(
+                                                                        cdValuColor) ??
+                                                                    -1,
+                                                                cmcdlniy,
+                                                                cdcdlniy,
+                                                                cmacvl,
+                                                              ),
+                                                            ),
+                                                            color:
+                                                                _buildColorOptions(
+                                                              index,
+                                                              chooseCdcdlniy ==
+                                                                      index ||
+                                                                  int.tryParse(
+                                                                          cmcdlniy) ==
+                                                                      index,
+                                                              int.tryParse(
+                                                                      cdvaluDialog) ??
+                                                                  -1,
+                                                              cmcdlniy,
+                                                              cdcdlniy,
+                                                              cmacvl,
+                                                            ),
+                                                            onTap: cmcdlniy
+                                                                        .isNotEmpty &&
+                                                                    cmcdlniy ==
+                                                                        cdcdlniy
+                                                                ? null
+                                                                : () {
+                                                                    ref
+                                                                        .read(chooseCdcdlniyProvider
+                                                                            .notifier)
+                                                                        .update(
+                                                                          (state) =>
+                                                                              index,
+                                                                        );
+                                                                    ref
+                                                                        .read(cdvaluProvider
+                                                                            .notifier)
+                                                                        .update(
+                                                                          (state) => item
+                                                                              .cdvalu
+                                                                              .toString(),
+                                                                        );
+                                                                    ref
+                                                                        .read(cdcdlniyProvider
+                                                                            .notifier)
+                                                                        .update((state) => item
+                                                                            .cdcdlniy
+                                                                            .toString());
+                                                                    AppPrint.debugLog(
+                                                                        "cmcmlniy from tap item checklist: $cmcmlniy -- ${item.cdcdlniy} -- $cdvaluDialog");
+                                                                  })
                                                         : item.cdtype
                                                                     ?.toLowerCase() ==
                                                                 'n'
@@ -367,12 +428,23 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                   return null;
                                                                 },
                                                                 label:
-                                                                    "Input bebas",
+                                                                    "Input sesuatu...",
                                                               );
                                                   },
                                                 ),
                                               ),
                                               10.h,
+                                              // FOR NOTE DIALOG
+                                              if (cdvaluDialog == "0" &&
+                                                  noteDialog.isEmpty)
+                                                Text(
+                                                  "Note Wajib Diisi",
+                                                  style: AppTextStyle
+                                                      .commonTextStyle
+                                                      .copyWith(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -384,10 +456,29 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                   color: Colors.white,
                                                 ),
                                                 child: CustomFormfieldWidget(
-                                                  controller:
-                                                      _detailNoteDialogC,
+                                                  enabled:
+                                                      cmcdlniy.isNotEmpty &&
+                                                              cmcdlniy !=
+                                                                  cdcdlniy ||
+                                                          cmcdlniy.isEmpty,
                                                   conditionColor: false,
-                                                  label: "Note",
+                                                  onChanged: (p0) {
+                                                    ref
+                                                        .read(noteDialogProvider
+                                                            .notifier)
+                                                        .update((state) => p0);
+                                                    AppPrint.debugLog(
+                                                        "NOTEE: $cmcdlniy -- $cdcdlniy");
+                                                  },
+                                                  validator: (value) {
+                                                    if (cdvaluDialog == "0") {
+                                                      return "Note wajib diisi";
+                                                    }
+                                                    return null;
+                                                  },
+                                                  label: cmremkItem.isNotEmpty
+                                                      ? cmremkItem
+                                                      : "Note",
                                                   labelStyle: AppTextStyle
                                                       .subTitleTextStyle
                                                       .copyWith(
@@ -397,62 +488,162 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                 ),
                                               ),
                                               10.h,
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  color: Colors.white,
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Row(
-                                                      children: List.generate(
-                                                          imagesDialog.isEmpty
-                                                              ? 1
-                                                              : imagesDialog
-                                                                  .length,
-                                                          (index) {
-                                                        if (imagesDialog
-                                                            .isEmpty) {
-                                                          return _emptyImage(
-                                                              takePhotoChecklistType:
-                                                                  TakePhotoChecklistType
-                                                                      .dialog);
-                                                        } else {
-                                                          return _image(
-                                                              imagesDialog[
-                                                                      index]
-                                                                  .path,
-                                                              index, () {
-                                                            ref
-                                                                .read(imagesOnDialogProvider
-                                                                    .notifier)
-                                                                .update(
-                                                                    (state) {
-                                                              return state = state
-                                                                  .where((element) =>
+
+                                              // IMAGE DIALOG
+                                              SingleChildScrollView(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 8),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    color: Colors.white,
+                                                  ),
+                                                  child: ckflkFiles.isEmpty
+                                                      ? Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            SizedBox(
+                                                              height: 120,
+                                                              // width: 450,
+                                                              child: ListView
+                                                                  .builder(
+                                                                shrinkWrap:
+                                                                    true,
+                                                                itemCount: imagesDialog
+                                                                        .isEmpty
+                                                                    ? 1
+                                                                    : imagesDialog
+                                                                        .length,
+                                                                scrollDirection:
+                                                                    Axis.horizontal,
+                                                                physics:
+                                                                    const NeverScrollableScrollPhysics(),
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  if (imagesDialog
+                                                                      .isEmpty) {
+                                                                    return _emptyImage(
+                                                                        takePhotoChecklistType:
+                                                                            TakePhotoChecklistType.dialog);
+                                                                  } else {
+                                                                    return _image(
                                                                       imagesDialog[
-                                                                          index] !=
-                                                                      element)
-                                                                  .toList();
-                                                            });
-                                                          });
-                                                        }
-                                                      }),
-                                                    ),
-                                                    10.w,
-                                                    if (imagesDialog.length <
-                                                            3 &&
-                                                        imagesDialog.isNotEmpty)
-                                                      _emptyImage(
-                                                          takePhotoChecklistType:
-                                                              TakePhotoChecklistType
-                                                                  .dialog),
-                                                  ],
+                                                                              index]
+                                                                          .path,
+                                                                      index,
+                                                                      () {
+                                                                        ref.read(imagesOnDialogProvider.notifier).update(
+                                                                            (state) {
+                                                                          return state = state
+                                                                              .where((element) => imagesDialog[index] != element)
+                                                                              .toList();
+                                                                        });
+                                                                      },
+                                                                    );
+                                                                  }
+                                                                },
+                                                              ),
+                                                            ),
+                                                            10.w,
+                                                            if (imagesDialog
+                                                                        .length <
+                                                                    5 &&
+                                                                imagesDialog
+                                                                    .isNotEmpty)
+                                                              _emptyImage(
+                                                                  takePhotoChecklistType:
+                                                                      TakePhotoChecklistType
+                                                                          .dialog),
+                                                          ],
+                                                        )
+                                                      : getImagesDialog.when(
+                                                          data: (data) {
+                                                            return SizedBox(
+                                                              height: 120,
+                                                              child: ListView
+                                                                  .builder(
+                                                                scrollDirection:
+                                                                    Axis.horizontal,
+                                                                shrinkWrap:
+                                                                    true,
+                                                                itemCount:
+                                                                    data.length,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  final decodeImg =
+                                                                      base64Decode(
+                                                                          data[
+                                                                              index]);
+                                                                  return Container(
+                                                                    width:
+                                                                        100, // Specify the width
+                                                                    height:
+                                                                        100, // Specify the height
+                                                                    margin: const EdgeInsets
+                                                                        .all(
+                                                                        4.0), // Optional: to add spacing
+                                                                    child: Image
+                                                                        .memory(
+                                                                      decodeImg,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            );
+                                                          },
+                                                          error: (error,
+                                                                  stackTrace) =>
+                                                              const SizedBox(
+                                                            height: 56,
+                                                            child: Center(
+                                                              child: Text(
+                                                                  "Maaf, terjadi kesalahan menampilkan gambar..."),
+                                                            ),
+                                                          ),
+                                                          loading: () {
+                                                            return Container(
+                                                              height: 100,
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          48),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            18),
+                                                                color: const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    227,
+                                                                    227,
+                                                                    227),
+                                                              ),
+                                                              child:
+                                                                  const Center(
+                                                                child: Row(
+                                                                  children: [
+                                                                    Text(
+                                                                        "Loading menampilkan gambar..."),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
                                                 ),
                                               ),
                                               10.h,
@@ -474,6 +665,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                               .pop();
                                                           ref.invalidate(
                                                               imagesOnDialogProvider);
+                                                          ref.invalidate(
+                                                              filesProvider);
                                                         },
                                                         title: "Cancel",
                                                         backgroundColor:
@@ -482,38 +675,46 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                     10.w,
                                                     ButtonReusableWidget(
                                                         width: 150,
-                                                        disabled: saveChecklist
-                                                                        .status ==
-                                                                    SaveChecklistStatus
-                                                                        .loading ||
-                                                                cdtype.toLowerCase() ==
-                                                                    'o'
-                                                            ? chooseCdcdlniy ==
-                                                                99
-                                                            : false,
+                                                        disabled: cmcdlniy
+                                                                    .isNotEmpty &&
+                                                                cmcdlniy ==
+                                                                    cdcdlniy ||
+                                                            cdvaluDialog ==
+                                                                    "0" &&
+                                                                noteDialog
+                                                                    .isEmpty ||
+                                                            saveChecklist
+                                                                    .status ==
+                                                                SaveChecklistStatus
+                                                                    .loading ||
+                                                            (cdtype.toLowerCase() ==
+                                                                        'o' &&
+                                                                    saveChecklist
+                                                                            .status !=
+                                                                        SaveChecklistStatus
+                                                                            .loading
+                                                                ? chooseCdcdlniy ==
+                                                                    99
+                                                                : false),
                                                         onPressed: () async {
-                                                          AppPrint.debugLog(
-                                                              "MY ITEM: $item");
-                                                          ref
+                                                          await ref
                                                               .read(
                                                                   saveChecklistProvider
                                                                       .notifier)
                                                               .callSaveChecklist(
-                                                                  cmcmlniy:
-                                                                      cmcmlniy,
-                                                                  cmacvl:
-                                                                      _detailNoteDialogC
-                                                                          .text,
-                                                                  cdcdlniy:
-                                                                      cdcdlniy,
-                                                                  file1:
-                                                                      files[0],
-                                                                  file2:
-                                                                      files[0],
-                                                                  file3:
-                                                                      files[0],
-                                                                  file4:
-                                                                      files[0]);
+                                                                cmcmlniy:
+                                                                    cmcmlniy,
+                                                                cmacvl:
+                                                                    cdvaluDialog,
+                                                                cdcdlniy:
+                                                                    cdcdlniy,
+                                                                saveChecklistType:
+                                                                    SaveChecklistType
+                                                                        .dialog,
+                                                                note:
+                                                                    noteDialog,
+                                                                files: files,
+                                                              );
                                                         },
                                                         title: saveChecklist
                                                                     .status ==
@@ -533,7 +734,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                       },
                                       error: (error, stackTrace) => SizedBox(
                                         height:
-                                            MediaQuery.of(context).size.height *
+                                            MediaQuery.sizeOf(context).height *
                                                 0.3,
                                         child: Center(
                                             child: Column(
@@ -556,7 +757,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                       ),
                                       loading: () => SizedBox(
                                         height:
-                                            MediaQuery.of(context).size.height *
+                                            MediaQuery.sizeOf(context).height *
                                                 0.3,
                                         child: const Center(
                                           child: CircularProgressIndicator
@@ -596,36 +797,93 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
                     ),
-                    child: Row(
-                      children: [
-                        Row(
-                          children: List.generate(
-                              images.isEmpty ? 1 : images.length, (index) {
-                            if (images.isEmpty) {
-                              return _emptyImage(
-                                  takePhotoChecklistType:
-                                      TakePhotoChecklistType.detail);
-                            } else {
-                              return _image(images[index].path, index, () {
-                                ref
-                                    .read(
-                                        imagesDetailChecklistProvider.notifier)
-                                    .update((state) {
-                                  return state = state
-                                      .where(
-                                          (element) => images[index] != element)
-                                      .toList();
-                                });
-                              });
-                            }
-                          }),
-                        ),
-                        10.w,
-                        if (images.length < 3 && images.isNotEmpty)
-                          _emptyImage(
-                              takePhotoChecklistType:
-                                  TakePhotoChecklistType.detail),
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: cmflkFiles.isEmpty
+                          ? Row(
+                              children: [
+                                Row(
+                                  children: List.generate(
+                                      images.isEmpty ? 1 : images.length,
+                                      (index) {
+                                    if (images.isEmpty) {
+                                      return _emptyImage(
+                                          takePhotoChecklistType:
+                                              TakePhotoChecklistType.detail);
+                                    } else {
+                                      return _image(images[index].path, index,
+                                          () {
+                                        ref
+                                            .read(imagesDetailChecklistProvider
+                                                .notifier)
+                                            .update((state) {
+                                          return state = state
+                                              .where((element) =>
+                                                  images[index] != element)
+                                              .toList();
+                                        });
+                                      });
+                                    }
+                                  }),
+                                ),
+                                10.w,
+                                if (images.length < 5 && images.isNotEmpty)
+                                  _emptyImage(
+                                      takePhotoChecklistType:
+                                          TakePhotoChecklistType.detail),
+                              ],
+                            )
+                          : getImages.when(
+                              data: (data) {
+                                return SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: data.map((image) {
+                                      final decodeImg = base64Decode(image);
+                                      return Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              image: MemoryImage(
+                                                decodeImg,
+                                              ),
+                                              onError:
+                                                  (exception, stackTrace) =>
+                                                      const SizedBox(
+                                                        child: Icon(
+                                                          Icons.error,
+                                                          size: 48,
+                                                        ),
+                                                      ),
+                                              fit: BoxFit.cover),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                );
+                              },
+                              error: (error, stackTrace) => const SizedBox(
+                                height: 56,
+                                child: Center(
+                                  child: Text(
+                                      "Maaf, terjadi kesalahan menampilkan gambar..."),
+                                ),
+                              ),
+                              loading: () {
+                                return SizedBox(
+                                  height: 56,
+                                  child: Center(
+                                    child: Row(
+                                      children: [
+                                        5.w,
+                                        const Text("Loading..."),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                   ),
                   10.h,
@@ -633,6 +891,8 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
               ),
             ),
           ),
+          if (saveChecklistState.status == SaveChecklistStatus.loading)
+            const LoadingScreenWidget()
         ],
       ),
       bottomNavigationBar: Container(
@@ -644,6 +904,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                   onPressed: () {
                     ref.read(routerProvider).pop();
                     ref.invalidate(imagesDetailChecklistProvider);
+                    ref.invalidate(filesProvider);
                   },
                   title: "Cancel",
                   backgroundColor: AppColors.negativeColor),
@@ -651,18 +912,20 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
             10.w,
             Expanded(
                 child: ButtonReusableWidget(
-                    disabled: images.isEmpty,
+                    disabled: images.isEmpty ||
+                        saveChecklistState.status ==
+                            SaveChecklistStatus.loading,
                     onPressed: () {
                       ref
                           .read(saveChecklistProvider.notifier)
                           .callSaveChecklist(
                               cmcmlniy: cmcmlniy,
-                              cmacvl: _detailNoteDialogC.text,
+                              cmacvl: "",
                               cdcdlniy: cdcdlniy,
-                              file1: files.first,
-                              file2: files.first,
-                              file3: files.first,
-                              file4: files.first);
+                              note: _detailNoteC.text,
+                              saveChecklistType: SaveChecklistType.page,
+                              ckcknoiy: ckcknoiy,
+                              files: files);
                     },
                     title: "Save",
                     backgroundColor: AppColors.primaryColor)),
@@ -670,6 +933,67 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
         ),
       ),
     );
+  }
+
+  Color _buildTextColor(
+    int index,
+    bool isChoose,
+    int cdvalu,
+    String cmcdlniy,
+    String cdcdlniy,
+    String cmacvl,
+  ) {
+    if (isChoose) {
+      return Colors.white;
+    } else {
+      if (cmcdlniy.isNotEmpty && cmcdlniy == cdcdlniy) {
+        if (int.tryParse(cdValuColor) == index) {
+          return Colors.white;
+        }
+        return Colors.black;
+      } else {
+        return Colors.black;
+      }
+    }
+  }
+
+  Color _buildColorOptions(
+    int index,
+    bool isChoose,
+    int cdvalu,
+    String cmcdlniy,
+    String cdcdlniy,
+    String cmacvl,
+  ) {
+    final dataBuildColorOptions = {
+      "cdcdlniy": cdcdlniy,
+      "cmcdlniy": cmcdlniy,
+      "cdvalu": cdvalu,
+      "index": index,
+      "cmacvl": cmacvl,
+    };
+
+    AppPrint.debugLog("DATA BUILD COLOR OPTIONS: $dataBuildColorOptions");
+    if (isChoose) {
+      if (cdvalu == 0) {
+        return Colors.red;
+      } else {
+        return Colors.green;
+      }
+    } else {
+      if (cmcdlniy.isNotEmpty && cmcdlniy == cdcdlniy) {
+        if (int.tryParse(cdValuColor) == index) {
+          if (int.tryParse(cmacvl) == 0) {
+            return Colors.red;
+          } else {
+            return Colors.green;
+          }
+        }
+        return const Color.fromARGB(255, 227, 227, 227);
+      } else {
+        return const Color.fromARGB(255, 227, 227, 227);
+      }
+    }
   }
 
   Widget _image(
@@ -718,13 +1042,17 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     );
   }
 
-  Widget _emptyImage({required TakePhotoChecklistType takePhotoChecklistType}) {
+  Widget _emptyImage(
+      {required TakePhotoChecklistType takePhotoChecklistType,
+      bool? disabled}) {
     return Row(
       children: [
         InkWell(
-          onTap: () async {
-            ref.read(takePictureProvider(type: takePhotoChecklistType));
-          },
+          onTap: disabled != null && disabled
+              ? null
+              : () async {
+                  ref.read(takePictureProvider(type: takePhotoChecklistType));
+                },
           child: Container(
             width: 100,
             height: 100,

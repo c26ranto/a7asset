@@ -1,6 +1,16 @@
 enum Mode { add, edit, view, approval, confirm, verify }
 
-enum SaveMode { view, insert, edit, delete, approve, unapprove, reject, confirm, unconfirm }
+enum SaveMode {
+  view,
+  insert,
+  edit,
+  delete,
+  approve,
+  unapprove,
+  reject,
+  confirm,
+  unconfirm
+}
 
 // TODO INPUT TYPE
 enum InputType { a, b, c }
@@ -14,3 +24,5 @@ enum CardStatusType {
 }
 
 enum TakePhotoChecklistType { dialog, detail }
+
+enum SaveChecklistType { dialog, page }

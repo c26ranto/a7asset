@@ -47,7 +47,6 @@ class _TempResultScreenState extends ConsumerState<TempResultScreen> {
             machineNumber: machineId,
             shiftId: shift.id,
             period: shift.period,
-            statusId: "0",
           );
     } catch (e) {
       AppPrint.debugLog("ERROR TEMP RESULT SCREEN: $e");

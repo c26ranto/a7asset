@@ -11,11 +11,15 @@ class HttpClientRepository {
     try {
       return await apiCall();
     } on SocketException {
-      throw CustomError(errorCode: AppErrorCode.internalServerError, errorMessage: AppErrorMessage.noInternet);
+      throw CustomError(
+          errorCode: AppErrorCode.internalServerError,
+          errorMessage: AppErrorMessage.noInternet);
     } on TimeoutException {
-      throw const CustomError(errorCode: AppErrorCode.requestTimeout, errorMessage: AppErrorMessage.timeout);
+      throw const CustomError(
+          errorCode: AppErrorCode.requestTimeout,
+          errorMessage: AppErrorMessage.timeout);
     } on CustomError catch (e) {
-      AppPrint.debugLog("EEEE: ${e is TypeError}");
+      AppPrint.debugLog("Type Error: ${e is TypeError}");
 
       String data = AppErrorMessage.internalServerError;
 
@@ -32,7 +36,8 @@ class HttpClientRepository {
       String errorMessage;
 
       if (e is TypeError) {
-        errorMessage = "Terjadi kesalahan tipe data, mohon coba beberapa saat lagi.";
+        errorMessage =
+            "Terjadi kesalahan tipe data, mohon coba beberapa saat lagi.";
       } else {
         errorMessage = "Terjadi kesalahan, mohon coba beberapa saat lagi.";
       }
