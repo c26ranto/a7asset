@@ -98,6 +98,7 @@ class ChecklistModel {
   String? mtmtcd;
   int? mtmtcdiy;
   dynamic mtmtnm;
+  String? cmremk;
   ChecklistModel({
     this.chchcd,
     this.chchcdiy,
@@ -194,6 +195,7 @@ class ChecklistModel {
     this.mtmtcdiy,
     this.mtmtnm,
     this.tempId,
+    this.cmremk,
   });
 
   Map<String, dynamic> toMap() {
@@ -292,6 +294,7 @@ class ChecklistModel {
       'mtmtcd': mtmtcd,
       'mtmtcdiy': mtmtcdiy,
       'mtmtnm': mtmtnm,
+      'cmremk': cmremk,
       "item": item,
     };
   }
@@ -401,6 +404,7 @@ class ChecklistModel {
         mtmtcd: map['mtmtcd'] != null ? (map['mtmtcd'] as String).trim() : null,
         mtmtcdiy: _toInt(map["mtmtcdiy"]),
         mtmtnm: map['mtmtnm'] != null ? (map['mtmtnm'] as String).trim() : null,
+        cmremk: map["cmremk"] != null ? (map["cmremk"] as String).trim() : null,
         item: map["item"]?.map((e) => ChecklistModel.fromMap(e)));
   }
 
@@ -509,5 +513,6 @@ class ChecklistModel {
     mtmtcd = other.mtmtcd ?? mtmtcd;
     mtmtcdiy = other.mtmtcdiy ?? mtmtcdiy;
     mtmtnm = other.mtmtnm ?? mtmtnm;
+    cmremk = other.cmremk ?? cmremk;
   }
 }

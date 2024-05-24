@@ -76,6 +76,7 @@ class CldetlModel {
   int? mtmtcdiy;
   String? mtmtnm;
   String? trlsno;
+  String? cmremk;
   CldetlModel({
     this.cdcdds,
     this.cdcdln,
@@ -151,6 +152,7 @@ class CldetlModel {
     this.mtmtcdiy,
     this.mtmtnm,
     this.trlsno,
+    this.cmremk,
   });
 
   Map<String, dynamic> toMap() {
@@ -229,6 +231,7 @@ class CldetlModel {
       'mtmtcdiy': mtmtcdiy,
       'mtmtnm': mtmtnm,
       'trlsno': trlsno,
+      'cmremk': cmremk,
     };
   }
 
@@ -320,6 +323,7 @@ class CldetlModel {
       mtmtcdiy: map['mtmtcdiy'] != null ? map['mtmtcdiy'] as int : null,
       mtmtnm: map['mtmtnm'] != null ? (map['mtmtnm'] as String).trim() : null,
       trlsno: map['trlsno'] != null ? (map['trlsno'] as String).trim() : null,
+      cmremk: map['cmremk'] != null ? (map['cmremk'] as String).trim() : null,
     );
   }
 
