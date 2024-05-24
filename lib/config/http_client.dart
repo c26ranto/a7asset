@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:assets_mobile/config/constants.dart';
+import 'package:assets_mobile/config/shared_preferences_config.dart';
 import 'package:assets_mobile/data/models/cutom_error.dart';
 import 'package:assets_mobile/data/models/http_client_params.dart';
 import 'package:assets_mobile/presentation/splash/provider/splash_provider.dart';
 import 'package:assets_mobile/repositories/auth/provider/auth_repository_provider.dart';
+import 'package:assets_mobile/route/route_name.dart';
+import 'package:assets_mobile/route/route_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:assets_mobile/utils/app_error_code.dart';
@@ -29,10 +32,11 @@ class HttpClient {
   const HttpClient({required this.ref, required this.httpClientParams});
 
   Future<Map<String, dynamic>> get callHttp async {
-    final prefs = await SharedPreferences.getInstance();
-
-    String? username = prefs.getString(AppKey.username) ?? "";
-    String? token = prefs.getString(AppKey.token);
+    String? username =
+        await SharedPreferencesHelper.getString(AppKey.username) ?? "";
+    String? token = await SharedPreferencesHelper.getString(AppKey.token);
+    String? refreshToken =
+        await SharedPreferencesHelper.getString(AppKey.refreshToken);
 
     String? encryptParam;
 
@@ -109,14 +113,15 @@ class HttpClient {
       "encrypt_param": encryptParam,
     };
 
-    AppPrint.debugLog("DATA REQUEST: $data");
+    AppPrint.debugLog("DATA REQUEST: $data -- TOKEN: $token");
 
-    if (token != null &&
-        token.isNotEmpty &&
-        (!httpClientParams.path.contains("getConnList") ||
+    if (token == null || token.isEmpty) {
+      ref.read(routerProvider).go(RouteName.login);
+    } else if (refreshToken.isNotEmpty &&
+        (!httpClientParams.path.contains("getConnList") &&
             !httpClientParams.path.contains("login"))) {
       final checkExpired = token.checkExpiredToken;
-      AppPrint.debugLog("CHECK EXPIRED TOKEN: $checkExpired");
+      AppPrint.debugLog("CHECK EXPIRED TOKEN HTTP CLIENT: $checkExpired");
       // WHEN EXPIRED
       // CALL REFRESH TOKEN
       if (checkExpired == true) {
@@ -280,6 +285,8 @@ class HttpClient {
       request = http.Request("POST", uri);
       request.body = encryptParam;
       headers['Content-Type'] = 'application/json';
+      streamedResponse =
+          await request.send().timeout(const Duration(seconds: 10));
     } else {
       request = http.Request('POST', uri);
       request.body = jsonEncode(encryptParam);
@@ -291,9 +298,11 @@ class HttpClient {
 
     request.headers.addAll(headers);
 
-    streamedResponse =
-        await request.send().timeout(const Duration(seconds: 10));
-
+    // IF PUT METHOD
+    if (isEdit != null && isEdit == false) {
+      streamedResponse =
+          await request.send().timeout(const Duration(seconds: 10));
+    }
     var responseBody = await streamedResponse.stream.bytesToString();
     AppPrint.debugLog("RESPONE BODY: $responseBody");
 
