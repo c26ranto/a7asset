@@ -98,9 +98,30 @@ class SummaryChecklistScreen extends ConsumerWidget {
                           ref.invalidate(cmflkFilesProvider);
                           ref.invalidate(cmcdlniyProvider);
                           ref.invalidate(cdcdlniyProvider);
+                          ref.invalidate(cdvaluProvider);
+                          ref.invalidate(cmremkItemProvider);
+                          ref.invalidate(cmremkProvider);
+                          ref.invalidate(cmacvlProvider);
 
                           AppPrint.debugLog(
                               "DATA FROM SUMMARY CHECKLIST: $item");
+
+                          ref.read(cmacvlProvider.notifier).update(
+                                (state) => item["cmacvl"],
+                              );
+
+                          // PASSING CDVALU
+                          ref.read(cdvaluProvider.notifier).update(
+                                (state) => item["cdvalu"].toString(),
+                              );
+
+                          // PASSING CMREMK
+                          ref.read(cmremkProvider.notifier).update(
+                                (state) => item["cmremk"],
+                              );
+                          ref.read(cmremkItemProvider.notifier).update(
+                                (state) => detailChecklist.first["cmremk"],
+                              );
 
                           if (detailChecklist.first["cdcdlniy"] != null) {
                             ref.read(cdcdlniyProvider.notifier).update(
