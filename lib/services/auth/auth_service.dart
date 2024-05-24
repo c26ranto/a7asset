@@ -142,6 +142,8 @@ class AuthService {
                 "refresh_token": refreshToken,
               }));
 
+      AppPrint.debugLog("RESP REFRESH: ${response.body}");
+
       final data = jsonDecode(response.body) as Map<String, dynamic>;
 
       // final httpClientParams = HttpClientParams(

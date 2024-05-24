@@ -117,10 +117,11 @@ class SummaryChecklistScreen extends ConsumerWidget {
 
                           // PASSING CMREMK
                           ref.read(cmremkProvider.notifier).update(
-                                (state) => item["cmremk"],
+                                (state) => item["cmremk"] ?? "",
                               );
                           ref.read(cmremkItemProvider.notifier).update(
-                                (state) => detailChecklist.first["cmremk"],
+                                (state) =>
+                                    detailChecklist.first["cmremk"] ?? "",
                               );
 
                           ref.read(cmcmlniyProvider.notifier).update(

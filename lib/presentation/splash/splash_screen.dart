@@ -49,12 +49,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         final checkExpired = token.checkExpiredToken;
         AppPrint.debugLog("CHECK EXPIRED: $checkExpired");
         if (checkExpired == true) {
-          final refresh = await ref.read(authRepositoryProvider).refreshToken();
-          await SharedPreferencesHelper.saveData({
-            AppKey.token: refresh["access_token"],
-            AppKey.refreshToken: refresh["refresh_token"]
-          });
-          await Future.delayed(const Duration(seconds: 1));
+          try {
+            final refresh =
+                await ref.read(authRepositoryProvider).refreshToken();
+            await SharedPreferencesHelper.saveData({
+              AppKey.token: refresh["access_token"],
+              AppKey.refreshToken: refresh["refresh_token"]
+            });
+            await Future.delayed(const Duration(seconds: 1));
+          } catch (e) {
+            ref.read(routerProvider).go(RouteName.login);
+            return;
+          }
           ref.read(routerProvider).go(RouteName.main);
         } else {
           ref.read(routerProvider).go(RouteName.main);

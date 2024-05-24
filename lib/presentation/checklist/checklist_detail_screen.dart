@@ -490,158 +490,161 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                               10.h,
 
                                               // IMAGE DIALOG
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  color: Colors.white,
-                                                ),
-                                                child: ckflkFiles.isEmpty
-                                                    ? Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          SizedBox(
-                                                            height: 120,
-                                                            width: 450,
-                                                            child: ListView
-                                                                .builder(
-                                                              itemCount: imagesDialog
-                                                                      .isEmpty
-                                                                  ? 1
-                                                                  : imagesDialog
-                                                                      .length,
-                                                              scrollDirection:
-                                                                  Axis.horizontal,
-                                                              itemBuilder:
-                                                                  (context,
-                                                                      index) {
-                                                                if (imagesDialog
-                                                                    .isEmpty) {
-                                                                  return _emptyImage(
-                                                                      takePhotoChecklistType:
-                                                                          TakePhotoChecklistType
-                                                                              .dialog);
-                                                                } else {
-                                                                  return _image(
-                                                                    imagesDialog[
-                                                                            index]
-                                                                        .path,
-                                                                    index,
-                                                                    () {
-                                                                      ref
-                                                                          .read(imagesOnDialogProvider
-                                                                              .notifier)
-                                                                          .update(
-                                                                              (state) {
-                                                                        return state = state
-                                                                            .where((element) =>
-                                                                                imagesDialog[index] !=
-                                                                                element)
-                                                                            .toList();
-                                                                      });
-                                                                    },
-                                                                  );
-                                                                }
-                                                              },
-                                                            ),
-                                                          ),
-                                                          10.w,
-                                                          if (imagesDialog
-                                                                      .length <
-                                                                  5 &&
-                                                              imagesDialog
-                                                                  .isNotEmpty)
-                                                            _emptyImage(
-                                                                takePhotoChecklistType:
-                                                                    TakePhotoChecklistType
-                                                                        .dialog),
-                                                        ],
-                                                      )
-                                                    : getImagesDialog.when(
-                                                        data: (data) {
-                                                          return SizedBox(
-                                                            height: 120,
-                                                            child: ListView
-                                                                .builder(
-                                                              scrollDirection:
-                                                                  Axis.horizontal,
-                                                              itemCount:
-                                                                  data.length,
-                                                              itemBuilder:
-                                                                  (context,
-                                                                      index) {
-                                                                final decodeImg =
-                                                                    base64Decode(
-                                                                        data[
-                                                                            index]);
-                                                                return Container(
-                                                                  width:
-                                                                      100, // Specify the width
-                                                                  height:
-                                                                      100, // Specify the height
-                                                                  margin: const EdgeInsets
-                                                                      .all(
-                                                                      4.0), // Optional: to add spacing
-                                                                  child: Image
-                                                                      .memory(
-                                                                    decodeImg,
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                  ),
-                                                                );
-                                                              },
-                                                            ),
-                                                          );
-                                                        },
-                                                        error: (error,
-                                                                stackTrace) =>
-                                                            const SizedBox(
-                                                          height: 56,
-                                                          child: Center(
-                                                            child: Text(
-                                                                "Maaf, terjadi kesalahan menampilkan gambar..."),
-                                                          ),
-                                                        ),
-                                                        loading: () {
-                                                          return Container(
-                                                            height: 100,
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        48),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          18),
-                                                              color: const Color
-                                                                  .fromARGB(
-                                                                  255,
-                                                                  227,
-                                                                  227,
-                                                                  227),
-                                                            ),
-                                                            child: const Center(
-                                                              child: Row(
-                                                                children: [
-                                                                  CircularProgressIndicator(),
-                                                                  SizedBox(
-                                                                      width: 8),
-                                                                  Text(
-                                                                      "Loading menampilkan gambar..."),
-                                                                ],
+                                              SingleChildScrollView(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 8),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    color: Colors.white,
+                                                  ),
+                                                  child: ckflkFiles.isEmpty
+                                                      ? Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            SizedBox(
+                                                              height: 120,
+                                                              // width: 450,
+                                                              child: ListView
+                                                                  .builder(
+                                                                shrinkWrap:
+                                                                    true,
+                                                                itemCount: imagesDialog
+                                                                        .isEmpty
+                                                                    ? 1
+                                                                    : imagesDialog
+                                                                        .length,
+                                                                scrollDirection:
+                                                                    Axis.horizontal,
+                                                                physics:
+                                                                    const NeverScrollableScrollPhysics(),
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  if (imagesDialog
+                                                                      .isEmpty) {
+                                                                    return _emptyImage(
+                                                                        takePhotoChecklistType:
+                                                                            TakePhotoChecklistType.dialog);
+                                                                  } else {
+                                                                    return _image(
+                                                                      imagesDialog[
+                                                                              index]
+                                                                          .path,
+                                                                      index,
+                                                                      () {
+                                                                        ref.read(imagesOnDialogProvider.notifier).update(
+                                                                            (state) {
+                                                                          return state = state
+                                                                              .where((element) => imagesDialog[index] != element)
+                                                                              .toList();
+                                                                        });
+                                                                      },
+                                                                    );
+                                                                  }
+                                                                },
                                                               ),
                                                             ),
-                                                          );
-                                                        },
-                                                      ),
+                                                            10.w,
+                                                            if (imagesDialog
+                                                                        .length <
+                                                                    5 &&
+                                                                imagesDialog
+                                                                    .isNotEmpty)
+                                                              _emptyImage(
+                                                                  takePhotoChecklistType:
+                                                                      TakePhotoChecklistType
+                                                                          .dialog),
+                                                          ],
+                                                        )
+                                                      : getImagesDialog.when(
+                                                          data: (data) {
+                                                            return SizedBox(
+                                                              height: 120,
+                                                              child: ListView
+                                                                  .builder(
+                                                                scrollDirection:
+                                                                    Axis.horizontal,
+                                                                shrinkWrap:
+                                                                    true,
+                                                                itemCount:
+                                                                    data.length,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  final decodeImg =
+                                                                      base64Decode(
+                                                                          data[
+                                                                              index]);
+                                                                  return Container(
+                                                                    width:
+                                                                        100, // Specify the width
+                                                                    height:
+                                                                        100, // Specify the height
+                                                                    margin: const EdgeInsets
+                                                                        .all(
+                                                                        4.0), // Optional: to add spacing
+                                                                    child: Image
+                                                                        .memory(
+                                                                      decodeImg,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            );
+                                                          },
+                                                          error: (error,
+                                                                  stackTrace) =>
+                                                              const SizedBox(
+                                                            height: 56,
+                                                            child: Center(
+                                                              child: Text(
+                                                                  "Maaf, terjadi kesalahan menampilkan gambar..."),
+                                                            ),
+                                                          ),
+                                                          loading: () {
+                                                            return Container(
+                                                              height: 100,
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          48),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            18),
+                                                                color: const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    227,
+                                                                    227,
+                                                                    227),
+                                                              ),
+                                                              child:
+                                                                  const Center(
+                                                                child: Row(
+                                                                  children: [
+                                                                    Text(
+                                                                        "Loading menampilkan gambar..."),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                ),
                                               ),
                                               10.h,
                                               Container(
