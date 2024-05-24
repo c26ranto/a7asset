@@ -98,7 +98,7 @@ class ChecklistService {
 
       List<CldetlModel> tempData = [];
 
-      AppPrint.debugLog("Resp generate cldetl: $response");
+      AppPrint.debugLog("Resp get generate cldetl: $response");
 
       final data = response["data"]["Data"];
 

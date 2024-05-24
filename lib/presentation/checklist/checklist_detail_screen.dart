@@ -24,8 +24,10 @@ import 'package:assets_mobile/utils/app_text_Style.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChecklistDetailScreen extends ConsumerStatefulWidget {
   const ChecklistDetailScreen({super.key});
@@ -38,21 +40,26 @@ class ChecklistDetailScreen extends ConsumerStatefulWidget {
 class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   final _detailNoteC = TextEditingController();
-  final _detailNoteDialogC = TextEditingController();
   final _numeriC = TextEditingController();
   final _freeTextC = TextEditingController();
+  String cdValuColor = "";
+
+  @override
+  void initState() {
+    cdValuColor = ref.read(cdvaluProvider);
+
+    super.initState();
+  }
 
   @override
   void dispose() {
     _detailNoteC.dispose();
-    _detailNoteDialogC.dispose();
     _freeTextC.dispose();
     _numeriC.dispose();
     super.dispose();
   }
 
   void clearController() {
-    _detailNoteDialogC.clear();
     _freeTextC.clear();
     _numeriC.clear();
   }
@@ -70,8 +77,13 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     final cmflkFiles = ref.watch(cmflkFilesProvider);
     final ckflkFiles = ref.watch(ckflkFilesProvider);
     final cmcdlniy = ref.watch(cmcdlniyProvider);
+    final cmremk = ref.watch(cmremkItemProvider);
+    final cmremkItem = ref.watch(cmremkItemProvider);
+    final cmacvl = ref.watch(cmacvlProvider);
 
     final saveChecklistState = ref.watch(saveChecklistProvider);
+
+    final getImages = ref.watch(getImagesChecklistProvider(files: cmflkFiles));
 
     ref.listen<SaveChecklistState>(
       saveChecklistProvider,
@@ -124,18 +136,18 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
               child: ListView(
                 children: [
                   10.h,
-                  const FormFieldDateWidget(
+                  FormFieldDateWidget(
                     title: "Note",
-                    label: "Tidak ada note",
+                    label: cmremk.isNotEmpty ? cmremk : "Tidak ada note",
                     fill: true,
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.photo,
                       size: 32,
                       color: Colors.white,
                     ),
                     disabled: false,
                     fillColor: Colors.white,
-                    outlineBorder: OutlineInputBorder(
+                    outlineBorder: const OutlineInputBorder(
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -196,6 +208,11 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                   final cdvalu = ref.watch(cdvaluProvider);
                                   final noteDialog =
                                       ref.watch(noteDialogProvider);
+                                  final cdcdlniy = ref.watch(cdcdlniyProvider);
+
+                                  final getImagesDialog = ref.watch(
+                                      getImagesChecklistProvider(
+                                          files: ckflkFiles));
 
                                   return SizedBox(
                                     width: MediaQuery.sizeOf(context).width,
@@ -254,51 +271,67 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                             titleStye: AppTextStyle
                                                                 .subTitleTextStyle
                                                                 .copyWith(
-                                                              color: cmcdlniy
-                                                                          .isNotEmpty &&
-                                                                      cmcdlniy ==
-                                                                          cdcdlniy
-                                                                  ? Colors.white
-                                                                  : chooseCdcdlniy ==
-                                                                          index
-                                                                      ? Colors
-                                                                          .white
-                                                                      : Colors
-                                                                          .black,
-                                                            ),
-                                                            color: _buildColorOptions(
+                                                              color:
+                                                                  _buildTextColor(
+                                                                index,
                                                                 chooseCdcdlniy ==
-                                                                    index,
-                                                                item.cdvalu ??
-                                                                    99,
-                                                                cmcdlniy,
-                                                                cdcdlniy),
-                                                            onTap: () {
-                                                              AppPrint.debugLog(
-                                                                  "cmcmlniy from item check: $cmcmlniy");
-                                                              ref
-                                                                  .read(chooseCdcdlniyProvider
-                                                                      .notifier)
-                                                                  .update(
-                                                                    (state) =>
+                                                                        index ||
+                                                                    int.tryParse(
+                                                                            cmcdlniy) ==
                                                                         index,
-                                                                  );
-                                                              ref
-                                                                  .read(cdvaluProvider
-                                                                      .notifier)
-                                                                  .update(
-                                                                    (state) => item
-                                                                        .cdvalu
-                                                                        .toString(),
-                                                                  );
-                                                              ref
-                                                                  .read(cdcdlniyProvider
-                                                                      .notifier)
-                                                                  .update((state) => result[
-                                                                          index]
-                                                                      .cdcdlniy
-                                                                      .toString());
-                                                            })
+                                                                int.tryParse(
+                                                                        cdValuColor) ??
+                                                                    -1,
+                                                                cmcdlniy,
+                                                                cdcdlniy,
+                                                                cmacvl,
+                                                              ),
+                                                            ),
+                                                            color:
+                                                                _buildColorOptions(
+                                                              index,
+                                                              chooseCdcdlniy ==
+                                                                      index ||
+                                                                  int.tryParse(
+                                                                          cmcdlniy) ==
+                                                                      index,
+                                                              int.tryParse(
+                                                                      cdvalu) ??
+                                                                  -1,
+                                                              cmcdlniy,
+                                                              cdcdlniy,
+                                                              cmacvl,
+                                                            ),
+                                                            onTap: cmcdlniy
+                                                                        .isNotEmpty &&
+                                                                    cmcdlniy ==
+                                                                        cdcdlniy
+                                                                ? null
+                                                                : () {
+                                                                    AppPrint.debugLog(
+                                                                        "cmcmlniy from item check: $cmcmlniy -- ${item.cdcdlniy} -- ${result[index].cdcdlniy}");
+                                                                    ref
+                                                                        .read(chooseCdcdlniyProvider
+                                                                            .notifier)
+                                                                        .update(
+                                                                          (state) =>
+                                                                              index,
+                                                                        );
+                                                                    ref
+                                                                        .read(cdvaluProvider
+                                                                            .notifier)
+                                                                        .update(
+                                                                          (state) => item
+                                                                              .cdvalu
+                                                                              .toString(),
+                                                                        );
+                                                                    ref
+                                                                        .read(cdcdlniyProvider
+                                                                            .notifier)
+                                                                        .update((state) => item
+                                                                            .cdcdlniy
+                                                                            .toString());
+                                                                  })
                                                         : item.cdtype
                                                                     ?.toLowerCase() ==
                                                                 'n'
@@ -394,7 +427,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                                   return null;
                                                                 },
                                                                 label:
-                                                                    "Input bebas",
+                                                                    "Input sesuatu...",
                                                               );
                                                   },
                                                 ),
@@ -422,19 +455,29 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                   color: Colors.white,
                                                 ),
                                                 child: CustomFormfieldWidget(
-                                                  enabled: cmcdlniy.isEmpty,
+                                                  enabled:
+                                                      cmcdlniy.isNotEmpty &&
+                                                              cmcdlniy !=
+                                                                  cdcdlniy ||
+                                                          cmcdlniy.isEmpty,
                                                   conditionColor: false,
-                                                  onChanged: (p0) => ref
-                                                      .read(noteDialogProvider
-                                                          .notifier)
-                                                      .update((state) => p0),
+                                                  onChanged: (p0) {
+                                                    ref
+                                                        .read(noteDialogProvider
+                                                            .notifier)
+                                                        .update((state) => p0);
+                                                    AppPrint.debugLog(
+                                                        "NOTEE: $cmcdlniy -- $cdcdlniy");
+                                                  },
                                                   validator: (value) {
                                                     if (cdvalu == "0") {
                                                       return "Note wajib diisi";
                                                     }
                                                     return null;
                                                   },
-                                                  label: "Note",
+                                                  label: cmremkItem.isNotEmpty
+                                                      ? cmremkItem
+                                                      : "Note",
                                                   labelStyle: AppTextStyle
                                                       .subTitleTextStyle
                                                       .copyWith(
@@ -444,116 +487,160 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                 ),
                                               ),
                                               10.h,
-                                              SingleChildScrollView(
-                                                scrollDirection:
-                                                    Axis.horizontal,
-                                                child: ref
-                                                    .watch(
-                                                        getImagesChecklistProvider(
-                                                            files: cmflkFiles))
-                                                    .when(
-                                                      data: (data) {
-                                                        if (data.isEmpty) {
-                                                          return Container(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        10,
-                                                                    vertical:
-                                                                        8),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8),
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                            child: Row(
-                                                              children: [
-                                                                Row(
-                                                                  children: List.generate(
-                                                                      imagesDialog
-                                                                              .isEmpty
-                                                                          ? 1
-                                                                          : imagesDialog
-                                                                              .length,
-                                                                      (index) {
-                                                                    if (imagesDialog
-                                                                        .isEmpty) {
-                                                                      return _emptyImage(
-                                                                          disabled: cmcdlniy
-                                                                              .isEmpty,
-                                                                          takePhotoChecklistType:
-                                                                              TakePhotoChecklistType.dialog);
-                                                                    } else {
-                                                                      return _image(
-                                                                          imagesDialog[index]
-                                                                              .path,
-                                                                          index,
-                                                                          () {
-                                                                        ref.read(imagesOnDialogProvider.notifier).update(
-                                                                            (state) {
-                                                                          return state = state
-                                                                              .where((element) => imagesDialog[index] != element)
-                                                                              .toList();
-                                                                        });
-                                                                      });
-                                                                    }
-                                                                  }),
-                                                                ),
-                                                                10.w,
+
+                                              // IMAGE DIALOG
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 8),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  color: Colors.white,
+                                                ),
+                                                child: ckflkFiles.isEmpty
+                                                    ? Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          SizedBox(
+                                                            height: 120,
+                                                            width: 450,
+                                                            child: ListView
+                                                                .builder(
+                                                              itemCount: imagesDialog
+                                                                      .isEmpty
+                                                                  ? 1
+                                                                  : imagesDialog
+                                                                      .length,
+                                                              scrollDirection:
+                                                                  Axis.horizontal,
+                                                              itemBuilder:
+                                                                  (context,
+                                                                      index) {
                                                                 if (imagesDialog
-                                                                            .length <
-                                                                        5 &&
-                                                                    imagesDialog
-                                                                        .isNotEmpty)
-                                                                  _emptyImage(
+                                                                    .isEmpty) {
+                                                                  return _emptyImage(
                                                                       takePhotoChecklistType:
                                                                           TakePhotoChecklistType
-                                                                              .dialog),
-                                                              ],
+                                                                              .dialog);
+                                                                } else {
+                                                                  return _image(
+                                                                    imagesDialog[
+                                                                            index]
+                                                                        .path,
+                                                                    index,
+                                                                    () {
+                                                                      ref
+                                                                          .read(imagesOnDialogProvider
+                                                                              .notifier)
+                                                                          .update(
+                                                                              (state) {
+                                                                        return state = state
+                                                                            .where((element) =>
+                                                                                imagesDialog[index] !=
+                                                                                element)
+                                                                            .toList();
+                                                                      });
+                                                                    },
+                                                                  );
+                                                                }
+                                                              },
+                                                            ),
+                                                          ),
+                                                          10.w,
+                                                          if (imagesDialog
+                                                                      .length <
+                                                                  5 &&
+                                                              imagesDialog
+                                                                  .isNotEmpty)
+                                                            _emptyImage(
+                                                                takePhotoChecklistType:
+                                                                    TakePhotoChecklistType
+                                                                        .dialog),
+                                                        ],
+                                                      )
+                                                    : getImagesDialog.when(
+                                                        data: (data) {
+                                                          return SizedBox(
+                                                            height: 120,
+                                                            child: ListView
+                                                                .builder(
+                                                              scrollDirection:
+                                                                  Axis.horizontal,
+                                                              itemCount:
+                                                                  data.length,
+                                                              itemBuilder:
+                                                                  (context,
+                                                                      index) {
+                                                                final decodeImg =
+                                                                    base64Decode(
+                                                                        data[
+                                                                            index]);
+                                                                return Container(
+                                                                  width:
+                                                                      100, // Specify the width
+                                                                  height:
+                                                                      100, // Specify the height
+                                                                  margin: const EdgeInsets
+                                                                      .all(
+                                                                      4.0), // Optional: to add spacing
+                                                                  child: Image
+                                                                      .memory(
+                                                                    decodeImg,
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                  ),
+                                                                );
+                                                              },
                                                             ),
                                                           );
-                                                        }
-                                                        return Container(
+                                                        },
+                                                        error: (error,
+                                                                stackTrace) =>
+                                                            const SizedBox(
+                                                          height: 56,
+                                                          child: Center(
+                                                            child: Text(
+                                                                "Maaf, terjadi kesalahan menampilkan gambar..."),
+                                                          ),
+                                                        ),
+                                                        loading: () {
+                                                          return Container(
+                                                            height: 100,
                                                             padding:
                                                                 const EdgeInsets
                                                                     .symmetric(
                                                                     horizontal:
-                                                                        10,
-                                                                    vertical:
-                                                                        8),
+                                                                        48),
                                                             decoration:
                                                                 BoxDecoration(
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          8),
-                                                              color:
-                                                                  Colors.white,
+                                                                          18),
+                                                              color: const Color
+                                                                  .fromARGB(
+                                                                  255,
+                                                                  227,
+                                                                  227,
+                                                                  227),
                                                             ),
-                                                            child: Row(
-                                                                children: data
-                                                                    .map((image) =>
-                                                                        _image(
-                                                                            "",
-                                                                            index,
-                                                                            () {}))
-                                                                    .toList()));
-                                                      },
-                                                      error:
-                                                          (error, stackTrace) =>
-                                                              const SizedBox(),
-                                                      loading: () {
-                                                        return const Center(
-                                                          child: Text(
-                                                              "Loading Image..."),
-                                                        );
-                                                      },
-                                                    ),
+                                                            child: const Center(
+                                                              child: Row(
+                                                                children: [
+                                                                  CircularProgressIndicator(),
+                                                                  SizedBox(
+                                                                      width: 8),
+                                                                  Text(
+                                                                      "Loading menampilkan gambar..."),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
                                               ),
                                               10.h,
                                               Container(
@@ -585,7 +672,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                                     ButtonReusableWidget(
                                                         width: 150,
                                                         disabled: cmcdlniy
-                                                                .isEmpty ||
+                                                                    .isNotEmpty &&
+                                                                cmcdlniy ==
+                                                                    cdcdlniy ||
                                                             cdvalu == "0" &&
                                                                 noteDialog
                                                                     .isEmpty ||
@@ -704,7 +793,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                     ),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: ckflkFiles.isEmpty
+                      child: cmflkFiles.isEmpty
                           ? Row(
                               children: [
                                 Row(
@@ -738,52 +827,57 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
                                           TakePhotoChecklistType.detail),
                               ],
                             )
-                          : ref
-                              .watch(
-                                  getImagesChecklistProvider(files: ckflkFiles))
-                              .when(
-                                data: (data) {
-                                  return SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: data.map((image) {
-                                        final decodeImg = base64Decode(image);
-                                        return Container(
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            image: DecorationImage(
-                                                image: MemoryImage(
-                                                  decodeImg,
-                                                ),
-                                                fit: BoxFit.cover),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  );
-                                },
-                                error: (error, stackTrace) => const SizedBox(
+                          : getImages.when(
+                              data: (data) {
+                                return SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: data.map((image) {
+                                      final decodeImg = base64Decode(image);
+                                      return Container(
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              image: MemoryImage(
+                                                decodeImg,
+                                              ),
+                                              onError:
+                                                  (exception, stackTrace) =>
+                                                      const SizedBox(
+                                                        child: Icon(
+                                                          Icons.error,
+                                                          size: 48,
+                                                        ),
+                                                      ),
+                                              fit: BoxFit.cover),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                );
+                              },
+                              error: (error, stackTrace) => const SizedBox(
+                                height: 56,
+                                child: Center(
+                                  child: Text(
+                                      "Maaf, terjadi kesalahan menampilkan gambar..."),
+                                ),
+                              ),
+                              loading: () {
+                                return SizedBox(
                                   height: 56,
                                   child: Center(
-                                    child: Text(
-                                        "Maaf, terjadi kesalahan menampilkan gambar..."),
-                                  ),
-                                ),
-                                loading: () {
-                                  return SizedBox(
-                                    height: 56,
-                                    child: Center(
-                                      child: Row(
-                                        children: [
-                                          5.w,
-                                          const Text("Loading..."),
-                                        ],
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        5.w,
+                                        const Text("Loading..."),
+                                      ],
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                   ),
                   10.h,
@@ -835,35 +929,65 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     );
   }
 
+  Color _buildTextColor(
+    int index,
+    bool isChoose,
+    int cdvalu,
+    String cmcdlniy,
+    String cdcdlniy,
+    String cmacvl,
+  ) {
+    if (isChoose) {
+      return Colors.white;
+    } else {
+      if (cmcdlniy.isNotEmpty && cmcdlniy == cdcdlniy) {
+        if (int.tryParse(cdValuColor) == index) {
+          return Colors.white;
+        }
+        return Colors.black;
+      } else {
+        return Colors.black;
+      }
+    }
+  }
+
   Color _buildColorOptions(
-      bool isChoose, int cdvalu, String cmcdlniy, String cdcdlniy) {
-    final data = {
-      "isChoose": isChoose,
-      "cdvalue": cdvalu,
-      "cmcdlniy": cmcdlniy,
+    int index,
+    bool isChoose,
+    int cdvalu,
+    String cmcdlniy,
+    String cdcdlniy,
+    String cmacvl,
+  ) {
+    final dataBuildColorOptions = {
       "cdcdlniy": cdcdlniy,
+      "cmcdlniy": cmcdlniy,
+      "cdvalu": cdvalu,
+      "index": index,
+      "cmacvl": cmacvl,
     };
 
-    AppPrint.debugLog("BUILD COLOR OPTIONS: $data");
-    return (() {
-      if (isChoose) {
-        if (cdvalu == 0) {
-          return Colors.red;
-        } else {
-          return Colors.green;
-        }
+    AppPrint.debugLog("DATA BUILD COLOR OPTIONS: $dataBuildColorOptions");
+    if (isChoose) {
+      if (int.tryParse(cmacvl) == 0) {
+        return Colors.red;
       } else {
-        if (cmcdlniy.isNotEmpty && cmcdlniy == cdcdlniy) {
-          if (cdvalu == 0) {
+        return Colors.green;
+      }
+    } else {
+      if (cmcdlniy.isNotEmpty && cmcdlniy == cdcdlniy) {
+        if (int.tryParse(cdValuColor) == index) {
+          if (int.tryParse(cmacvl) == 0) {
             return Colors.red;
           } else {
             return Colors.green;
           }
-        } else {
-          return const Color.fromARGB(255, 227, 227, 227);
         }
+        return const Color.fromARGB(255, 227, 227, 227);
+      } else {
+        return const Color.fromARGB(255, 227, 227, 227);
       }
-    }());
+    }
   }
 
   Widget _image(
@@ -918,7 +1042,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen>
     return Row(
       children: [
         InkWell(
-          onTap: disabled != null
+          onTap: disabled != null && disabled
               ? null
               : () async {
                   ref.read(takePictureProvider(type: takePhotoChecklistType));
