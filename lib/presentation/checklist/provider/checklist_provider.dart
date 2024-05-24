@@ -10,6 +10,7 @@ import 'package:assets_mobile/repositories/checklist/provider/checklist_reposito
 import 'package:assets_mobile/repositories/machines/provider/machine_repository_provider.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
 import 'package:assets_mobile/utils/app_print.dart';
+import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -104,13 +105,25 @@ final cmcdlniyProvider = StateProvider<String>((ref) {
   return "";
 });
 
+final cmremkProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final cmremkItemProvider = StateProvider<String>((ref) {
+  return "";
+});
+
+final cmacvlProvider = StateProvider<String>((ref) {
+  return "";
+});
+
 @riverpod
 FutureOr<void> takePicture(TakePictureRef ref,
     {required TakePhotoChecklistType type}) async {
   final ImagePicker picker = ImagePicker();
 
-  final result =
-      await picker.pickImage(source: ImageSource.camera, imageQuality: 60);
+  final result = await picker.pickImage(
+      source: ImageSource.camera, maxHeight: 720, maxWidth: 720);
 
   if (result != null) {
     final bytes = await result.readAsBytes();
@@ -323,6 +336,8 @@ class SaveChecklist extends _$SaveChecklist {
     String? note,
     List<Uint8List>? files,
   }) async {
+    AppPrint.debugLog(
+        "CMCMLNIY: $cmcmlniy -- CMACVL: $cmacvl -- CDCDLNIY: $cdcdlniy -- CKCKNOIY: $ckcknoiy");
     state = state.copyWith(status: SaveChecklistStatus.loading);
     final machineId = ref.watch(idQrCodeProvider);
     final shift = ref.watch(dataShiftProvider);
@@ -370,20 +385,7 @@ class ChecklistController extends _$ChecklistController {
         final mpmpcdiy = item.mpmpcdiy.toString();
         final mimicdiy = item.mimicdiy;
         final miminm = item.miminm;
-        final mrrlcdiy = item.mrrlcdiy;
-        final mrmrnm = item.mrmrnm;
         final chchcdiy = item.chchcdiy;
-        final cdtype = item.cdtype;
-        final cmcmlniy = item.cmcmlniy;
-        final cmacvl = item.cmacvl;
-        final cmcdlniy = item.cmcdlniy;
-        final cdcdds = item.cdcdds;
-        final cdvalu = item.cdvalu;
-        final cdrguv = item.cdrguv;
-        final cdunms = item.cdunms;
-        final chchnm = item.chchnm;
-
-        // cdcdlniy <- for existing value not cdvalu
 
         final filesChecklist = [
           {
@@ -517,5 +519,6 @@ FutureOr<List<String>> getImagesChecklist(GetImagesChecklistRef ref,
   final response = await ref
       .read(checklistRepositoryProvider)
       .getImagesChecklist(files: files);
+  ref.cacheFor(const Duration(minutes: 2));
   return response;
 }
