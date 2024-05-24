@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:assets_mobile/config/constants.dart';
 import 'package:assets_mobile/config/http_client.dart';
+import 'package:assets_mobile/config/shared_preferences_config.dart';
 import 'package:assets_mobile/data/models/cutom_error.dart';
 import 'package:assets_mobile/data/models/http_client_params.dart';
 import 'package:assets_mobile/utils/app_enums.dart';
@@ -11,10 +12,8 @@ import 'package:assets_mobile/utils/app_key.dart';
 import 'package:assets_mobile/utils/app_print.dart';
 import 'package:assets_mobile/utils/extenstion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  late SharedPreferences preferences;
   final Ref ref;
 
   AuthService({required this.ref});
@@ -24,8 +23,6 @@ class AuthService {
       required String password,
       required String database}) async {
     try {
-      preferences = await SharedPreferences.getInstance();
-
       final params = {
         "Database": database,
         "Password": password,
@@ -46,10 +43,11 @@ class AuthService {
       final response =
           await ref.read(httpClientProvider(httpClientParams)).callHttp;
 
-      if (!response.containsKey("Data"))
+      if (!response.containsKey("Data")) {
         throw CustomError(
             errorCode: AppErrorCode.unauthorized,
             errorMessage: AppErrorMessage.internalServerError);
+      }
 
       final decryptData = List<String>.from(response["Data"]).decryptA7;
 
@@ -60,12 +58,14 @@ class AuthService {
 
       AppPrint.debugLog("TOKENNNN: $token");
 
-      preferences.setString(AppKey.token, decryptData["access_token"]);
-      preferences.setString(AppKey.refreshToken, decryptData["refresh_token"]);
-      preferences.setString(AppKey.username, username);
-      preferences.setString(AppKey.appDB, decryptData["db"]);
-      preferences.setString(AppKey.version, dummyApkVersi);
-      preferences.setString(AppKey.password, password);
+      await SharedPreferencesHelper.saveData({
+        AppKey.token: decryptData["access_token"],
+        AppKey.refreshToken: decryptData["refresh_token"],
+        AppKey.username: username,
+        AppKey.appDB: decryptData["db"],
+        AppKey.version: dummyApkVersi,
+        AppKey.password: password,
+      });
 
       log("DATA SIGN IN: $decryptData");
     } catch (e, st) {
@@ -76,11 +76,9 @@ class AuthService {
 
   Future<void> changePassword({required String newPassword}) async {
     try {
-      preferences = await SharedPreferences.getInstance();
-
-      final username = preferences.getString(AppKey.username) ?? "anonymous";
-      final password = preferences.getString(AppKey.password);
-      final token = preferences.getString(AppKey.token);
+      final username = await SharedPreferencesHelper.getString(AppKey.username);
+      final password = await SharedPreferencesHelper.getString(AppKey.password);
+      final token = await SharedPreferencesHelper.getString(AppKey.token);
 
       final params = {
         'tbluph': {
@@ -111,7 +109,6 @@ class AuthService {
     }
   }
 
-  // TODO LOGOUT
   Future<void> logout() async {
     try {
       final httpClientParams = HttpClientParams(
@@ -133,7 +130,8 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> refreshToken() async {
-    preferences = await SharedPreferences.getInstance();
+    final refreshToken =
+        await SharedPreferencesHelper.getString(AppKey.refreshToken);
 
     try {
       final httpClientParams = HttpClientParams(
@@ -142,7 +140,7 @@ class AuthService {
           token: "",
           postRequestType: PostRequestType.body,
           body: {
-            "refresh_token": preferences.getString(AppKey.refreshToken),
+            "refresh_token": refreshToken,
           });
 
       final response =
@@ -150,8 +148,10 @@ class AuthService {
 
       AppPrint.debugLog("RESPONSE REFRESH: $response");
 
-      preferences.setString(AppKey.token, response["access_token"]);
-      preferences.setString(AppKey.refreshToken, response["refresh_token"]);
+      await SharedPreferencesHelper.saveData({
+        AppKey.token: response["access_token"],
+        AppKey.refreshToken: response["refresh_token"]
+      });
 
       return response;
     } catch (e, st) {
